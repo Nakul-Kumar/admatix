@@ -1,0 +1,16 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account": {
+    "account_id": "acc_demo_meta",
+    "platform": "meta_ads",
+    "tenant_id": "tenant_demo",
+    "name": "Agency Demo — Meta Ads",
+    "currency": "USD",
+    "timezone": "America/New_York"
+  },
+  "campaigns": [
+    { "campaign_id": "meta_camp_1", "account_id": "acc_demo_meta", "platform": "meta_ads", "name": "Advantage+ Shopping", "status": "active", "objective": "conversions", "daily_budget": 600 }
+  ],
+  "campaign_daily_metrics": [],
+  "_notes": "Stub. WP-B (Connectors & Fixtures) expands Meta fixtures, including a creative-fatigue series for the CreativeQA detector."
+}

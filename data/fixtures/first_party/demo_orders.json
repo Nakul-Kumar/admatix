@@ -1,0 +1,17 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account_id": "acc_demo",
+  "first_party_revenue_daily": [
+    { "date": "2026-05-12", "account_id": "acc_demo", "revenue": 4600, "orders": 41, "gross_margin": 0.62 },
+    { "date": "2026-05-13", "account_id": "acc_demo", "revenue": 4880, "orders": 44, "gross_margin": 0.62 },
+    { "date": "2026-05-14", "account_id": "acc_demo", "revenue": 4400, "orders": 39, "gross_margin": 0.61 },
+    { "date": "2026-05-15", "account_id": "acc_demo", "revenue": 5010, "orders": 45, "gross_margin": 0.63 },
+    { "date": "2026-05-16", "account_id": "acc_demo", "revenue": 4720, "orders": 42, "gross_margin": 0.62 },
+    { "date": "2026-05-17", "account_id": "acc_demo", "revenue": 4910, "orders": 44, "gross_margin": 0.62 },
+    { "date": "2026-05-18", "account_id": "acc_demo", "revenue": 4650, "orders": 41, "gross_margin": 0.61 },
+    { "date": "2026-05-19", "account_id": "acc_demo", "revenue": 4780, "orders": 43, "gross_margin": 0.62 },
+    { "date": "2026-05-20", "account_id": "acc_demo", "revenue": 4690, "orders": 42, "gross_margin": 0.62 },
+    { "date": "2026-05-21", "account_id": "acc_demo", "revenue": 4810, "orders": 43, "gross_margin": 0.62 }
+  ],
+  "_notes": "First-party revenue is consistently LOWER than the sum of platform_revenue across campaigns — platforms over-attribute. The MER reconciliation should surface this gap."
+}

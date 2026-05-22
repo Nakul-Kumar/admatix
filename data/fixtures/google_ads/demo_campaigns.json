@@ -1,0 +1,38 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account": {
+    "account_id": "acc_demo",
+    "platform": "google_ads",
+    "tenant_id": "tenant_demo",
+    "name": "Agency Demo — Google Ads",
+    "currency": "USD",
+    "timezone": "America/New_York"
+  },
+  "campaigns": [
+    { "campaign_id": "campaign_a", "account_id": "acc_demo", "platform": "google_ads", "name": "Brand - Search", "status": "active", "objective": "conversions", "daily_budget": 500 },
+    { "campaign_id": "campaign_b", "account_id": "acc_demo", "platform": "google_ads", "name": "Prospecting - PMax", "status": "active", "objective": "conversions", "daily_budget": 800 }
+  ],
+  "campaign_daily_metrics": [
+    { "date": "2026-05-12", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 470, "impressions": 22000, "clicks": 880, "conversions": 12, "platform_revenue": 1200 },
+    { "date": "2026-05-13", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 485, "impressions": 22500, "clicks": 900, "conversions": 13, "platform_revenue": 1280 },
+    { "date": "2026-05-14", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 478, "impressions": 22100, "clicks": 870, "conversions": 11, "platform_revenue": 1150 },
+    { "date": "2026-05-15", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 490, "impressions": 23000, "clicks": 910, "conversions": 12, "platform_revenue": 1220 },
+    { "date": "2026-05-16", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 482, "impressions": 22400, "clicks": 890, "conversions": 12, "platform_revenue": 1200 },
+    { "date": "2026-05-17", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 495, "impressions": 23200, "clicks": 905, "conversions": 13, "platform_revenue": 1260 },
+    { "date": "2026-05-18", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 660, "impressions": 30500, "clicks": 1180, "conversions": 12, "platform_revenue": 1210 },
+    { "date": "2026-05-19", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 705, "impressions": 32800, "clicks": 1240, "conversions": 11, "platform_revenue": 1140 },
+    { "date": "2026-05-20", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 690, "impressions": 31900, "clicks": 1210, "conversions": 12, "platform_revenue": 1200 },
+    { "date": "2026-05-21", "account_id": "acc_demo", "campaign_id": "campaign_a", "platform": "google_ads", "spend": 712, "impressions": 33100, "clicks": 1255, "conversions": 12, "platform_revenue": 1220 },
+    { "date": "2026-05-12", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 780, "impressions": 41000, "clicks": 1500, "conversions": 29, "platform_revenue": 4100 },
+    { "date": "2026-05-13", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 795, "impressions": 41800, "clicks": 1530, "conversions": 31, "platform_revenue": 4350 },
+    { "date": "2026-05-14", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 770, "impressions": 40500, "clicks": 1480, "conversions": 28, "platform_revenue": 4000 },
+    { "date": "2026-05-15", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 800, "impressions": 42000, "clicks": 1550, "conversions": 32, "platform_revenue": 4500 },
+    { "date": "2026-05-16", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 785, "impressions": 41200, "clicks": 1510, "conversions": 30, "platform_revenue": 4250 },
+    { "date": "2026-05-17", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 790, "impressions": 41500, "clicks": 1520, "conversions": 31, "platform_revenue": 4400 },
+    { "date": "2026-05-18", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 775, "impressions": 40800, "clicks": 1490, "conversions": 29, "platform_revenue": 4150 },
+    { "date": "2026-05-19", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 805, "impressions": 42300, "clicks": 1560, "conversions": 33, "platform_revenue": 4600 },
+    { "date": "2026-05-20", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 788, "impressions": 41400, "clicks": 1515, "conversions": 30, "platform_revenue": 4300 },
+    { "date": "2026-05-21", "account_id": "acc_demo", "campaign_id": "campaign_b", "platform": "google_ads", "spend": 792, "impressions": 41600, "clicks": 1525, "conversions": 31, "platform_revenue": 4400 }
+  ],
+  "_notes": "Campaign A shows a spend spike from 2026-05-18 with flat conversions (rising CAC, pacing drift, spend-spike-no-lift). Campaign B is healthy. Detectors should flag Campaign A. WP-B expands this fixture set."
+}
