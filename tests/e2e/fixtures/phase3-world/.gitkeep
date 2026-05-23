@@ -1,0 +1,2 @@
+# Materialised at test runtime by services/simulator via the verifier's
+# /simulate endpoint. No binary data is committed here.
