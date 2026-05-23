@@ -125,4 +125,25 @@ describe("runSuite — supporting invariants", () => {
       /cannot read benchmark suite/,
     );
   });
+
+  // QA finding #10 (HIGH): two runs against the same fixtures/policy must
+  // produce a byte-comparable persisted file. Previously run_id used
+  // Math.random() and created_at used wall-clock, so reruns drifted.
+  it("F10: run_id is deterministic for the same suite + pins + results", async () => {
+    const fixedClock = () => "2026-05-22T12:00:00.000Z";
+    const a = await runSuite(
+      SUITE,
+      { store: memoryStore() },
+      { clock: fixedClock },
+    );
+    const b = await runSuite(
+      SUITE,
+      { store: memoryStore() },
+      { clock: fixedClock },
+    );
+    expect(b.run_id).toBe(a.run_id);
+    expect(b.created_at).toBe(a.created_at);
+    // The full persisted shape should be byte-identical.
+    expect(JSON.stringify(b)).toBe(JSON.stringify(a));
+  });
 });
