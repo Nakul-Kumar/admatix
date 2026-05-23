@@ -9,21 +9,14 @@ describe("resolveAccountRef (acceptance #2)", () => {
     });
   });
 
-  it("parses live refs", () => {
-    expect(resolveAccountRef("live:1234567890")).toEqual({
-      kind: "live",
-      id: "1234567890",
-    });
+  it("F9: live: refs are rejected at the parse boundary (MVP is fixture-only)", () => {
+    expect(() => resolveAccountRef("live:1234567890")).toThrow(/not supported in the MVP|fixture/);
   });
 
   it("supports underscores, dots, and colons inside the id", () => {
     expect(resolveAccountRef("fixture:acc_demo_meta")).toEqual({
       kind: "fixture",
       id: "acc_demo_meta",
-    });
-    expect(resolveAccountRef("live:tenant.acct-1")).toEqual({
-      kind: "live",
-      id: "tenant.acct-1",
     });
   });
 
