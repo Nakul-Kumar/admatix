@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node"],
+    "paths": {
+      "@admatix/agents": ["./packages/agents/src/index.ts"],
+      "@admatix/api": ["./apps/api/src/index.ts"],
+      "@admatix/connectors": ["./packages/connectors/src/index.ts"],
+      "@admatix/core": ["./packages/core/src/index.ts"],
+      "@admatix/evals": ["./packages/evals/src/index.ts"],
+      "@admatix/evidence": ["./packages/evidence/src/index.ts"],
+      "@admatix/mcp-server": ["./apps/mcp-server/src/index.ts"],
+      "@admatix/policy": ["./packages/policy/src/index.ts"],
+      "@admatix/schemas": ["./packages/schemas/src/index.ts"]
+    }
+  },
+  "include": ["scripts/**/*.ts", "tests/**/*.ts"]
+}

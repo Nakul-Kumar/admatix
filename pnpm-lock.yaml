@@ -8,6 +8,36 @@ importers:
 
   .:
     devDependencies:
+      '@admatix/agents':
+        specifier: workspace:*
+        version: link:packages/agents
+      '@admatix/api':
+        specifier: workspace:*
+        version: link:apps/api
+      '@admatix/connectors':
+        specifier: workspace:*
+        version: link:packages/connectors
+      '@admatix/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@admatix/evals':
+        specifier: workspace:*
+        version: link:packages/evals
+      '@admatix/evidence':
+        specifier: workspace:*
+        version: link:packages/evidence
+      '@admatix/mcp-server':
+        specifier: workspace:*
+        version: link:apps/mcp-server
+      '@admatix/policy':
+        specifier: workspace:*
+        version: link:packages/policy
+      '@admatix/schemas':
+        specifier: workspace:*
+        version: link:packages/schemas
+      '@types/node':
+        specifier: ^20.14.0
+        version: 20.19.41
       tsx:
         specifier: ^4.19.0
         version: 4.22.3
