@@ -12,9 +12,19 @@
     "lint": "turbo run lint",
     "doctor": "tsx scripts/doctor.ts",
     "seed-fixtures": "tsx scripts/seed-fixtures.ts",
-    "scan-secrets": "tsx scripts/scan-secrets.ts"
+    "scan-secrets": "tsx scripts/scan-secrets.ts",
+    "demo": "tsx scripts/demo.ts"
   },
   "devDependencies": {
+    "@admatix/agents": "workspace:*",
+    "@admatix/api": "workspace:*",
+    "@admatix/connectors": "workspace:*",
+    "@admatix/core": "workspace:*",
+    "@admatix/evals": "workspace:*",
+    "@admatix/evidence": "workspace:*",
+    "@admatix/mcp-server": "workspace:*",
+    "@admatix/policy": "workspace:*",
+    "@admatix/schemas": "workspace:*",
     "turbo": "^2.1.0",
     "typescript": "^5.6.0",
     "tsx": "^4.19.0",
