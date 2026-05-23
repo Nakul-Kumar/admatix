@@ -161,3 +161,20 @@ is gitignored and is NOT present inside git worktrees — always use the absolut
 path. `SUPABASE_DB_URL` is the direct connection (IPv6 + `sslmode=require`),
 which works from the VPS. dbt targets it with `dbt-postgres`; migrations apply
 with `psql "$SUPABASE_DB_URL"`.
+
+---
+
+## Reference specs + track ownership (added 2026-05-23)
+
+**Reference specs** — build agents for later phases must read these alongside their WP spec:
+- Phase 2 (data layer): `docs/architecture/DATA-LAYER-DDL.md` — complete commented PostgreSQL 17 DDL, all 5 schemas / 53 tables. WP-L applies it to Supabase; WP-N/O wrap bronze/silver/gold in dbt.
+- Phase 3 (datasets): `docs/build/DATASETS.md` — exact URLs, licenses, schemas, shell commands.
+- Phase 3-4 (simulator/verifier/validation): `docs/architecture/SIMULATION-VERIFICATION.md` — generative simulator model, the verifier's five methods + FastAPI surface, validation harness with concrete pass thresholds, pinned Python stack.
+
+**Track ownership — IMPORTANT for the orchestrator:**
+Phase 3 work packages **WP-P (services/ingest)** and **WP-Q (services/simulator)** are
+owned by the **Codex parallel track** on branch `codex/sim-readiness`. The orchestrator
+must **NOT** dispatch WP-P or WP-Q. When Phase 3 begins: if branch `codex/sim-readiness`
+exists on origin and its tests pass, merge it into `main`, then dispatch only **WP-R**
+(verifier) and **WP-S** (wiring). If that branch is not ready when Phase 2 closes, wait
+one tick, then flag NEED-HUMAN. All other phases/work packages are unchanged.
