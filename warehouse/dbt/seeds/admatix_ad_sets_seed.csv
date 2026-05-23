@@ -1,0 +1,5 @@
+ad_set_business_key,campaign_business_key,external_ad_set_id,ad_set_name,status,bid_strategy,daily_budget,optimization_goal
+campaign_a__default,campaign_a,campaign_a__default,Default Ad Group,active,max_conversions,500,conversions
+campaign_b__default,campaign_b,campaign_b__default,Default Asset Group,active,max_conversion_value,800,conversion_value
+campaign_track_break__default,campaign_track_break,campaign_track_break__default,Tracking Break Ad Group,active,target_cpa,600,conversions
+meta_camp_fatigue__default,meta_camp_fatigue,meta_camp_fatigue__default,Prospecting Broad,active,lowest_cost,200,conversions

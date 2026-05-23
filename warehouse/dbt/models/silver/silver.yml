@@ -1,0 +1,126 @@
+version: 2
+
+models:
+  - name: silver_campaign_daily
+    description: Cleaned daily campaign performance conformed to the warehouse contract.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [metric_date, platform, account_key, campaign_key]
+    columns:
+      - {name: silver_campaign_daily_id, description: Surrogate row id., tests: [not_null, unique]}
+      - {name: metric_date, description: Metric date., tests: [not_null]}
+      - {name: platform, description: Source platform enum., tests: [not_null]}
+      - {name: account_key, description: Conformed account business key., tests: [not_null]}
+      - {name: campaign_key, description: Conformed campaign business key., tests: [not_null]}
+      - {name: spend, description: Daily spend.}
+      - {name: impressions, description: Daily impressions.}
+      - {name: clicks, description: Daily clicks.}
+      - {name: conversions, description: Daily platform conversions.}
+      - {name: platform_revenue, description: Directional platform-attributed revenue.}
+      - {name: currency, description: ISO-4217 currency.}
+      - {name: _source, description: Logical source.}
+      - {name: _batch_id, description: Ingest batch id.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: silver_creative_daily
+    description: Cleaned daily creative performance conformed to the warehouse contract.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [metric_date, platform, account_key, campaign_key, creative_key]
+    columns:
+      - {name: silver_creative_daily_id, description: Surrogate row id., tests: [not_null, unique]}
+      - {name: metric_date, description: Metric date.}
+      - {name: platform, description: Source platform enum.}
+      - {name: account_key, description: Conformed account business key.}
+      - {name: campaign_key, description: Conformed campaign business key.}
+      - {name: creative_key, description: Conformed creative business key.}
+      - {name: spend, description: Daily spend.}
+      - {name: impressions, description: Daily impressions.}
+      - {name: clicks, description: Daily clicks.}
+      - {name: conversions, description: Daily platform conversions.}
+      - {name: frequency, description: Average creative frequency.}
+      - {name: _source, description: Logical source.}
+      - {name: _batch_id, description: Ingest batch id.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: silver_first_party_daily
+    description: Cleaned first-party daily revenue and order totals.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [metric_date, account_key]
+    columns:
+      - {name: silver_first_party_daily_id, description: Surrogate row id., tests: [not_null, unique]}
+      - {name: metric_date, description: Revenue date.}
+      - {name: account_key, description: Conformed account business key.}
+      - {name: revenue, description: First-party revenue.}
+      - {name: orders, description: Order count.}
+      - {name: gross_margin, description: Gross margin dollars.}
+      - {name: new_customers, description: New customer count.}
+      - {name: currency, description: ISO-4217 currency.}
+      - {name: _source, description: Logical source.}
+      - {name: _batch_id, description: Ingest batch id.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: silver_conversions
+    description: Cleaned individual conversion events from first-party sources.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [conversion_key, _source]
+    columns:
+      - {name: silver_conversion_id, description: Surrogate row id., tests: [not_null, unique]}
+      - {name: conversion_key, description: Conformed conversion business key.}
+      - {name: account_key, description: Conformed account business key.}
+      - {name: campaign_key, description: Optional campaign business key.}
+      - {name: creative_key, description: Optional creative business key.}
+      - {name: conversion_ts, description: UTC conversion timestamp.}
+      - {name: customer_key, description: Hashed customer key.}
+      - {name: revenue, description: Conversion revenue.}
+      - {name: is_first_party, description: True for truth-source conversions.}
+      - {name: attribution_model, description: Attribution model name.}
+      - {name: _source, description: Logical source.}
+      - {name: _batch_id, description: Ingest batch id.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: silver_treatment_assignment
+    description: Unified treatment assignment rows from public datasets and simulator events.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [experiment_key, unit_key]
+    columns:
+      - {name: silver_treatment_assignment_id, description: Surrogate row id., tests: [unique]}
+      - {name: experiment_key, description: Experiment or scenario key.}
+      - {name: unit_key, description: Randomised unit key.}
+      - {name: account_key, description: Optional account business key.}
+      - {name: campaign_key, description: Optional campaign business key.}
+      - {name: treatment_arm, description: Named assignment arm.}
+      - {name: is_treated, description: True when assigned to treatment.}
+      - {name: assigned_at, description: Assignment timestamp.}
+      - {name: assignment_source, description: Assignment source type.}
+      - {name: _source, description: Logical source.}
+      - {name: _batch_id, description: Ingest batch id.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: silver_auctions
+    description: Cleaned iPinYou auction rows; empty in Phase 2 until WP-P lands data.
+    columns:
+      - {name: silver_auction_id, description: Surrogate row id., tests: [unique]}
+      - {name: auction_key, description: Source auction or bid key.}
+      - {name: auction_ts_raw, description: Raw auction timestamp.}
+      - {name: creative_key, description: Source creative key.}
+      - {name: advertiser_key, description: Source advertiser key.}
+      - {name: region, description: Region code.}
+      - {name: city, description: City code.}
+      - {name: ad_exchange, description: Ad exchange id.}
+      - {name: domain, description: Publisher domain.}
+      - {name: ad_slot_id, description: Ad slot id.}
+      - {name: ad_slot_width, description: Slot width.}
+      - {name: ad_slot_height, description: Slot height.}
+      - {name: floor_price, description: Slot floor price.}
+      - {name: bid_price, description: Bid price.}
+      - {name: paid_price, description: Paid clearing price.}
+      - {name: is_click, description: Click flag.}
+      - {name: is_conversion, description: Conversion flag.}
+      - {name: _source, description: Logical source.}
+      - {name: _batch_id, description: Ingest batch id.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+

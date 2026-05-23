@@ -1,0 +1,126 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: Conformed calendar dimension.
+    columns:
+      - {name: date_key, description: Smart YYYYMMDD key., tests: [not_null, unique]}
+      - {name: full_date, description: Calendar date.}
+      - {name: day_of_week, description: ISO weekday number.}
+      - {name: day_name, description: Weekday name.}
+      - {name: day_of_month, description: Day of month.}
+      - {name: day_of_year, description: Day of year.}
+      - {name: week_of_year, description: Week of year.}
+      - {name: iso_week, description: ISO week number.}
+      - {name: month_number, description: Month number.}
+      - {name: month_name, description: Month name.}
+      - {name: quarter, description: Calendar quarter.}
+      - {name: year, description: Calendar year.}
+      - {name: is_weekend, description: Weekend flag.}
+      - {name: is_month_start, description: Month-start flag.}
+      - {name: is_month_end, description: Month-end flag.}
+  - name: dim_account
+    description: SCD Type 1 ad account dimension.
+    columns:
+      - {name: account_key, description: Surrogate account key., tests: [not_null, unique]}
+      - {name: account_business_key, description: Stable account business key.}
+      - {name: tenant_id, description: Owning tenant UUID.}
+      - {name: platform, description: Source platform.}
+      - {name: external_account_id, description: Platform-native account id.}
+      - {name: account_name, description: Account name.}
+      - {name: currency, description: Account currency.}
+      - {name: timezone, description: Account timezone.}
+      - {name: is_active, description: Active flag.}
+      - {name: updated_at, description: Refresh timestamp.}
+  - name: dim_campaign
+    description: SCD Type 2 campaign dimension sourced from dbt snapshots.
+    columns:
+      - {name: campaign_key, description: Surrogate campaign version key., tests: [not_null, unique]}
+      - {name: campaign_business_key, description: Stable campaign business key.}
+      - {name: account_key, description: Surrogate account key.}
+      - {name: platform, description: Source platform.}
+      - {name: external_campaign_id, description: Platform-native campaign id.}
+      - {name: campaign_name, description: Campaign name.}
+      - {name: objective, description: Campaign objective.}
+      - {name: status, description: Campaign status.}
+      - {name: daily_budget, description: Daily budget.}
+      - {name: lifetime_budget, description: Lifetime budget.}
+      - {name: start_date, description: Start date.}
+      - {name: end_date, description: End date.}
+      - {name: valid_from, description: Version effective timestamp.}
+      - {name: valid_to, description: Version end timestamp or infinity.}
+      - {name: is_current, description: Current-version flag.}
+      - {name: row_hash, description: Tracked attribute hash.}
+  - name: dim_ad_set
+    description: SCD Type 2 ad set dimension sourced from dbt snapshots.
+    columns:
+      - {name: ad_set_key, description: Surrogate ad set version key., tests: [not_null, unique]}
+      - {name: ad_set_business_key, description: Stable ad set business key.}
+      - {name: campaign_key, description: Parent campaign surrogate key.}
+      - {name: external_ad_set_id, description: Platform-native ad set id.}
+      - {name: ad_set_name, description: Ad set name.}
+      - {name: status, description: Ad set status.}
+      - {name: bid_strategy, description: Bid strategy.}
+      - {name: daily_budget, description: Daily budget.}
+      - {name: optimization_goal, description: Optimization goal.}
+      - {name: valid_from, description: Version effective timestamp.}
+      - {name: valid_to, description: Version end timestamp or infinity.}
+      - {name: is_current, description: Current-version flag.}
+      - {name: row_hash, description: Tracked attribute hash.}
+  - name: dim_creative
+    description: SCD Type 2 creative dimension sourced from dbt snapshots.
+    columns:
+      - {name: creative_key, description: Surrogate creative version key., tests: [not_null, unique]}
+      - {name: creative_business_key, description: Stable creative business key.}
+      - {name: campaign_key, description: Parent campaign surrogate key.}
+      - {name: ad_set_key, description: Optional parent ad set key.}
+      - {name: external_creative_id, description: Platform-native creative id.}
+      - {name: creative_format, description: Creative format.}
+      - {name: headline, description: Creative headline.}
+      - {name: body_text, description: Creative body copy.}
+      - {name: final_url, description: Landing URL.}
+      - {name: policy_status, description: Platform policy status.}
+      - {name: status, description: Creative status.}
+      - {name: valid_from, description: Version effective timestamp.}
+      - {name: valid_to, description: Version end timestamp or infinity.}
+      - {name: is_current, description: Current-version flag.}
+      - {name: row_hash, description: Tracked attribute hash.}
+  - name: dim_geo
+    description: SCD Type 1 geography dimension.
+    columns:
+      - {name: geo_key, description: Surrogate geography key., tests: [not_null, unique]}
+      - {name: geo_business_key, description: Geography business key.}
+      - {name: country_code, description: ISO country code.}
+      - {name: country_name, description: Country name.}
+      - {name: region, description: Region name.}
+      - {name: region_code, description: Region code.}
+      - {name: city, description: City name.}
+      - {name: metro_code, description: Metro code.}
+      - {name: postal_code, description: Postal code.}
+  - name: dim_audience
+    description: SCD Type 1 audience dimension.
+    columns:
+      - {name: audience_key, description: Surrogate audience key., tests: [not_null, unique]}
+      - {name: audience_business_key, description: Audience business key.}
+      - {name: audience_name, description: Audience name.}
+      - {name: audience_type, description: Audience type.}
+      - {name: platform, description: Optional platform.}
+      - {name: size_estimate, description: Estimated audience size.}
+      - {name: description, description: Audience description.}
+  - name: dim_platform
+    description: SCD Type 1 platform lookup dimension.
+    columns:
+      - {name: platform_key, description: Surrogate platform key., tests: [not_null, unique]}
+      - {name: platform_code, description: Platform enum code.}
+      - {name: platform_name, description: Platform display name.}
+      - {name: platform_family, description: Platform family.}
+      - {name: is_truth_source, description: True for first-party truth source.}
+  - name: dim_device
+    description: SCD Type 1 device dimension.
+    columns:
+      - {name: device_key, description: Surrogate device key., tests: [not_null, unique]}
+      - {name: device_business_key, description: Device business key.}
+      - {name: device_type, description: Device type.}
+      - {name: device_category, description: Device category.}
+      - {name: operating_system, description: Operating system.}
+

@@ -1,0 +1,13 @@
+admatix_supabase:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      threads: 4
+      dbname: "{{ env_var('SUPABASE_DB_URL').split('/', 3)[3].split('?')[0] }}"
+      host: "{{ env_var('SUPABASE_DB_URL').split('@')[-1].split('/')[0].split(':')[0] }}"
+      user: "{{ env_var('SUPABASE_DB_URL').split('://')[1].split(':')[0] }}"
+      pass: "{{ env_var('SUPABASE_DB_URL').split('://')[1].split('@')[0].split(':', 1)[1] }}"
+      port: "{{ env_var('SUPABASE_DB_URL').split('@')[-1].split('/')[0].split(':')[-1] | as_number }}"
+      schema: warehouse
+      sslmode: require

@@ -1,0 +1,4 @@
+account_business_key,tenant_id,platform,external_account_id,account_name,currency,timezone,is_active
+acc_demo,00000000-0000-0000-0000-000000000001,google_ads,acc_demo,Agency Demo Google Ads,USD,America/New_York,true
+acc_demo_tracking,00000000-0000-0000-0000-000000000001,google_ads,acc_demo_tracking,Agency Demo Google Ads Tracking,USD,America/New_York,true
+acc_demo_meta,00000000-0000-0000-0000-000000000001,meta_ads,acc_demo_meta,Agency Demo Meta Ads,USD,America/New_York,true

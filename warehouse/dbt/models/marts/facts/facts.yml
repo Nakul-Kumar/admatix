@@ -1,0 +1,125 @@
+version: 2
+
+models:
+  - name: fct_impressions
+    description: Event-grain impression fact represented by deterministic Phase 2 fixture micro-batches.
+    columns:
+      - {name: impression_id, description: Surrogate impression fact key., tests: [not_null, unique]}
+      - {name: date_key, description: Impression date key.}
+      - {name: account_key, description: Account dimension key.}
+      - {name: campaign_key, description: Campaign dimension key.}
+      - {name: ad_set_key, description: Optional ad set dimension key.}
+      - {name: creative_key, description: Optional creative dimension key.}
+      - {name: platform_key, description: Platform dimension key.}
+      - {name: geo_key, description: Geography dimension key.}
+      - {name: audience_key, description: Audience dimension key.}
+      - {name: device_key, description: Device dimension key.}
+      - {name: impression_ts, description: UTC impression timestamp.}
+      - {name: impressions, description: Additive impressions.}
+      - {name: cost, description: Additive media cost.}
+      - {name: _source, description: Logical source.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: fct_clicks
+    description: Event-grain click fact represented by deterministic Phase 2 fixture micro-batches.
+    columns:
+      - {name: click_id, description: Surrogate click fact key., tests: [not_null, unique]}
+      - {name: date_key, description: Click date key.}
+      - {name: account_key, description: Account dimension key.}
+      - {name: campaign_key, description: Campaign dimension key.}
+      - {name: ad_set_key, description: Optional ad set dimension key.}
+      - {name: creative_key, description: Optional creative dimension key.}
+      - {name: platform_key, description: Platform dimension key.}
+      - {name: geo_key, description: Geography dimension key.}
+      - {name: audience_key, description: Audience dimension key.}
+      - {name: device_key, description: Device dimension key.}
+      - {name: click_ts, description: UTC click timestamp.}
+      - {name: clicks, description: Additive clicks.}
+      - {name: cost, description: Additive media cost.}
+      - {name: _source, description: Logical source.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: fct_conversions
+    description: Event-grain conversion fact from first-party conversion rows.
+    columns:
+      - {name: conversion_id, description: Surrogate conversion fact key., tests: [not_null, unique]}
+      - {name: date_key, description: Conversion date key.}
+      - {name: account_key, description: Account dimension key.}
+      - {name: campaign_key, description: Optional campaign dimension key.}
+      - {name: ad_set_key, description: Optional ad set dimension key.}
+      - {name: creative_key, description: Optional creative dimension key.}
+      - {name: platform_key, description: Platform dimension key.}
+      - {name: geo_key, description: Geography dimension key.}
+      - {name: audience_key, description: Audience dimension key.}
+      - {name: device_key, description: Device dimension key.}
+      - {name: conversion_ts, description: UTC conversion timestamp.}
+      - {name: conversions, description: Additive conversion count.}
+      - {name: revenue, description: Additive conversion revenue.}
+      - {name: is_first_party, description: First-party truth-source flag.}
+      - {name: attribution_model, description: Attribution model name.}
+      - {name: _source, description: Logical source.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: fct_spend_daily
+    description: Daily spend fact at campaign grain.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [date_key, campaign_key, ad_set_key]
+    columns:
+      - {name: spend_daily_id, description: Surrogate spend fact key., tests: [not_null, unique]}
+      - {name: date_key, description: Spend date key.}
+      - {name: account_key, description: Account dimension key.}
+      - {name: campaign_key, description: Campaign dimension key.}
+      - {name: ad_set_key, description: Optional ad set dimension key.}
+      - {name: platform_key, description: Platform dimension key.}
+      - {name: spend, description: Additive daily spend.}
+      - {name: impressions, description: Additive daily impressions.}
+      - {name: clicks, description: Additive daily clicks.}
+      - {name: conversions, description: Additive daily conversions.}
+      - {name: platform_revenue, description: Directional platform-attributed revenue.}
+      - {name: currency, description: ISO-4217 currency.}
+      - {name: _source, description: Logical source.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: fct_campaign_action
+    description: Governance bridge fact linking H0 packets, proposed actions, policy decisions, approvals, outcomes, and ledger transaction ids.
+    columns:
+      - {name: campaign_action_id, description: Surrogate campaign action fact key., tests: [unique]}
+      - {name: proposed_date_key, description: Proposed action date key.}
+      - {name: decided_date_key, description: Policy or approval decision date key.}
+      - {name: measured_date_key, description: Outcome measurement date key.}
+      - {name: account_key, description: Account dimension key.}
+      - {name: campaign_key, description: Campaign dimension key.}
+      - {name: platform_key, description: Platform dimension key.}
+      - {name: h0_packet_id, description: Originating H0 packet id.}
+      - {name: proposed_action_id, description: Proposed action id.}
+      - {name: tx_id, description: Ledger transaction id.}
+      - {name: action_type, description: Proposed action type.}
+      - {name: risk_level, description: Policy risk level.}
+      - {name: policy_result, description: PolicyGuard result.}
+      - {name: approval_decision, description: Human approval decision.}
+      - {name: estimated_impact, description: Estimated impact.}
+      - {name: realized_impact, description: Realized measured impact.}
+      - {name: was_measured, description: True once measured.}
+      - {name: _source, description: Logical source.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+  - name: fct_outcome
+    description: Outcome fact with estimated lift, confidence bounds, and simulator ground truth when available.
+    columns:
+      - {name: outcome_id, description: Surrogate outcome fact key., tests: [unique]}
+      - {name: date_key, description: Measurement date key.}
+      - {name: account_key, description: Account dimension key.}
+      - {name: campaign_key, description: Optional campaign dimension key.}
+      - {name: platform_key, description: Platform dimension key.}
+      - {name: h0_packet_id, description: Originating H0 packet id.}
+      - {name: tx_id, description: Ledger transaction id.}
+      - {name: success_metric, description: Measured success metric.}
+      - {name: baseline_value, description: Baseline metric value.}
+      - {name: observed_value, description: Observed metric value.}
+      - {name: delta_pct, description: Percent delta.}
+      - {name: estimated_lift, description: Estimated lift.}
+      - {name: lift_ci_low, description: Confidence interval lower bound.}
+      - {name: lift_ci_high, description: Confidence interval upper bound.}
+      - {name: ground_truth_lift, description: Simulator ground truth when known.}
+      - {name: causal_status, description: Causal claim status.}
+      - {name: passed, description: Outcome pass flag.}
+      - {name: _source, description: Logical source.}
+      - {name: _loaded_at, description: Materialisation timestamp.}
+

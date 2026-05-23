@@ -1,0 +1,4 @@
+platform,external_account_id,campaign_external_id,creative_external_id,metric_date,spend,impressions,clicks,conversions,frequency,_source,_batch_id,_row_hash
+meta_ads,acc_demo_meta,meta_camp_fatigue,creative_fatigue_1,2026-05-08,200,10000,250,12,1.10,fixture_meta_ads_creative,phase2_seed,1000000000000000000000000000000000000000000000000000000000000001
+meta_ads,acc_demo_meta,meta_camp_fatigue,creative_fatigue_1,2026-05-15,216,13100,170,6,2.15,fixture_meta_ads_creative,phase2_seed,1000000000000000000000000000000000000000000000000000000000000002
+meta_ads,acc_demo_meta,meta_camp_fatigue,creative_fatigue_1,2026-05-21,219,13200,92,3,3.10,fixture_meta_ads_creative,phase2_seed,1000000000000000000000000000000000000000000000000000000000000003

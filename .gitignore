@@ -14,3 +14,8 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 .build/
+warehouse/dbt/target/
+warehouse/dbt/dbt_packages/
+warehouse/dbt/logs/
+warehouse/dbt/profiles/local/
+warehouse/dbt/profiles/.user.yml

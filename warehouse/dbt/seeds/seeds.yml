@@ -1,0 +1,211 @@
+version: 2
+
+seeds:
+  - name: admatix_accounts_seed
+    description: Phase 2 fixture ad accounts derived from committed connector fixtures.
+    config:
+      column_types:
+        tenant_id: uuid
+        is_active: boolean
+    columns:
+      - name: account_business_key
+        description: Conformed account business key.
+      - name: tenant_id
+        description: Owning tenant UUID used for fixture rows.
+      - name: platform
+        description: Source platform enum value.
+      - name: external_account_id
+        description: Platform-native account identifier.
+      - name: account_name
+        description: Human-readable account name.
+      - name: currency
+        description: ISO-4217 account currency.
+      - name: timezone
+        description: IANA account timezone.
+      - name: is_active
+        description: True when the account is active.
+  - name: admatix_campaigns_seed
+    description: Phase 2 fixture campaigns derived from Google Ads and Meta Ads fixtures.
+    config:
+      column_types:
+        daily_budget: numeric(18,4)
+        lifetime_budget: numeric(18,4)
+        start_date: date
+        end_date: date
+    columns:
+      - name: campaign_business_key
+        description: Conformed campaign business key.
+      - name: account_business_key
+        description: Parent account business key.
+      - name: platform
+        description: Source platform enum value.
+      - name: external_campaign_id
+        description: Platform-native campaign identifier.
+      - name: campaign_name
+        description: Human-readable campaign name.
+      - name: objective
+        description: Campaign objective.
+      - name: status
+        description: Campaign lifecycle status.
+      - name: daily_budget
+        description: Daily campaign budget.
+      - name: lifetime_budget
+        description: Lifetime campaign budget when present.
+      - name: start_date
+        description: Campaign start date.
+      - name: end_date
+        description: Campaign end date.
+      - name: bid_strategy
+        description: Campaign bid strategy.
+  - name: admatix_ad_sets_seed
+    description: Phase 2 fixture ad set and ad group records.
+    config:
+      column_types:
+        daily_budget: numeric(18,4)
+    columns:
+      - name: ad_set_business_key
+        description: Conformed ad set business key.
+      - name: campaign_business_key
+        description: Parent campaign business key.
+      - name: external_ad_set_id
+        description: Platform-native ad set or ad group identifier.
+      - name: ad_set_name
+        description: Human-readable ad set name.
+      - name: status
+        description: Ad set lifecycle status.
+      - name: bid_strategy
+        description: Ad set bid strategy.
+      - name: daily_budget
+        description: Daily ad set budget.
+      - name: optimization_goal
+        description: Optimization goal.
+  - name: admatix_creatives_seed
+    description: Phase 2 fixture creative records.
+    columns:
+      - name: creative_business_key
+        description: Conformed creative business key.
+      - name: campaign_business_key
+        description: Parent campaign business key.
+      - name: ad_set_business_key
+        description: Parent ad set business key.
+      - name: external_creative_id
+        description: Platform-native creative identifier.
+      - name: creative_format
+        description: Creative format.
+      - name: headline
+        description: Creative headline.
+      - name: body_text
+        description: Creative body text.
+      - name: final_url
+        description: Landing page URL.
+      - name: policy_status
+        description: Platform policy review status.
+      - name: status
+        description: Creative lifecycle status.
+  - name: admatix_platform_metrics_seed
+    description: Small Phase 2 daily platform metric fixture rows.
+    config:
+      column_types:
+        metric_date: date
+        spend: numeric(18,4)
+        impressions: bigint
+        clicks: bigint
+        conversions: numeric(18,4)
+        platform_revenue: numeric(18,4)
+    columns:
+      - name: platform
+        description: Source platform.
+      - name: external_account_id
+        description: Platform-native account id.
+      - name: campaign_external_id
+        description: Platform-native campaign id.
+      - name: metric_date
+        description: Metric date.
+      - name: spend
+        description: Platform spend.
+      - name: impressions
+        description: Platform impressions.
+      - name: clicks
+        description: Platform clicks.
+      - name: conversions
+        description: Platform conversions.
+      - name: platform_revenue
+        description: Platform-attributed revenue.
+      - name: currency
+        description: ISO-4217 currency.
+      - name: _source
+        description: Logical seed source.
+      - name: _batch_id
+        description: Seed batch identifier.
+      - name: _row_hash
+        description: Stable row hash for deduplication.
+  - name: admatix_creative_metrics_seed
+    description: Small Phase 2 creative metric fixture rows.
+    config:
+      column_types:
+        metric_date: date
+        spend: numeric(18,4)
+        impressions: bigint
+        clicks: bigint
+        conversions: numeric(18,4)
+        frequency: numeric(12,4)
+    columns:
+      - name: platform
+        description: Source platform.
+      - name: external_account_id
+        description: Platform-native account id.
+      - name: campaign_external_id
+        description: Platform-native campaign id.
+      - name: creative_external_id
+        description: Platform-native creative id.
+      - name: metric_date
+        description: Metric date.
+      - name: spend
+        description: Creative spend.
+      - name: impressions
+        description: Creative impressions.
+      - name: clicks
+        description: Creative clicks.
+      - name: conversions
+        description: Creative conversions.
+      - name: frequency
+        description: Average frequency.
+      - name: _source
+        description: Logical seed source.
+      - name: _batch_id
+        description: Seed batch identifier.
+      - name: _row_hash
+        description: Stable row hash for deduplication.
+  - name: admatix_first_party_orders_seed
+    description: Small Phase 2 first-party order fixture rows.
+    config:
+      column_types:
+        order_ts: timestamptz
+        revenue: numeric(18,4)
+        gross_margin: numeric(18,4)
+        is_new_customer: integer
+    columns:
+      - name: external_account_id
+        description: Account or store identifier.
+      - name: order_external_id
+        description: Source-native order id.
+      - name: order_ts
+        description: UTC order timestamp.
+      - name: customer_key
+        description: Hashed customer key.
+      - name: revenue
+        description: Order revenue.
+      - name: gross_margin
+        description: Order gross margin.
+      - name: currency
+        description: ISO-4217 currency.
+      - name: channel
+        description: Order channel.
+      - name: is_new_customer
+        description: One when first purchase.
+      - name: _source
+        description: Logical seed source.
+      - name: _batch_id
+        description: Seed batch identifier.
+      - name: _row_hash
+        description: Stable row hash for deduplication.

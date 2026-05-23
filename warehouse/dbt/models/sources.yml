@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: warehouse
+    schema: warehouse
+    loaded_at_field: _loaded_at
+    tables:
+      - name: bronze_criteo_uplift
+      - name: bronze_hillstrom
+      - name: bronze_avazu
+      - name: bronze_ipinyou
+      - name: bronze_sim_events
+      - name: bronze_platform_metrics
+      - name: bronze_first_party_orders
+  - name: app
+    schema: app
+    tables:
+      - name: h0_packets
+      - name: proposed_actions
+      - name: policy_decisions
+      - name: execution_diffs
+      - name: approval_receipts
+      - name: outcome_measurements
+      - name: agent_runs
+      - name: ad_accounts
+      - name: tenants
+      - name: policies
+  - name: ledger
+    schema: ledger
+    description: Read-only governance ledger sources. dbt models may SELECT only.
+    tables:
+      - name: action_events
+      - name: merkle_anchors
+  - name: sim
+    schema: sim
+    tables:
+      - name: scenarios
+      - name: campaigns
+      - name: true_effects
+      - name: events
+

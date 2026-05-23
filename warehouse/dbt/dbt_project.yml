@@ -1,0 +1,47 @@
+name: admatix_warehouse
+version: "0.1.0"
+config-version: 2
+profile: admatix_supabase
+
+model-paths: ["models"]
+snapshot-paths: ["snapshots"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+vars:
+  admatix_date_spine_start: "2020-01-01"
+  admatix_date_spine_end: "2030-12-31"
+
+models:
+  admatix_warehouse:
+    bronze:
+      +schema: warehouse
+      +materialized: view
+      +tags: ["bronze"]
+    silver:
+      +schema: warehouse
+      +materialized: table
+      +tags: ["silver"]
+    marts:
+      dims:
+        +schema: warehouse
+        +materialized: table
+        +tags: ["dim"]
+      facts:
+        +schema: warehouse
+        +materialized: incremental
+        +tags: ["fact"]
+
+seeds:
+  admatix_warehouse:
+    +schema: warehouse
+
+snapshots:
+  admatix_warehouse:
+    +target_schema: warehouse
+

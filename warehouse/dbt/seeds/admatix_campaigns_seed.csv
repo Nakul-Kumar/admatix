@@ -1,0 +1,5 @@
+campaign_business_key,account_business_key,platform,external_campaign_id,campaign_name,objective,status,daily_budget,lifetime_budget,start_date,end_date,bid_strategy
+campaign_a,acc_demo,google_ads,campaign_a,Brand Search,conversions,active,500,,2026-05-01,,max_conversions
+campaign_b,acc_demo,google_ads,campaign_b,Prospecting PMax,conversions,active,800,,2026-05-01,,max_conversion_value
+campaign_track_break,acc_demo_tracking,google_ads,campaign_track_break,Prospecting Search Tracking Break,conversions,active,600,,2026-05-01,,target_cpa
+meta_camp_fatigue,acc_demo_meta,meta_ads,meta_camp_fatigue,Prospecting Static Hero,conversions,active,200,,2026-05-01,,lowest_cost
