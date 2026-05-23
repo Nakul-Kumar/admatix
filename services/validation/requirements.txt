@@ -1,0 +1,24 @@
+# AdMatix research-grade validation harness — top-level Python deps.
+#
+# Extends services/verifier's pin set per SIMULATION-VERIFICATION §4.
+# Resolve to requirements.lock with `uv pip compile requirements.txt -o requirements.lock`
+# and install via `uv pip sync requirements.lock`. CI installs from the lock.
+#
+# admatix-simulator and admatix-verifier are local sibling packages — they
+# are installed in editable mode from disk (see install instructions in
+# docs/runbooks/validation.md). They are intentionally NOT listed here as
+# path requirements because `uv pip compile` resolves transitive deps from
+# PyPI only; the sibling packages are added on top with `pip install -e`.
+#
+numpy==2.1.*
+pandas==2.2.*
+scipy>=1.14,<1.17
+statsmodels==0.14.*
+pymc==5.*
+arviz==0.20.*
+simuk
+matplotlib==3.9.*
+pytest==8.3.*
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+httpx==0.27.*
