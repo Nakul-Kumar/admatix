@@ -38,6 +38,9 @@ importers:
       '@admatix/evidence':
         specifier: workspace:*
         version: link:../../packages/evidence
+      '@admatix/policy':
+        specifier: workspace:*
+        version: link:../../packages/policy
       '@admatix/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
