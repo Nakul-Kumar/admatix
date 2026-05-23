@@ -1,0 +1,5 @@
+creative_business_key,campaign_business_key,ad_set_business_key,external_creative_id,creative_format,headline,body_text,final_url,policy_status,status
+campaign_a__text,campaign_a,campaign_a__default,campaign_a__text,text,Brand Search,Official store search ad,https://shop.example.com/,approved,active
+campaign_b__asset,campaign_b,campaign_b__default,campaign_b__asset,text,Prospecting PMax,Automated performance asset,https://shop.example.com/collections,approved,active
+campaign_track_break__text,campaign_track_break,campaign_track_break__default,campaign_track_break__text,text,Prospecting Search,Landing page without tracking,https://shop.example.com/landing,approved,active
+creative_fatigue_1,meta_camp_fatigue,meta_camp_fatigue__default,creative_fatigue_1,image,Static Hero Sale,Limited-time offer creative,https://shop.example.com/sale,approved,active

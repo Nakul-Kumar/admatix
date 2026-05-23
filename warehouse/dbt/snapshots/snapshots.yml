@@ -1,0 +1,61 @@
+version: 2
+
+snapshots:
+  - name: dim_campaign_snapshot
+    description: dbt SCD-2 snapshot for campaign attributes.
+    columns:
+      - {name: campaign_business_key, description: Stable campaign business key., tests: [not_null]}
+      - {name: account_business_key, description: Parent account business key.}
+      - {name: platform, description: Source platform.}
+      - {name: external_campaign_id, description: Platform-native campaign id.}
+      - {name: campaign_name, description: Campaign name.}
+      - {name: objective, description: Campaign objective.}
+      - {name: status, description: Campaign status.}
+      - {name: daily_budget, description: Daily budget.}
+      - {name: lifetime_budget, description: Lifetime budget.}
+      - {name: start_date, description: Start date.}
+      - {name: end_date, description: End date.}
+      - {name: bid_strategy, description: Bid strategy.}
+      - {name: is_current, description: Source current marker for initial Phase 2 rows.}
+      - {name: row_hash, description: Tracked attribute hash.}
+      - {name: dbt_scd_id, description: dbt snapshot SCD id.}
+      - {name: dbt_updated_at, description: dbt snapshot update timestamp.}
+      - {name: valid_from, description: Snapshot validity start timestamp.}
+      - {name: valid_to, description: Snapshot validity end timestamp.}
+  - name: dim_ad_set_snapshot
+    description: dbt SCD-2 snapshot for ad set attributes.
+    columns:
+      - {name: ad_set_business_key, description: Stable ad set business key., tests: [not_null]}
+      - {name: campaign_business_key, description: Parent campaign business key.}
+      - {name: external_ad_set_id, description: Platform-native ad set id.}
+      - {name: ad_set_name, description: Ad set name.}
+      - {name: status, description: Ad set status.}
+      - {name: bid_strategy, description: Bid strategy.}
+      - {name: daily_budget, description: Daily budget.}
+      - {name: optimization_goal, description: Optimization goal.}
+      - {name: is_current, description: Source current marker for initial Phase 2 rows.}
+      - {name: row_hash, description: Tracked attribute hash.}
+      - {name: dbt_scd_id, description: dbt snapshot SCD id.}
+      - {name: dbt_updated_at, description: dbt snapshot update timestamp.}
+      - {name: valid_from, description: Snapshot validity start timestamp.}
+      - {name: valid_to, description: Snapshot validity end timestamp.}
+  - name: dim_creative_snapshot
+    description: dbt SCD-2 snapshot for creative attributes.
+    columns:
+      - {name: creative_business_key, description: Stable creative business key., tests: [not_null]}
+      - {name: campaign_business_key, description: Parent campaign business key.}
+      - {name: ad_set_business_key, description: Parent ad set business key.}
+      - {name: external_creative_id, description: Platform-native creative id.}
+      - {name: creative_format, description: Creative format.}
+      - {name: headline, description: Creative headline.}
+      - {name: body_text, description: Creative body text.}
+      - {name: final_url, description: Landing page URL.}
+      - {name: policy_status, description: Platform policy status.}
+      - {name: status, description: Creative status.}
+      - {name: is_current, description: Source current marker for initial Phase 2 rows.}
+      - {name: row_hash, description: Tracked attribute hash.}
+      - {name: dbt_scd_id, description: dbt snapshot SCD id.}
+      - {name: dbt_updated_at, description: dbt snapshot update timestamp.}
+      - {name: valid_from, description: Snapshot validity start timestamp.}
+      - {name: valid_to, description: Snapshot validity end timestamp.}
+

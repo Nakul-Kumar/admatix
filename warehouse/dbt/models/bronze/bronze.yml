@@ -1,0 +1,336 @@
+version: 2
+
+models:
+  - name: bronze_criteo_uplift
+    description: Empty Phase 2 bronze-compatible view for Criteo Uplift until WP-P ingestion lands.
+    columns: &criteo_cols
+      - name: bronze_id
+        description: Surrogate bronze row id.
+        tests: [unique]
+      - name: f0
+        description: Anonymised numeric feature 0.
+      - name: f1
+        description: Anonymised numeric feature 1.
+      - name: f2
+        description: Anonymised numeric feature 2.
+      - name: f3
+        description: Anonymised numeric feature 3.
+      - name: f4
+        description: Anonymised numeric feature 4.
+      - name: f5
+        description: Anonymised numeric feature 5.
+      - name: f6
+        description: Anonymised numeric feature 6.
+      - name: f7
+        description: Anonymised numeric feature 7.
+      - name: f8
+        description: Anonymised numeric feature 8.
+      - name: f9
+        description: Anonymised numeric feature 9.
+      - name: f10
+        description: Anonymised numeric feature 10.
+      - name: f11
+        description: Anonymised numeric feature 11.
+      - name: treatment
+        description: Treatment flag.
+      - name: conversion
+        description: Conversion label.
+      - name: visit
+        description: Visit label.
+      - name: exposure
+        description: Exposure label.
+      - name: raw
+        description: Lossless raw row JSON.
+      - name: _loaded_at
+        description: Load timestamp.
+      - name: _source
+        description: Logical source.
+      - name: _batch_id
+        description: Batch identifier.
+      - name: _row_hash
+        description: Stable row hash.
+  - name: bronze_hillstrom
+    description: Empty Phase 2 bronze-compatible view for Hillstrom until WP-P ingestion lands.
+    columns:
+      - name: bronze_id
+        description: Surrogate bronze row id.
+        tests: [unique]
+      - name: recency
+        description: Months since last purchase.
+      - name: history_segment
+        description: Historical spend segment.
+      - name: history
+        description: Prior purchase history.
+      - name: mens
+        description: Prior mens category flag.
+      - name: womens
+        description: Prior womens category flag.
+      - name: zip_code
+        description: Zip-code class.
+      - name: newbie
+        description: New customer flag.
+      - name: channel
+        description: Prior purchase channel.
+      - name: segment
+        description: Treatment segment.
+      - name: visit
+        description: Visit label.
+      - name: conversion
+        description: Conversion label.
+      - name: spend
+        description: Outcome spend.
+      - name: raw
+        description: Lossless raw row JSON.
+      - name: _loaded_at
+        description: Load timestamp.
+      - name: _source
+        description: Logical source.
+      - name: _batch_id
+        description: Batch identifier.
+      - name: _row_hash
+        description: Stable row hash.
+  - name: bronze_avazu
+    description: Empty Phase 2 bronze-compatible view for Avazu until WP-P ingestion lands.
+    columns:
+      - name: bronze_id
+        description: Surrogate bronze row id.
+        tests: [unique]
+      - name: ad_id
+        description: Source ad id.
+      - name: click
+        description: Click label.
+      - name: hour_raw
+        description: Raw hour string.
+      - name: c1
+        description: Anonymised categorical field.
+      - name: banner_pos
+        description: Banner position.
+      - name: site_id
+        description: Site id.
+      - name: site_domain
+        description: Site domain.
+      - name: site_category
+        description: Site category.
+      - name: app_id
+        description: App id.
+      - name: app_domain
+        description: App domain.
+      - name: app_category
+        description: App category.
+      - name: device_id
+        description: Device id.
+      - name: device_ip
+        description: Device IP.
+      - name: device_model
+        description: Device model.
+      - name: device_type
+        description: Device type.
+      - name: device_conn_type
+        description: Device connection type.
+      - name: raw
+        description: Lossless raw row JSON.
+      - name: _loaded_at
+        description: Load timestamp.
+      - name: _source
+        description: Logical source.
+      - name: _batch_id
+        description: Batch identifier.
+      - name: _row_hash
+        description: Stable row hash.
+  - name: bronze_ipinyou
+    description: Empty Phase 2 bronze-compatible view for iPinYou until WP-P ingestion lands.
+    columns:
+      - name: bronze_id
+        description: Surrogate bronze row id.
+        tests: [unique]
+      - name: bid_id
+        description: Source bid id.
+      - name: log_type
+        description: Log record type.
+      - name: timestamp_raw
+        description: Raw timestamp string.
+      - name: ipinyou_id
+        description: Anonymised user id.
+      - name: user_agent
+        description: User agent.
+      - name: ip
+        description: Anonymised IP.
+      - name: region
+        description: Region code.
+      - name: city
+        description: City code.
+      - name: ad_exchange
+        description: Ad exchange id.
+      - name: domain
+        description: Publisher domain.
+      - name: url
+        description: Page URL.
+      - name: ad_slot_id
+        description: Ad slot id.
+      - name: ad_slot_width
+        description: Slot width.
+      - name: ad_slot_height
+        description: Slot height.
+      - name: ad_slot_floor
+        description: Slot floor price.
+      - name: bidding_price
+        description: Bid price.
+      - name: paying_price
+        description: Paid clearing price.
+      - name: creative_id
+        description: Creative id.
+      - name: advertiser_id
+        description: Advertiser id.
+      - name: is_click
+        description: Click flag.
+      - name: is_conversion
+        description: Conversion flag.
+      - name: raw
+        description: Lossless raw row JSON.
+      - name: _loaded_at
+        description: Load timestamp.
+      - name: _source
+        description: Logical source.
+      - name: _batch_id
+        description: Batch identifier.
+      - name: _row_hash
+        description: Stable row hash.
+  - name: bronze_sim_events
+    description: Empty Phase 2 bronze-compatible view for simulator events until WP-Q writes events.
+    columns:
+      - name: bronze_id
+        description: Surrogate bronze row id.
+        tests: [unique]
+      - name: scenario_id
+        description: Simulator scenario id.
+      - name: sim_campaign_id
+        description: Simulator campaign id.
+      - name: event_type
+        description: Simulator event type.
+      - name: event_ts
+        description: Event timestamp.
+      - name: user_key
+        description: Synthetic user key.
+      - name: treatment_arm
+        description: Treatment arm.
+      - name: spend
+        description: Event spend.
+      - name: revenue
+        description: Event revenue.
+      - name: raw
+        description: Lossless raw row JSON.
+      - name: _loaded_at
+        description: Load timestamp.
+      - name: _source
+        description: Logical source.
+      - name: _batch_id
+        description: Batch identifier.
+      - name: _row_hash
+        description: Stable row hash.
+  - name: bronze_platform_metrics
+    description: Bronze view over Phase 2 fixture platform metric seed rows preserving ingest metadata.
+    columns:
+      - name: bronze_id
+        description: Deterministic surrogate row number for fixture bronze rows.
+        tests: [not_null, unique]
+      - name: platform
+        description: Source platform identifier.
+        tests: [not_null]
+      - name: external_account_id
+        description: Platform-native account identifier.
+      - name: campaign_external_id
+        description: Platform-native campaign identifier.
+      - name: metric_date
+        description: Date the platform metrics cover.
+      - name: spend
+        description: Spend reported by the platform.
+      - name: impressions
+        description: Impressions reported by the platform.
+      - name: clicks
+        description: Clicks reported by the platform.
+      - name: conversions
+        description: Conversions reported by the platform.
+      - name: platform_revenue
+        description: Platform-attributed revenue; directional only.
+      - name: currency
+        description: ISO-4217 currency code.
+      - name: raw
+        description: Lossless JSON representation of the seed row.
+      - name: _loaded_at
+        description: Timestamp the bronze view row is materialised.
+      - name: _source
+        description: Logical source identifier.
+      - name: _batch_id
+        description: Ingest batch identifier.
+      - name: _row_hash
+        description: Stable SHA-256 row hash for fixture deduplication.
+  - name: bronze_first_party_orders
+    description: Bronze view over Phase 2 first-party order seed rows preserving ingest metadata.
+    columns:
+      - name: bronze_id
+        description: Deterministic surrogate row number for fixture bronze rows.
+        tests: [not_null, unique]
+      - name: external_account_id
+        description: Account or store identifier.
+      - name: order_external_id
+        description: Source-native order id.
+      - name: order_ts
+        description: UTC order timestamp.
+      - name: customer_key
+        description: Hashed customer identifier.
+      - name: revenue
+        description: Order revenue.
+      - name: gross_margin
+        description: Order gross margin.
+      - name: currency
+        description: ISO-4217 currency code.
+      - name: channel
+        description: Order channel.
+      - name: is_new_customer
+        description: One when the customer is new.
+      - name: raw
+        description: Lossless JSON representation of the seed row.
+      - name: _loaded_at
+        description: Timestamp the bronze view row is materialised.
+      - name: _source
+        description: Logical source identifier.
+      - name: _batch_id
+        description: Ingest batch identifier.
+      - name: _row_hash
+        description: Stable SHA-256 row hash for fixture deduplication.
+  - name: bronze_creative_metrics_fixture
+    description: Bronze view over Phase 2 fixture creative metric seed rows.
+    columns:
+      - name: bronze_id
+        description: Deterministic surrogate row number for fixture bronze rows.
+        tests: [not_null, unique]
+      - name: platform
+        description: Source platform identifier.
+      - name: external_account_id
+        description: Platform-native account identifier.
+      - name: campaign_external_id
+        description: Platform-native campaign identifier.
+      - name: creative_external_id
+        description: Platform-native creative identifier.
+      - name: metric_date
+        description: Date the creative metrics cover.
+      - name: spend
+        description: Spend reported for the creative.
+      - name: impressions
+        description: Impressions reported for the creative.
+      - name: clicks
+        description: Clicks reported for the creative.
+      - name: conversions
+        description: Conversions reported for the creative.
+      - name: frequency
+        description: Average creative frequency.
+      - name: raw
+        description: Lossless JSON representation of the seed row.
+      - name: _loaded_at
+        description: Timestamp the bronze view row is materialised.
+      - name: _source
+        description: Logical source identifier.
+      - name: _batch_id
+        description: Ingest batch identifier.
+      - name: _row_hash
+        description: Stable SHA-256 row hash for fixture deduplication.

@@ -1,0 +1,4 @@
+external_account_id,order_external_id,order_ts,customer_key,revenue,gross_margin,currency,channel,is_new_customer,_source,_batch_id,_row_hash
+acc_demo,order_20260512_001,2026-05-12T15:00:00Z,cust_hash_001,4600,2852,USD,web,1,fixture_first_party,phase2_seed,2000000000000000000000000000000000000000000000000000000000000001
+acc_demo,order_20260513_001,2026-05-13T15:00:00Z,cust_hash_002,4880,3025.60,USD,web,0,fixture_first_party,phase2_seed,2000000000000000000000000000000000000000000000000000000000000002
+acc_demo,order_20260518_001,2026-05-18T15:00:00Z,cust_hash_003,4650,2836.50,USD,web,0,fixture_first_party,phase2_seed,2000000000000000000000000000000000000000000000000000000000000003
