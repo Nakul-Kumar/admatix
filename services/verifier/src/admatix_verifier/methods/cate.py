@@ -58,6 +58,8 @@ def _qini(events: pd.DataFrame, scores: np.ndarray) -> float | None:
                 value = float(result[non_random[0]].iloc[0])
                 return value
             return None
+        if isinstance(result, pd.Series):
+            return float(result.iloc[0])
         return float(result)
     except Exception:
         # Fall back to a hand-rolled Qini: cumulative uplift sorted by score.

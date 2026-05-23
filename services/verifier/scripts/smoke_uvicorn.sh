@@ -16,6 +16,9 @@ fi
 
 cd "$HERE"
 
+# Make the src layout importable without requiring a pip install of the package.
+export PYTHONPATH="$HERE/src:${PYTHONPATH:-}"
+
 python -m uvicorn admatix_verifier.app:app --host "$HOST" --port "$PORT" \
   --log-level warning >"$LOG" 2>&1 &
 PID=$!

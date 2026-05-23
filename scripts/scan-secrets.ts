@@ -3,7 +3,7 @@ import { join, relative } from "node:path";
 import process from "node:process";
 
 const root = process.cwd();
-const excludedDirs = new Set([".git", ".turbo", "coverage", "dist", "node_modules"]);
+const excludedDirs = new Set([".git", ".turbo", ".venv", "coverage", "dist", "node_modules"]);
 const excludedFiles = new Set(["pnpm-lock.yaml"]);
 const textExtensions = new Set([
   ".css",
