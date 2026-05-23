@@ -4,11 +4,25 @@ Implementation note: `tfcausalimpact==0.0.18` (the spec's pinned fallback)
 locks pandas<2.2 — incompatible with the rest of the verifier's pin set
 (econml/causalml require modern pandas). We use `statsmodels`'
 `UnobservedComponents` BSTS — a Kalman-filter state-space model with a
-local-level trend and a weekly cycle. It produces a Gaussian-marginal
-posterior on the post-period gap (observed − predicted), which we summarise
-as `estimate ± z·SE` for the 95% interval. Operators who want the
-TensorFlow-Probability BSTS may install the `bsts-tfp` extra (which pulls
-`tfp-causalimpact`); the contract is unchanged.
+local-level trend and a weekly cycle.
+
+SE of the mean post-period gap. The naive plug-in
+`SE² = mean(per-step se²) / N` treats per-step forecast errors as
+independent, but local-level state-space forecasts are positively
+correlated across the post-period horizon (a level shock at step h biases
+every subsequent step). That collapse to a diagonal covariance
+under-states the SE of the average gap by ~30 % and produces under-covering
+intervals (validated empirically — see
+`docs/phase-reports/verifier-method-validation.md`). We therefore draw
+`_N_FORECAST_SIM` posterior-predictive trajectories with
+`results.simulate(anchor='end', repetitions=…)`, take each trajectory's
+post-period mean, and use the standard deviation of those means as the SE
+of the counterfactual average. This captures the full forecast-error
+covariance for free.
+
+Operators who want the TensorFlow-Probability BSTS may install the
+`bsts-tfp` extra (which pulls `tfp-causalimpact`); the contract is
+unchanged.
 
 Pre-period definition: the first half of the observed timeline is used as
 the training window. The post-period is the second half.
@@ -28,6 +42,10 @@ from ..models import MethodResult, VerifyRequest
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import statsmodels.api as sm  # noqa: E402
+
+
+_N_FORECAST_SIM = 1000
+_FORECAST_SIM_SEED = 17
 
 
 def _daily_series(events: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
@@ -97,11 +115,28 @@ def run(req: VerifyRequest, events: pd.DataFrame) -> MethodResult:
             res = model.fit(disp=False, method="lbfgs")
 
         forecast = res.get_forecast(steps=len(post_treated), exog=post_control.reshape(-1, 1))
+        sim_paths = np.asarray(
+            res.simulate(
+                nsimulations=len(post_treated),
+                anchor="end",
+                exog=post_control.reshape(-1, 1),
+                repetitions=_N_FORECAST_SIM,
+                random_state=np.random.default_rng(_FORECAST_SIM_SEED),
+            )
+        )
     mean = np.asarray(forecast.predicted_mean, dtype=float)
-    se = np.asarray(forecast.se_mean, dtype=float)
+    per_step_se = np.asarray(forecast.se_mean, dtype=float)
     gap = post_treated - mean
     estimate = float(np.mean(gap))
-    se_aggr = float(np.sqrt(np.mean(se**2) / max(len(gap), 1)))
+
+    # `sim_paths` shape from statsmodels' `simulate` with `repetitions=N` is
+    # `(nsteps, k_endog=1, N)`. Take each repetition's post-period mean and
+    # use the std across repetitions as the SE of the counterfactual mean
+    # — this is the joint-covariance-aware analog of the naive plug-in.
+    sim_paths_flat = sim_paths.reshape(sim_paths.shape[0], -1)
+    sim_means = sim_paths_flat.mean(axis=0)
+    se_aggr = float(np.std(sim_means, ddof=1))
+    naive_se = float(np.sqrt(np.mean(per_step_se**2) / max(len(gap), 1)))
     z = stats.norm.ppf(0.975)
     ci_low = estimate - z * se_aggr
     ci_high = estimate + z * se_aggr
@@ -114,6 +149,9 @@ def run(req: VerifyRequest, events: pd.DataFrame) -> MethodResult:
         "pre_periods": int(pre_end),
         "post_periods": int(len(post_treated)),
         "posterior_se": se_aggr,
+        "naive_independent_se": naive_se,
+        "se_method": "monte_carlo_simulate_anchor_end",
+        "n_forecast_sim": int(_N_FORECAST_SIM),
         "model": "statsmodels.UnobservedComponents(local_level+control_exog)",
     }
     return MethodResult(

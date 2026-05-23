@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "ope_analytic": {
+    "config": {
+      "n_seeds": 200,
+      "n_users": 4000,
+      "p_treat": 0.3,
+      "p_control": 0.1
+    },
+    "scenarios": {
+      "const_prop_always_treat": {
+        "ips": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": 8.000000000000201e-05,
+          "rmse": 0.010372800971772287,
+          "coverage_95": 0.97,
+          "coverage_90": 0.92,
+          "mean_estimate": 0.30008,
+          "mean_ci_width_95": 0.04426344867158329
+        },
+        "snips": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": 0.00022237622763486288,
+          "rmse": 0.00958282948924137,
+          "coverage_95": 0.96,
+          "coverage_90": 0.915,
+          "mean_estimate": 0.3002223762276348,
+          "mean_ci_width_95": 0.04018303334069165
+        },
+        "dr": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": 0.00022237622763486618,
+          "rmse": 0.009582829489241365,
+          "coverage_95": 0.965,
+          "coverage_90": 0.915,
+          "mean_estimate": 0.3002223762276348,
+          "mean_ci_width_95": 0.04016009096991329
+        }
+      },
+      "const_prop_split_policy": {
+        "ips": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": -0.00016000000000000972,
+          "rmse": 0.008917959407846615,
+          "coverage_95": 0.965,
+          "coverage_90": 0.925,
+          "mean_estimate": 0.19984000000000002,
+          "mean_ci_width_95": 0.037167686279011514
+        },
+        "snips": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": -0.0003505934632913224,
+          "rmse": 0.008182215229693517,
+          "coverage_95": 0.96,
+          "coverage_90": 0.92,
+          "mean_estimate": 0.19964940653670868,
+          "mean_ci_width_95": 0.035017523602219915
+        },
+        "dr": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": -0.0003055989882768928,
+          "rmse": 0.008151652155354003,
+          "coverage_95": 0.96,
+          "coverage_90": 0.915,
+          "mean_estimate": 0.1996944010117231,
+          "mean_ci_width_95": 0.034494907121929604
+        }
+      },
+      "varying_prop_always_treat": {
+        "ips": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": 0.0010724064818525487,
+          "rmse": 0.01252427079157638,
+          "coverage_95": 0.96,
+          "coverage_90": 0.935,
+          "mean_estimate": 0.3010724064818525,
+          "mean_ci_width_95": 0.05312479815708229
+        },
+        "snips": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": 0.0011348777921979126,
+          "rmse": 0.011783698145514646,
+          "coverage_95": 0.955,
+          "coverage_90": 0.92,
+          "mean_estimate": 0.3011348777921979,
+          "mean_ci_width_95": 0.04697336747932509
+        },
+        "dr": {
+          "n_runs": 200,
+          "n_valid": 200,
+          "n_inconclusive": 0,
+          "bias": 0.0011315168625760437,
+          "rmse": 0.011777770378973582,
+          "coverage_95": 0.955,
+          "coverage_90": 0.92,
+          "mean_estimate": 0.301131516862576,
+          "mean_ci_width_95": 0.046987042326598186
+        }
+      }
+    }
+  },
+  "bsts_analytic": {
+    "config": {
+      "n_seeds": 100
+    },
+    "scenarios": {
+      "no_seasonal_small_effect": {
+        "n_runs": 100,
+        "n_valid": 100,
+        "n_inconclusive": 0,
+        "bias": -0.00014719998969628387,
+        "rmse": 0.001337677909170274,
+        "coverage_95": 0.96,
+        "coverage_90": 0.94,
+        "mean_estimate": 0.004852800010303716,
+        "mean_ci_width_95": 0.0061382403857272675,
+        "mean_posterior_se": 0.0015659064233182157,
+        "true_delta": 0.005,
+        "n_periods": 60
+      },
+      "no_seasonal_medium_effect": {
+        "n_runs": 100,
+        "n_valid": 100,
+        "n_inconclusive": 0,
+        "bias": -0.00014719998969628257,
+        "rmse": 0.0013376779091702744,
+        "coverage_95": 0.96,
+        "coverage_90": 0.94,
+        "mean_estimate": 0.019852800010303717,
+        "mean_ci_width_95": 0.006138240385727266,
+        "mean_posterior_se": 0.0015659064233182157,
+        "true_delta": 0.02,
+        "n_periods": 60
+      },
+      "seasonal_medium_effect": {
+        "n_runs": 100,
+        "n_valid": 100,
+        "n_inconclusive": 0,
+        "bias": -6.640334901221821e-05,
+        "rmse": 0.0013622319572902217,
+        "coverage_95": 0.96,
+        "coverage_90": 0.93,
+        "mean_estimate": 0.019933596650987782,
+        "mean_ci_width_95": 0.006188352493060028,
+        "mean_posterior_se": 0.0015786903590762286,
+        "true_delta": 0.02,
+        "n_periods": 60
+      }
+    }
+  },
+  "reference_comparison": {
+    "bsts": [
+      {
+        "fixture": "bsts_no_seasonal_small",
+        "true_delta": 0.005,
+        "bespoke_estimate": 0.007972195833363073,
+        "bespoke_ci": [
+          -0.000673178942595859,
+          0.016617570609322004
+        ],
+        "bespoke_posterior_se": 0.004410986550851212,
+        "bespoke_naive_independent_se": 0.001047786806997785,
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.005224520340561867,
+        "reference_ci": [
+          0.003506113681942223,
+          0.007105261320248246
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.002747675492801206
+      },
+      {
+        "fixture": "bsts_no_seasonal_medium",
+        "true_delta": 0.02,
+        "bespoke_estimate": 0.020329629022763245,
+        "bespoke_ci": [
+          0.01850056675842796,
+          0.02215869128709853
+        ],
+        "bespoke_posterior_se": 0.0009332121808169419,
+        "bespoke_naive_independent_se": 0.0007500912190205688,
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.020400384441018105,
+        "reference_ci": [
+          0.01883483715355396,
+          0.022007032483816146
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": -7.075541825486004e-05
+      },
+      {
+        "fixture": "bsts_seasonal_medium",
+        "true_delta": 0.02,
+        "bespoke_estimate": 0.02199587699384351,
+        "bespoke_ci": [
+          0.018374917866857497,
+          0.02561683612082952
+        ],
+        "bespoke_posterior_se": 0.0018474620735624103,
+        "bespoke_naive_independent_se": 0.0009170038674765315,
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.01964579150080681,
+        "reference_ci": [
+          0.01809200970456004,
+          0.021219184156507254
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0023500854930367
+      }
+    ],
+    "ope": [
+      {
+        "fixture": "ope_const_prop_always_treat",
+        "estimator": "ips",
+        "true_value": 0.3,
+        "bespoke_estimate": 0.288,
+        "bespoke_ci": [
+          0.26623691225788354,
+          0.3097630877421164
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.288,
+        "reference_ci": [
+          0.2655,
+          0.30851249999999997
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      },
+      {
+        "fixture": "ope_const_prop_always_treat",
+        "estimator": "snips",
+        "true_value": 0.3,
+        "bespoke_estimate": 0.28728179551122196,
+        "bespoke_ci": [
+          0.2674729951399695,
+          0.3070905958824744
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.28728179551122196,
+        "reference_ci": [
+          0.26483790523690776,
+          0.3077431421446384
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      },
+      {
+        "fixture": "ope_const_prop_always_treat",
+        "estimator": "dr",
+        "true_value": 0.3,
+        "bespoke_estimate": 0.28728179551122196,
+        "bespoke_ci": [
+          0.26742347313904136,
+          0.30714011788340256
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.28728179551122196,
+        "reference_ci": [
+          0.26647114713216963,
+          0.3070491022443891
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      },
+      {
+        "fixture": "ope_const_prop_split_policy",
+        "estimator": "ips",
+        "true_value": 0.2,
+        "bespoke_estimate": 0.202,
+        "bespoke_ci": [
+          0.1833214604045027,
+          0.22067853959549733
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.202,
+        "reference_ci": [
+          0.1834875,
+          0.222
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      },
+      {
+        "fixture": "ope_const_prop_split_policy",
+        "estimator": "snips",
+        "true_value": 0.2,
+        "bespoke_estimate": 0.20059582919563063,
+        "bespoke_ci": [
+          0.18310474195772447,
+          0.21808691643353678
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.2005958291956306,
+        "reference_ci": [
+          0.18221201588877858,
+          0.2204568023833168
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 2.7755575615628914e-17
+      },
+      {
+        "fixture": "ope_const_prop_split_policy",
+        "estimator": "dr",
+        "true_value": 0.2,
+        "bespoke_estimate": 0.20061749999999998,
+        "bespoke_ci": [
+          0.18325111365804506,
+          0.2179838863419549
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.20061749999999998,
+        "reference_ci": [
+          0.18317801875000003,
+          0.21855808125
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      },
+      {
+        "fixture": "ope_varying_prop_always_treat",
+        "estimator": "ips",
+        "true_value": 0.3,
+        "bespoke_estimate": 0.31749897612252215,
+        "bespoke_ci": [
+          0.29110125015219823,
+          0.34389670209284606
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.31749897612252215,
+        "reference_ci": [
+          0.29105427899884706,
+          0.34325796217092314
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      },
+      {
+        "fixture": "ope_varying_prop_always_treat",
+        "estimator": "snips",
+        "true_value": 0.3,
+        "bespoke_estimate": 0.3125220686735848,
+        "bespoke_ci": [
+          0.2894704272566549,
+          0.3355737100905147
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.3125220686735848,
+        "reference_ci": [
+          0.2864919014224373,
+          0.3378772736102889
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      },
+      {
+        "fixture": "ope_varying_prop_always_treat",
+        "estimator": "dr",
+        "true_value": 0.3,
+        "bespoke_estimate": 0.31255538395781945,
+        "bespoke_ci": [
+          0.2891372997174428,
+          0.3359734681981961
+        ],
+        "bespoke_ci_contains_truth": true,
+        "reference_estimate": 0.31255538395781945,
+        "reference_ci": [
+          0.2882461548522168,
+          0.3359876614272877
+        ],
+        "reference_ci_contains_truth": true,
+        "reference_delta_estimate": 0.0
+      }
+    ],
+    "reference_libs": {
+      "bsts": "tfcausalimpact==0.0.18",
+      "ope": "obp==0.5.7"
+    },
+    "reference_present": {
+      "bsts": true,
+      "ope": true
+    }
+  },
+  "acceptance": {
+    "bias_relative_tolerance": 0.1,
+    "coverage_90_band": [
+      0.85,
+      0.95
+    ],
+    "reference_delta_estimate_abs_max": 0.02
+  }
+}
