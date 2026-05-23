@@ -3,6 +3,8 @@ import Fastify, {
   type FastifyServerOptions,
 } from "fastify";
 import { createStore, type Store } from "@admatix/core";
+import { registerAuthHook } from "./auth.js";
+import { assertFixturesMode } from "./fixtures-mode.js";
 import { registerAuditRoutes } from "./routes/audit.js";
 import { registerPacketsRoutes } from "./routes/packets.js";
 import { registerApprovalsRoutes } from "./routes/approvals.js";
@@ -21,11 +23,30 @@ export interface ApiOptions extends FastifyServerOptions {
 
 /** Build a Fastify instance with every AdMatix route registered. */
 export async function buildServer(opts: ApiOptions = {}): Promise<FastifyInstance> {
+  assertFixturesMode();
   const { host: _host, port: _port, deps: _deps, ...fastifyOpts } = opts;
-  const app = Fastify({ logger: { level: "info" }, ...fastifyOpts });
+  // Default logger redacts secrets in flight — AGENTS.md §9 says we never
+  // log OAuth tokens. Callers can still override via `logger: false`
+  // (tests) or a full logger object.
+  const defaultLogger = {
+    level: "info",
+    redact: [
+      "req.headers.authorization",
+      "req.headers.cookie",
+      "req.headers['x-api-token']",
+      "headers.authorization",
+      "headers.cookie",
+    ],
+  };
+  const app = Fastify({
+    logger: fastifyOpts.logger ?? defaultLogger,
+    ...fastifyOpts,
+  });
   const store = opts.deps?.store ?? createStore();
 
   app.get("/healthz", async () => ({ ok: true, service: "admatix-api" }));
+
+  registerAuthHook(app);
 
   await app.register((instance, _o, done) => {
     registerAuditRoutes(instance, { store });
