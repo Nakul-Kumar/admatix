@@ -20,7 +20,11 @@ export function pacingDetector(input: DetectorInput): Finding[] {
   for (const [campaignId, rows] of rowsByCampaign(parsed.daily)) {
     const campaign = campaignsById.get(campaignId);
     const budget = campaign?.daily_budget;
-    if (!campaign || budget === undefined || rows.length < 3) continue;
+    // QA finding #11: `budget === 0` was missed by the original guard,
+    // so `(spend - 0) / 0` produced Infinity which then satisfied the
+    // 35% threshold and surfaced as "NaN%" in the description. Fail
+    // closed: skip campaigns without a positive daily budget.
+    if (!campaign || budget === undefined || budget <= 0 || rows.length < 3) continue;
     const recent = rows.slice(-3);
     const recentSpend = avg(recent.map((row) => row.spend));
     const drift = (recentSpend - budget) / budget;
