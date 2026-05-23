@@ -200,8 +200,7 @@ export async function activatePacketDryRun(packet: H0Packet): Promise<{
   const traceId = packet.trace_id;
   const adapter = makePlatformAdapterAgent({ traceId });
   const builder = makeDiffBuilderAgent({ traceId });
-  const translated = await adapter.translate({ packet });
-  const action = normalizeActionForCli(translated.action, packet);
+  const { action } = await adapter.translate({ packet });
   const campaign = await campaignForPacket(packet);
   const decision = evaluateAction(action, {
     campaign,
@@ -301,40 +300,7 @@ export function actionable(
 
 export function withCliDemoId(packet: H0Packet, index: number): H0Packet {
   const id = `h0_${String(index + 1).padStart(3, "0")}`;
-  return {
-    ...packet,
-    packet_id: id,
-    guardrails: {
-      ...packet.guardrails,
-      max_daily_budget_delta_pct:
-        packet.guardrails.max_daily_budget_delta_pct !== undefined &&
-        packet.guardrails.max_daily_budget_delta_pct <= 1
-          ? packet.guardrails.max_daily_budget_delta_pct * 100
-          : packet.guardrails.max_daily_budget_delta_pct,
-    },
-    proposal: normalizePacketProposal(packet),
-  };
-}
-
-function normalizePacketProposal(packet: H0Packet): H0Packet["proposal"] {
-  if (packet.proposal.action !== "budget_shift") return packet.proposal;
-  const maxReduction = packet.proposal.params["max_reduction_pct"];
-  if (typeof maxReduction !== "number") return packet.proposal;
-  return {
-    ...packet.proposal,
-    params: {
-      ...packet.proposal.params,
-      delta_pct: -Math.round(maxReduction * 10000) / 100,
-    },
-  };
-}
-
-function normalizeActionForCli(action: ProposedAction, packet: H0Packet): ProposedAction {
-  const proposal = normalizePacketProposal(packet);
-  return {
-    ...action,
-    params: proposal.params,
-  };
+  return { ...packet, packet_id: id };
 }
 
 async function campaignForPacket(packet: H0Packet): Promise<Campaign | undefined> {

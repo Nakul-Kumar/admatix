@@ -6,6 +6,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { H0Packet } from "@admatix/schemas";
 import { createStore, nowIso } from "@admatix/core";
+import { signApprovalReceipt } from "@admatix/policy";
 import {
   APPROVED_TOOL_NAMES,
   createAdmatixMcpServer,
@@ -28,7 +29,7 @@ const FixturePacket = H0Packet.parse({
   baseline_window: "2026-05-12..2026-05-21",
   success_metric: "estimated_waste_reduction",
   guardrails: {
-    max_daily_budget_delta_pct: 0.2,
+    max_daily_budget_delta_pct: 20,
     requires_human_approval: true,
   },
   evidence: [
@@ -64,6 +65,19 @@ afterEach(async () => {
   await Promise.all(
     tmpRoots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
   );
+});
+
+describe("F8: MCP entry point enforces ADMATIX_MODE=fixtures", () => {
+  it("createAdmatixMcpServer throws if ADMATIX_MODE is not fixtures", async () => {
+    const prev = process.env["ADMATIX_MODE"];
+    process.env["ADMATIX_MODE"] = "live";
+    try {
+      expect(() => createAdmatixMcpServer({ dataDir: "/tmp" })).toThrow(/ADMATIX_MODE/);
+    } finally {
+      if (prev === undefined) delete process.env["ADMATIX_MODE"];
+      else process.env["ADMATIX_MODE"] = prev;
+    }
+  });
 });
 
 describe("MCP server", () => {
@@ -105,6 +119,78 @@ describe("MCP server", () => {
     expect(JSON.stringify(parsed.data)).toContain("approval_receipt_required");
   });
 
+  // QA finding #1 (CRITICAL): activate_dry_run must call PolicyGuard.
+  // Previously this path produced a diff for a packet that breached the
+  // budget cap because PolicyGuard was never invoked. This test would
+  // have caught it: a packet whose params.delta_pct exceeds the cap must
+  // come back BLOCKED, never with an ExecutionDiff.
+  it("F1: blocks an unsafe budget_shift packet via PolicyGuard", async () => {
+    const store = createStore(await tempRoot());
+    const unsafePacket = H0Packet.parse({
+      ...FixturePacket,
+      packet_id: "h0_unsafe_test",
+      guardrails: { max_daily_budget_delta_pct: 20, requires_human_approval: true },
+      proposal: {
+        action: "budget_shift",
+        target_entity_id: "cmp_brand",
+        params: { delta_pct: 80 }, // breaches the 20% cap
+        dry_run_only: true,
+      },
+    });
+    await store.put("h0_packets", unsafePacket.packet_id, unsafePacket);
+
+    const result = await activateDryRunTool(
+      {
+        packet_id: unsafePacket.packet_id,
+        approval_receipt: signedReceipt({
+          receipt_id: "rcpt_unsafe",
+          packet_id: unsafePacket.packet_id,
+          action_id: "act_unsafe",
+          decision: "approved",
+          decided_by: "user_test",
+          role: "media_manager",
+          decided_at: nowIso(),
+        }),
+      },
+      {
+        store,
+        connector: (await import("@admatix/connectors")).fixtureConnector(),
+      },
+    );
+
+    const parsed = ToolResultEnvelopeSchema.parse(result);
+    expect(parsed.status).toBe("blocked");
+    expect(JSON.stringify(parsed.data)).toContain("policy_block");
+    expect(JSON.stringify(parsed.data)).toMatch(/exceeds the 20% cap/);
+  });
+
+  it("F1: rejects approval receipts whose HMAC signature does not verify", async () => {
+    const store = createStore(await tempRoot());
+    await store.put("h0_packets", FixturePacket.packet_id, FixturePacket);
+    const result = await activateDryRunTool(
+      {
+        packet_id: FixturePacket.packet_id,
+        approval_receipt: {
+          receipt_id: "rcpt_tampered",
+          packet_id: FixturePacket.packet_id,
+          action_id: "act_tampered",
+          decision: "approved",
+          decided_by: "evil_user",
+          role: "finance_director",
+          decided_at: nowIso(),
+          signature: "ffeeddccbbaa00112233445566778899", // not a real HMAC
+        },
+      },
+      {
+        store,
+        connector: (await import("@admatix/connectors")).fixtureConnector(),
+      },
+    );
+    const parsed = ToolResultEnvelopeSchema.parse(result);
+    expect(parsed.status).toBe("blocked");
+    expect(JSON.stringify(parsed.data)).toContain("signature_invalid");
+  });
+
   it("validates direct tool outputs and includes trace_id on every response", async () => {
     const store = createStore(await tempRoot());
     const connector = (await import("@admatix/connectors")).fixtureConnector();
@@ -126,7 +212,7 @@ describe("MCP server", () => {
       await activateDryRunTool(
         {
           packet_id: FixturePacket.packet_id,
-          approval_receipt: {
+          approval_receipt: signedReceipt({
             receipt_id: "rcpt_test",
             packet_id: FixturePacket.packet_id,
             action_id: "act_approved",
@@ -134,7 +220,7 @@ describe("MCP server", () => {
             decided_by: "user_test",
             role: "media_manager",
             decided_at: nowIso(),
-          },
+          }),
         },
         ctx,
       ),
@@ -220,7 +306,7 @@ describe("MCP server", () => {
       name: "activate_dry_run",
       arguments: {
         packet_id: packet.packet_id,
-        approval_receipt: {
+        approval_receipt: signedReceipt({
           receipt_id: "rcpt_stdio",
           packet_id: packet.packet_id,
           action_id: "act_stdio",
@@ -228,7 +314,7 @@ describe("MCP server", () => {
           decided_by: "user_stdio",
           role: "media_manager",
           decided_at: nowIso(),
-        },
+        }),
       },
     });
     const dryRunEnvelope = ToolResultEnvelopeSchema.parse(dryRun.structuredContent);
@@ -269,4 +355,21 @@ function zPacketArrayFromEnvelope(
 ) {
   const data = envelope.data as { packets?: unknown };
   return H0Packet.array().parse(data.packets);
+}
+
+function signedReceipt(
+  base: {
+    receipt_id: string;
+    packet_id: string;
+    action_id: string;
+    decision: "approved" | "rejected";
+    decided_by: string;
+    role: string;
+    decided_at: string;
+  },
+): typeof base & { signature: string } {
+  return {
+    ...base,
+    signature: signApprovalReceipt(base),
+  };
 }

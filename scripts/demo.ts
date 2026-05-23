@@ -434,14 +434,27 @@ async function step8RoiAndCockpit(
 
   // Cockpit data surface: drive the Fastify API in-process via inject().
   const app = await buildServer({ deps: { store }, logger: false });
+  const demoAuth = { authorization: "Bearer tok_demo_media_manager" };
   try {
     const healthRes = await app.inject({ method: "GET", url: "/healthz" });
     const healthBody = healthRes.json();
-    const auditsRes = await app.inject({ method: "GET", url: "/api/v1/audits" });
+    const auditsRes = await app.inject({
+      method: "GET",
+      url: "/api/v1/audits",
+      headers: demoAuth,
+    });
     const auditsBody = auditsRes.json() as { reports: unknown[] };
-    const packetsRes = await app.inject({ method: "GET", url: "/api/v1/packets" });
+    const packetsRes = await app.inject({
+      method: "GET",
+      url: "/api/v1/packets",
+      headers: demoAuth,
+    });
     const packetsBody = packetsRes.json() as { packets: unknown[] };
-    const approvalsRes = await app.inject({ method: "GET", url: "/api/v1/approvals" });
+    const approvalsRes = await app.inject({
+      method: "GET",
+      url: "/api/v1/approvals",
+      headers: demoAuth,
+    });
     const approvalsBody = approvalsRes.json() as { receipts: unknown[] };
     out.line(`      GET /healthz → ${JSON.stringify(healthBody)}`);
     out.line(`      GET /api/v1/audits → ${auditsBody.reports.length} report(s)`);
@@ -483,29 +496,7 @@ function aliasPackets(packets: H0Packet[]): H0Packet[] {
   return packets.map((p, i) => ({
     ...p,
     packet_id: `h0_${String(i + 1).padStart(3, "0")}`,
-    proposal: rewriteProposalForDemo(p),
-    guardrails: {
-      ...p.guardrails,
-      max_daily_budget_delta_pct:
-        p.guardrails.max_daily_budget_delta_pct !== undefined &&
-        p.guardrails.max_daily_budget_delta_pct <= 1
-          ? p.guardrails.max_daily_budget_delta_pct * 100
-          : p.guardrails.max_daily_budget_delta_pct,
-    },
   }));
-}
-
-function rewriteProposalForDemo(packet: H0Packet): H0Packet["proposal"] {
-  if (packet.proposal.action !== "budget_shift") return packet.proposal;
-  const maxReduction = packet.proposal.params["max_reduction_pct"];
-  if (typeof maxReduction !== "number") return packet.proposal;
-  return {
-    ...packet.proposal,
-    params: {
-      ...packet.proposal.params,
-      delta_pct: -Math.round(maxReduction * 10000) / 100,
-    },
-  };
 }
 
 function numeric(summary: Record<string, number>, key: string): number {

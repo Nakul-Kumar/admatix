@@ -22,7 +22,8 @@ export function buildH0Packets(
       baseline_window: parsedReport.window,
       success_metric: successMetricFor(finding),
       guardrails: {
-        max_daily_budget_delta_pct: 0.2,
+        // Percent points (NOT a fraction). 20 means |delta_pct| <= 20%.
+        max_daily_budget_delta_pct: 20,
         min_mer: 1,
         requires_human_approval: true,
       },
@@ -94,7 +95,10 @@ function paramsFor(finding: Finding): Record<string, unknown> {
   if (finding.detector === "supply-path") {
     return { exclusion_reason: "mfa_low_viewability_or_high_ivt" };
   }
-  return { max_reduction_pct: 0.2, dry_run_reason: finding.title };
+  // budget_shift: signed percent of current daily budget. PolicyGuard
+  // (budget_cap rule) reads params.delta_pct directly — must be a number
+  // in percent points, NOT a fraction.
+  return { delta_pct: -20, dry_run_reason: finding.title };
 }
 
 function rollbackMethodFor(finding: Finding): string {

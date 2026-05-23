@@ -19,10 +19,19 @@ export const EvidenceRef = z.object({
 });
 export type EvidenceRef = z.infer<typeof EvidenceRef>;
 
+/**
+ * Per-account guardrails. All numeric fields are in their natural domain unit:
+ *
+ * - `max_daily_budget_delta_pct` — absolute % points, e.g. `20` means a
+ *   budget shift's |delta_pct| may not exceed 20%. NEVER a fraction. A value
+ *   <= 1 is therefore a near-zero cap, not a unit confusion.
+ * - `min_mer` — ratio (e.g. `3.0` = 3:1 revenue to spend).
+ * - `max_cac` — currency, account default.
+ */
 export const Guardrails = z.object({
-  max_daily_budget_delta_pct: z.number().optional(),
-  min_mer: z.number().optional(),
-  max_cac: z.number().optional(),
+  max_daily_budget_delta_pct: z.number().nonnegative().optional(),
+  min_mer: z.number().nonnegative().optional(),
+  max_cac: z.number().nonnegative().optional(),
   requires_human_approval: z.boolean().default(true),
 });
 export type Guardrails = z.infer<typeof Guardrails>;
