@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: mart_waste
+    description: Identified wasted spend mart for campaign and creative surfaces with spend but no conversions over the evaluated window.
+    columns:
+      - {name: date_key, description: Smart YYYYMMDD key for the waste signal date., tests: [not_null]}
+      - {name: metric_date, description: Calendar date for the waste signal.}
+      - {name: account_key, description: Account dimension surrogate key., tests: [not_null]}
+      - {name: tenant_id, description: Tenant UUID that owns the account., tests: [not_null]}
+      - {name: platform, description: Platform enum code for the account.}
+      - {name: account_name, description: Human-readable account name.}
+      - {name: platform_key, description: Platform dimension surrogate key.}
+      - {name: platform_name, description: Human-readable platform name.}
+      - {name: campaign_key, description: Campaign dimension surrogate key., tests: [not_null]}
+      - {name: campaign_business_key, description: Stable conformed campaign business key.}
+      - {name: external_campaign_id, description: Platform-native campaign identifier.}
+      - {name: campaign_name, description: Human-readable campaign name.}
+      - {name: creative_key, description: Creative dimension surrogate key when the waste signal is creative-level.}
+      - {name: external_creative_id, description: Platform-native creative identifier when available.}
+      - {name: creative_format, description: Creative format when available.}
+      - name: waste_type
+        description: Waste signal type.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [campaign_zero_conversion_window, creative_zero_conversion]
+      - {name: waste_entity_id, description: Entity identifier the waste signal applies to.}
+      - {name: wasted_spend, description: Spend considered wasted by the signal.}
+      - {name: conversions_in_window, description: Conversion count observed over the signal lookback window.}
+      - {name: lookback_days, description: Number of days evaluated for the waste signal.}
+      - {name: dead_keyword_signal_available, description: False until keyword-level forward signals are available in a later phase.}
+      - {name: _loaded_at, description: Timestamp when the mart row was materialized.}

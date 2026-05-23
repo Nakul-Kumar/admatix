@@ -121,7 +121,7 @@ export async function verifyLedgerChain(options: { readonly smokeInsert?: boolea
         entry_hash::text,
         to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS created_at_chain
       FROM ledger.action_events
-      ORDER BY seq ASC
+      ORDER BY ledger.action_events.seq ASC
     `);
 
     let previousHash = ZERO_HASH;

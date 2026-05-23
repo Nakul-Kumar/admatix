@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: mart_evidence_coverage
+    description: Tenant by day evidence coverage mart measuring the share of proposed actions with complete H0 evidence and ledger visibility.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [date_key, tenant_id]
+    columns:
+      - {name: date_key, description: Smart YYYYMMDD key for the action proposal date., tests: [not_null]}
+      - {name: metric_date, description: Calendar date for the coverage row.}
+      - {name: tenant_id, description: Tenant UUID., tests: [not_null]}
+      - {name: tenant_slug, description: Tenant slug used in URLs and CLI output.}
+      - {name: tenant_name, description: Human-readable tenant name.}
+      - {name: proposed_action_count, description: Count of proposed actions on the date.}
+      - {name: complete_h0_action_count, description: Count of proposed actions whose H0 packet has hypothesis, null hypothesis, and evidence refs.}
+      - {name: policy_decision_count, description: Count of proposed actions with a PolicyGuard decision.}
+      - {name: blocked_action_count, description: Count of proposed actions blocked by policy.}
+      - {name: allowed_action_count, description: Count of proposed actions allowed by policy.}
+      - {name: needs_approval_action_count, description: Count of proposed actions requiring approval by policy.}
+      - {name: ledger_visible_action_count, description: Count of proposed actions visible through the campaign action fact bridge.}
+      - {name: coverage_pct, description: Complete H0 action count divided by proposed action count.}
+      - {name: ledger_visibility_pct, description: Ledger-visible action count divided by proposed action count.}
+      - {name: _loaded_at, description: Timestamp when the mart row was materialized.}
