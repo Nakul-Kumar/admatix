@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  approvalSecret,
   approvalPayload,
   signApprovalReceipt,
   verifyApprovalReceipt,
@@ -14,7 +15,51 @@ const base = {
   decision: "approved" as const,
 };
 
+function withEnv<T>(updates: Record<string, string | undefined>, fn: () => T): T {
+  const prev: Record<string, string | undefined> = {};
+  for (const key of Object.keys(updates)) {
+    prev[key] = process.env[key];
+    const next = updates[key];
+    if (next === undefined) delete process.env[key];
+    else process.env[key] = next;
+  }
+  try {
+    return fn();
+  } finally {
+    for (const [key, value] of Object.entries(prev)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
 describe("approval-signing — HMAC fail-closed", () => {
+  it("hard-fails in production when ADMATIX_APPROVAL_SECRET is missing", () => {
+    withEnv(
+      {
+        ADMATIX_ENV: "production",
+        NODE_ENV: undefined,
+        ADMATIX_APPROVAL_SECRET: undefined,
+      },
+      () => {
+        expect(() => approvalSecret()).toThrow(/ADMATIX_APPROVAL_SECRET/);
+      },
+    );
+  });
+
+  it("hard-fails in production when ADMATIX_APPROVAL_SECRET is the demo default", () => {
+    withEnv(
+      {
+        ADMATIX_ENV: "production",
+        NODE_ENV: undefined,
+        ADMATIX_APPROVAL_SECRET: "admatix-dev-only-do-not-use-in-prod",
+      },
+      () => {
+        expect(() => approvalSecret()).toThrow(/demo default secret/);
+      },
+    );
+  });
+
   it("signs and round-trips a receipt", () => {
     const signature = signApprovalReceipt(base, SECRET);
     const r = verifyApprovalReceipt(

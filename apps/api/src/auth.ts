@@ -38,9 +38,23 @@ const DEV_TOKENS: Record<string, { tenant_id: string; role: string }> = {
   },
 };
 
+function isProductionEnv(): boolean {
+  return (
+    process.env["ADMATIX_ENV"] === "production" ||
+    process.env["NODE_ENV"] === "production"
+  );
+}
+
 function loadTokens(): Record<string, { tenant_id: string; role: string }> {
   const raw = process.env["ADMATIX_API_TOKENS"];
-  if (!raw) return DEV_TOKENS;
+  if (!raw) {
+    if (isProductionEnv()) {
+      throw new Error(
+        "ADMATIX_API_TOKENS is required in production; demo defaults are local-only.",
+      );
+    }
+    return DEV_TOKENS;
+  }
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (
@@ -52,6 +66,9 @@ function loadTokens(): Record<string, { tenant_id: string; role: string }> {
     }
     const out: Record<string, { tenant_id: string; role: string }> = {};
     for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+      if (isProductionEnv() && Object.hasOwn(DEV_TOKENS, k)) {
+        throw new Error(`ADMATIX_API_TOKENS includes demo default token "${k}"`);
+      }
       if (
         v &&
         typeof v === "object" &&
@@ -63,6 +80,9 @@ function loadTokens(): Record<string, { tenant_id: string; role: string }> {
           role: (v as { role: string }).role,
         };
       }
+    }
+    if (isProductionEnv() && Object.keys(out).length === 0) {
+      throw new Error("ADMATIX_API_TOKENS must define at least one production token");
     }
     return out;
   } catch (err) {
@@ -80,9 +100,15 @@ function extractBearer(req: FastifyRequest): string | null {
 }
 
 export function resolveIdentity(req: FastifyRequest): ApiIdentity | null {
+  return resolveIdentityWithTokens(req, loadTokens());
+}
+
+function resolveIdentityWithTokens(
+  req: FastifyRequest,
+  tokens: Record<string, { tenant_id: string; role: string }>,
+): ApiIdentity | null {
   const token = extractBearer(req);
   if (!token) return null;
-  const tokens = loadTokens();
   const found = tokens[token];
   if (!found) return null;
   return {
@@ -93,10 +119,11 @@ export function resolveIdentity(req: FastifyRequest): ApiIdentity | null {
 }
 
 export function registerAuthHook(app: FastifyInstance): void {
+  const tokens = loadTokens();
   app.addHook("onRequest", async (req, reply) => {
     // /healthz is the only unauthenticated route.
     if (req.url === "/healthz" || req.url.startsWith("/healthz?")) return;
-    const identity = resolveIdentity(req);
+    const identity = resolveIdentityWithTokens(req, tokens);
     if (!identity) {
       reply.code(401);
       return reply.send({ error: "unauthorized" });
