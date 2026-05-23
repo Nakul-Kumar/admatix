@@ -1,6 +1,10 @@
 import { mkdir, readFile, writeFile, readdir, appendFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import {
+  createSupabaseStore,
+  type SupabaseStoreOptions,
+} from "./store-supabase.js";
 
 /**
  * Persistence abstraction. The MVP implementation writes JSON/JSONL under the
@@ -17,6 +21,18 @@ export interface Store {
   append(stream: string, record: unknown): Promise<void>;
 }
 
+/**
+ * Options accepted by {@link createStore}. The legacy positional `rootDir`
+ * call signature is preserved; new callers can pass an options object to
+ * select the Supabase backend.
+ */
+export type CreateStoreOptions =
+  | {
+      backend?: "filesystem";
+      rootDir?: string;
+    }
+  | ({ backend: "supabase" } & SupabaseStoreOptions);
+
 const SAFE_NAME = /^[a-zA-Z0-9_.-]+$/;
 
 function assertSafe(kind: string, name: string): void {
@@ -27,7 +43,42 @@ function assertSafe(kind: string, name: string): void {
   }
 }
 
-export function createStore(rootDir?: string): Store {
+/**
+ * Create the configured Store.
+ *
+ * Backwards-compatible call shapes:
+ * - `createStore()` → filesystem store rooted at `./data`.
+ * - `createStore(rootDir)` → filesystem store rooted at `rootDir`.
+ *
+ * New options-object shape:
+ * - `createStore({ rootDir })` → filesystem store.
+ * - `createStore({ backend: "supabase", connectionString, … })` → Supabase.
+ *
+ * Env-based selection: if `ADMATIX_STORE === "supabase"` and
+ * `SUPABASE_DB_URL` is set, the no-args / `rootDir` form transparently
+ * returns the Supabase store so existing call sites do not need to change.
+ */
+export function createStore(options?: string | CreateStoreOptions): Store {
+  if (typeof options === "object" && options !== null) {
+    if ("backend" in options && options.backend === "supabase") {
+      return createSupabaseStore(options);
+    }
+    return createFilesystemStore(options.rootDir);
+  }
+  const envBackend = process.env.ADMATIX_STORE?.toLowerCase();
+  const envUrl = process.env.SUPABASE_DB_URL;
+  if (envBackend === "supabase" && envUrl) {
+    return createSupabaseStore({
+      connectionString: envUrl,
+      tenantId: process.env.ADMATIX_TENANT_ID,
+      appSchema: process.env.ADMATIX_APP_SCHEMA,
+      ledgerSchema: process.env.ADMATIX_LEDGER_SCHEMA,
+    });
+  }
+  return createFilesystemStore(options);
+}
+
+function createFilesystemStore(rootDir?: string): Store {
   const root = resolve(rootDir ?? "data");
   const statePath = (collection: string, id: string) => {
     assertSafe("collection", collection);
