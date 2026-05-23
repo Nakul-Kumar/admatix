@@ -85,7 +85,7 @@ export const agencyDemoPackets: H0Packet[] = [
     baseline_window: "2026-05-12..2026-05-21",
     success_metric: "spend_vs_daily_budget",
     guardrails: {
-      max_daily_budget_delta_pct: 0.2,
+      max_daily_budget_delta_pct: 20,
       min_mer: 1,
       requires_human_approval: true,
     },
@@ -94,7 +94,7 @@ export const agencyDemoPackets: H0Packet[] = [
     proposal: {
       action: "budget_shift",
       target_entity_id: "campaign_a",
-      params: { max_reduction_pct: 0.2, dry_run_reason: "pacing drift after 2026-05-18" },
+      params: { delta_pct: -20, dry_run_reason: "pacing drift after 2026-05-18" },
       dry_run_only: true,
     },
     rollback: {
@@ -120,7 +120,7 @@ export const agencyDemoPackets: H0Packet[] = [
     baseline_window: "2026-05-12..2026-05-21",
     success_metric: "estimated_waste_reduction",
     guardrails: {
-      max_daily_budget_delta_pct: 0.2,
+      max_daily_budget_delta_pct: 20,
       min_mer: 1,
       requires_human_approval: true,
     },
@@ -129,7 +129,7 @@ export const agencyDemoPackets: H0Packet[] = [
     proposal: {
       action: "budget_shift",
       target_entity_id: "campaign_a",
-      params: { max_reduction_pct: 0.15 },
+      params: { delta_pct: -15 },
       dry_run_only: true,
     },
     rollback: {

@@ -13,7 +13,7 @@ import {
   type Finding,
   type NormalizedMetrics,
 } from "@admatix/schemas";
-import { newId, nowIso, sha256 } from "@admatix/core";
+import { newId, nowIso } from "@admatix/core";
 import type { DetectorInput } from "@admatix/evidence";
 import type { MediaAnalystDeps } from "./index.js";
 
@@ -21,10 +21,12 @@ function mkFinding(args: {
   detector: string;
   severity: Finding["severity"];
   campaign_id: string;
+  account_id?: string;
   title: string;
   description: string;
   estimated_waste?: number;
 }): Finding {
+  const accountId = args.account_id ?? "acc_demo";
   return {
     finding_id: newId("find"),
     detector: args.detector,
@@ -36,9 +38,8 @@ function mkFinding(args: {
     evidence: [
       {
         source: "google_ads_fixture",
-        ref: `metric:campaign_daily:${args.campaign_id}`,
+        ref: `campaign:${accountId}:${args.campaign_id}`,
         entity_id: args.campaign_id,
-        hash: sha256({ campaign_id: args.campaign_id, detector: args.detector }),
       },
     ],
     causal_status: "directional_until_lift_test",
@@ -93,13 +94,16 @@ function detectorRules(input: DetectorInput): Finding[] {
     }
   }
   // Always emit a tracking-quality finding so we have ≥3 packets on the
-  // demo fixture.
-  if (input.account) {
+  // demo fixture. We anchor the ref to a real campaign (the first one in
+  // the input) so the EvidenceLedger resolver can find the row.
+  const anchor = input.campaigns[0];
+  if (input.account && anchor) {
     findings.push(
       mkFinding({
         detector: "tracking",
         severity: "low",
-        campaign_id: input.account.account_id,
+        campaign_id: anchor.campaign_id,
+        account_id: anchor.account_id,
         title: "Tracking parity check",
         description: `Platform-reported revenue should be validated against first-party for ${input.account.account_id}`,
       }),
@@ -162,6 +166,7 @@ function buildPacketFromFinding(
     baseline_window: "2026-05-12..2026-05-21",
     success_metric: "cac",
     guardrails: {
+      // Percent points: 15 means |delta_pct| <= 15%.
       max_daily_budget_delta_pct: 15,
       requires_human_approval: true,
     },
@@ -213,7 +218,7 @@ export function makeUnsafeEvidenceDeps(): MediaAnalystDeps {
           evidence: [
             {
               source: "google_ads_fixture",
-              ref: "metric:campaign_daily:campaign_a",
+              ref: "campaign:acc_demo:campaign_a",
               entity_id: "campaign_a",
             },
           ],

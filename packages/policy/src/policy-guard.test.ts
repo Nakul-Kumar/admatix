@@ -4,8 +4,9 @@ import type {
   H0Packet,
   ProposedAction,
 } from "@admatix/schemas";
-import { evaluateAction, loadPolicy } from "./policy-guard.js";
+import { evaluateAction, evaluateActionAgainstRules, loadPolicy } from "./policy-guard.js";
 import type { PolicyContext } from "./policy-guard.js";
+import type { PolicyRule } from "@admatix/schemas";
 
 const guardrails: Guardrails = {
   max_daily_budget_delta_pct: 20,
@@ -186,5 +187,28 @@ describe("evaluateAction — packet-style usage", () => {
   it("H0Packet schema type is reachable from the policy package", () => {
     const _typeProbe: H0Packet | undefined = undefined;
     expect(_typeProbe).toBeUndefined();
+  });
+});
+
+describe("F12: PolicyGuard fails closed on unknown rule kinds", () => {
+  it("an unknown PolicyRule.kind blocks the action (no silent no-op)", () => {
+    // Bypass the schema enum at the type level — this is what would
+    // happen if a future PolicyRule.kind was added to the schema but the
+    // switch in policy-guard.ts was never updated.
+    const unknownRule = {
+      rule_id: "future_v1",
+      description: "A rule kind PolicyGuard does not handle yet.",
+      kind: "future_kind_not_in_schema",
+      params: {},
+      severity: "block",
+    } as unknown as PolicyRule;
+    const decision = evaluateActionAgainstRules(
+      budgetShift(5),
+      baseContext(),
+      { version: "v1", rules: [unknownRule] },
+    );
+    expect(decision.result).toBe("block");
+    expect(decision.matched_rules).toContain("policy_kind_unhandled");
+    expect(decision.reasons.join(" ")).toMatch(/policy_kind_unhandled/);
   });
 });

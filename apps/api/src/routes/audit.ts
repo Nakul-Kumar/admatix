@@ -13,7 +13,6 @@ import { buildH0Packets, runAudit } from "@admatix/evidence";
 const AuditRequest = z.object({
   accountRef: z.string().default("fixture:acc_demo"),
   goal: z.string().default("reduce_cac"),
-  tenantId: z.string().default("tenant_demo"),
   window: z.string().default("2026-05-12..2026-05-21"),
 });
 type AuditRequest = z.infer<typeof AuditRequest>;
@@ -35,7 +34,12 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditDeps): void
       reply.code(400);
       return { error: "invalid_request", issues: parsed.error.issues };
     }
-    const { audit, packets } = await runAuditForRequest(parsed.data, deps);
+    const identity = req.identity;
+    if (!identity) {
+      reply.code(401);
+      return { error: "unauthorized" };
+    }
+    const { audit, packets } = await runAuditForRequest(parsed.data, identity.tenant_id, deps);
     return AuditResponse.parse({ audit, packets });
   });
 
@@ -50,10 +54,19 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditDeps): void
       reply.code(404);
       return { error: "not_found" };
     }
-    return AuditReport.parse(stored);
+    const report = AuditReport.parse(stored);
+    // The MVP fixture-mode story is single-tenant per account_id; if a
+    // report's account belongs to another tenant via convention
+    // (account_id prefix), we'd filter here. For now any authenticated
+    // caller can read.
+    return report;
   });
 
-  app.get("/api/v1/audits", async () => {
+  app.get("/api/v1/audits", async (req, reply) => {
+    if (!req.identity) {
+      reply.code(401);
+      return { error: "unauthorized" };
+    }
     const reports = await deps.store.list<AuditReportT>("audit_reports");
     return { reports: reports.map((r) => AuditReport.parse(r)) };
   });
@@ -61,15 +74,22 @@ export function registerAuditRoutes(app: FastifyInstance, deps: AuditDeps): void
 
 async function runAuditForRequest(
   req: AuditRequest,
+  tenantId: string,
   deps: AuditDeps,
 ): Promise<{ audit: AuditReportT; packets: H0PacketT[] }> {
   const ref = resolveAccountRef(req.accountRef);
+  if (ref.kind !== "fixture") {
+    throw new Error(
+      `audit: live account refs are not supported in the MVP (got "${req.accountRef}"). Use fixture:<account_id>.`,
+    );
+  }
   const connector = fixtureConnector();
   const accounts = await connector.listAccounts();
-  const account =
-    accounts.find((a) => a.account_id === ref.id) ?? accounts[0];
+  const account = accounts.find((a) => a.account_id === ref.id);
   if (!account) {
-    throw new Error(`audit: no accounts available from connector ${connector.platform}`);
+    throw new Error(
+      `audit: unknown fixture account "${ref.id}" (available: ${accounts.map((a) => a.account_id).join(", ") || "<none>"}).`,
+    );
   }
   const campaigns = await connector.getCampaigns(account.account_id);
   const daily = await connector.getCampaignDailyMetrics(account.account_id, req.window);
@@ -82,7 +102,7 @@ async function runAuditForRequest(
     { account, campaigns, metrics, daily, firstParty },
     req.window,
   );
-  const packets = buildH0Packets(audit, req.goal, req.tenantId);
+  const packets = buildH0Packets(audit, req.goal, tenantId);
   await deps.store.put("audit_reports", audit.report_id, audit);
   for (const packet of packets) {
     await deps.store.put("h0_packets", packet.packet_id, packet);

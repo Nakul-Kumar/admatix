@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import {
   BenchmarkResult,
@@ -12,6 +13,8 @@ import { policyScorer } from "./scorers/policy.js";
 import { stateDiffScorer } from "./scorers/state-diff.js";
 import { loadTasks } from "./task.js";
 import type { RunSuiteOptions, Scorer, Store } from "./types.js";
+
+const DETERMINISTIC_FALLBACK_CREATED_AT = "1970-01-01T00:00:00.000Z";
 
 const POLICY_VERSION_FALLBACK = "policy-v1";
 const FIXTURE_VERSION_FALLBACK = "unknown";
@@ -51,13 +54,18 @@ export async function runSuite(
 
   const pinned = resolvePinned(root, suite, opts);
   const summary = summarise(results);
+  // Determinism: same fixture + code + policy + model + results → same id.
+  // AGENTS.md §10 (pin everything in evals) and #8 (deterministic where
+  // possible). Reruns yield a byte-stable persisted file.
+  const run_id = makeRunId(suite, pinned, results);
+  const created_at = opts.clock ? opts.clock() : new Date().toISOString();
   const run = BenchmarkRun.parse({
-    run_id: makeRunId(suite),
+    run_id,
     suite,
     results,
     pinned,
     summary,
-    created_at: new Date().toISOString(),
+    created_at,
   });
   await deps.store.put("benchmark_runs", run.run_id, run);
   return run;
@@ -158,11 +166,21 @@ function readPolicyVersion(root: string, suite: string): string {
   }
 }
 
-function makeRunId(suite: string): string {
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const rand = Math.random().toString(36).slice(2, 8);
-  return `run_${suite}_${stamp}_${rand}`;
+function makeRunId(
+  suite: string,
+  pinned: BenchmarkRun["pinned"],
+  results: BenchmarkResult[],
+): string {
+  // Deterministic fingerprint of the run (suite + pins + results). Same
+  // inputs → same id; rerunning produces an idempotent write.
+  const fingerprint = createHash("sha256")
+    .update(JSON.stringify({ suite, pinned, results }))
+    .digest("hex");
+  return `run_${suite}_${fingerprint.slice(0, 16)}`;
 }
+
+// Exposed for tests / future callers that want a stable timestamp.
+export { DETERMINISTIC_FALLBACK_CREATED_AT };
 
 function round(n: number, decimals: number): number {
   const factor = 10 ** decimals;

@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import type { Finding, H0Packet } from "@admatix/schemas";
-import { verifyEvidence } from "./evidence-ledger.js";
+import {
+  createEvidenceResolver,
+  verifyEvidence,
+  verifyEvidenceWithResolver,
+} from "./evidence-ledger.js";
 
 function basePacket(overrides: Partial<H0Packet> = {}): H0Packet {
   return {
@@ -126,5 +130,90 @@ describe("verifyEvidence — fail-closed behaviour", () => {
     const result = verifyEvidence(null as unknown as H0Packet);
     expect(result.ok).toBe(false);
     expect(result.missing).toContain("subject");
+  });
+});
+
+describe("verifyEvidenceWithResolver — provenance check (QA finding #2)", () => {
+  it("rejects refs that do not match any known pattern (would have caught the bug: any string passed)", async () => {
+    const resolver = createEvidenceResolver({
+      campaignDailyMetric: () => ({ exists: true }),
+    });
+    const packet = {
+      ...basePacket(),
+      evidence: [{ source: "google_ads_fixture", ref: "any-old-string" }],
+    } as H0Packet;
+    const result = await verifyEvidenceWithResolver(packet, resolver);
+    expect(result.ok).toBe(false);
+    expect(result.missing).toContain("evidence[0].ref:unrecognized_pattern");
+  });
+
+  it("rejects refs whose pointed-to row does not exist", async () => {
+    const resolver = createEvidenceResolver({
+      campaignDailyMetric: () => null, // nothing exists
+    });
+    const packet = {
+      ...basePacket(),
+      evidence: [
+        {
+          source: "google_ads_fixture",
+          ref: "metric:campaign_daily:acc_demo:campaign_a:2026-05-21",
+        },
+      ],
+    } as H0Packet;
+    const result = await verifyEvidenceWithResolver(packet, resolver);
+    expect(result.ok).toBe(false);
+    expect(result.missing).toContain("evidence[0].ref:unresolved");
+  });
+
+  it("accepts refs that resolve and whose recomputed hash matches", async () => {
+    const resolver = createEvidenceResolver({
+      campaignDailyMetric: () => ({ exists: true, hash: "deadbeef" }),
+    });
+    const packet = {
+      ...basePacket(),
+      evidence: [
+        {
+          source: "google_ads_fixture",
+          ref: "metric:campaign_daily:acc_demo:campaign_a:2026-05-21",
+          hash: "deadbeef",
+        },
+      ],
+    } as H0Packet;
+    const result = await verifyEvidenceWithResolver(packet, resolver);
+    expect(result.ok).toBe(true);
+    expect(result.missing).toEqual([]);
+  });
+
+  it("rejects when the supplied hash disagrees with the resolved row", async () => {
+    const resolver = createEvidenceResolver({
+      campaignDailyMetric: () => ({ exists: true, hash: "from_disk" }),
+    });
+    const packet = {
+      ...basePacket(),
+      evidence: [
+        {
+          source: "google_ads_fixture",
+          ref: "metric:campaign_daily:acc_demo:campaign_a:2026-05-21",
+          hash: "tampered_value",
+        },
+      ],
+    } as H0Packet;
+    const result = await verifyEvidenceWithResolver(packet, resolver);
+    expect(result.ok).toBe(false);
+    expect(result.missing).toContain("evidence[0].hash:mismatch");
+  });
+
+  it("admits self-describing system refs (trust/action/policy) without a lookup callback", async () => {
+    const resolver = createEvidenceResolver({});
+    const finding = {
+      ...baseFinding(),
+      evidence: [
+        { source: "admatix", ref: "trust:agent:media-analyst" },
+        { source: "admatix", ref: "action:act_01" },
+        { source: "admatix", ref: "policy:budget_cap_v1:v1" },
+      ],
+    } as Finding;
+    const result = await verifyEvidenceWithResolver(finding, resolver);
+    expect(result.ok).toBe(true);
   });
 });

@@ -22,7 +22,7 @@ export type {
   WorkflowDeps,
 } from "./orchestrator.js";
 export type { WorkflowIntent, WorkflowResult } from "./types.js";
-export { runWorkflow } from "./orchestrator.js";
+export { runWorkflow, runActivation } from "./orchestrator.js";
 
 export { makeOrchestratorAgent } from "./agents/orchestrator-agent.js";
 export { makePolicyGuardAgent } from "./agents/policy-guard-agent.js";

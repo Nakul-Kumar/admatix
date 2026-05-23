@@ -25,14 +25,25 @@ export interface PacketsDeps {
 
 /** Read-side routes for H0 packets. */
 export function registerPacketsRoutes(app: FastifyInstance, deps: PacketsDeps): void {
-  app.get("/api/v1/packets", async () => {
+  app.get("/api/v1/packets", async (req, reply) => {
+    const identity = req.identity;
+    if (!identity) {
+      reply.code(401);
+      return { error: "unauthorized" };
+    }
     const packets = await deps.store.list<H0PacketT>("h0_packets");
-    return PacketsListResponse.parse({
-      packets: packets.map((p) => H0Packet.parse(p)),
-    });
+    const parsed = packets
+      .map((p) => H0Packet.parse(p))
+      .filter((p) => p.tenant_id === identity.tenant_id);
+    return PacketsListResponse.parse({ packets: parsed });
   });
 
   app.get("/api/v1/packets/:packetId", async (req, reply) => {
+    const identity = req.identity;
+    if (!identity) {
+      reply.code(401);
+      return { error: "unauthorized" };
+    }
     const params = z.object({ packetId: z.string() }).safeParse(req.params);
     if (!params.success) {
       reply.code(400);
@@ -44,6 +55,10 @@ export function registerPacketsRoutes(app: FastifyInstance, deps: PacketsDeps): 
       return { error: "not_found" };
     }
     const packet = H0Packet.parse(stored);
+    if (packet.tenant_id !== identity.tenant_id) {
+      reply.code(404);
+      return { error: "not_found" };
+    }
     const validity = verifyEvidence(packet);
     return PacketWithValidity.parse({ packet, validity });
   });

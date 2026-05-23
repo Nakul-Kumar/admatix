@@ -73,4 +73,10 @@ export interface RunSuiteOptions {
   codeVersion?: string;
   policyVersion?: string;
   model?: string;
+  /**
+   * Pluggable clock. Defaults to the system clock; pass a fixed string in
+   * tests so persisted `BenchmarkRun.created_at` is byte-stable across
+   * reruns. AGENTS.md §10 (pin everything in evals).
+   */
+  clock?: () => string;
 }

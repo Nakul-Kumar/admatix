@@ -120,6 +120,18 @@ function safeActionId(action: unknown): string {
   return "unknown";
 }
 
+/**
+ * @internal — exported only for the exhaustiveness test (QA finding #12).
+ * Production callers use `evaluateAction` which loads the on-disk policy.
+ */
+export function evaluateActionAgainstRules(
+  action: ProposedAction,
+  ctx: PolicyContext,
+  policy: { version: string; rules: PolicyRule[] },
+): PolicyDecision {
+  return evaluateActionInner(action, ctx, policy);
+}
+
 export function evaluateAction(action: ProposedAction, ctx: PolicyContext): PolicyDecision {
   let policy: { version: string; rules: PolicyRule[] };
   try {
@@ -132,6 +144,14 @@ export function evaluateAction(action: ProposedAction, ctx: PolicyContext): Poli
       [`Could not load policy: ${(err as Error).message}`],
     );
   }
+  return evaluateActionInner(action, ctx, policy);
+}
+
+function evaluateActionInner(
+  action: ProposedAction,
+  ctx: PolicyContext,
+  policy: { version: string; rules: PolicyRule[] },
+): PolicyDecision {
   const policy_version = policy.version;
   const action_id_for_failure = safeActionId(action);
 
@@ -230,8 +250,23 @@ export function evaluateAction(action: ProposedAction, ctx: PolicyContext): Poli
       }
       case "brand_safety":
       case "platform_limit":
-        // Not enforced by the MVP rules engine.
+        // Recognised but not enforced by the MVP rules engine. Listing
+        // them explicitly satisfies the exhaustiveness check below.
         break;
+      default: {
+        // Fail-closed exhaustiveness check (QA finding #12 / AGENTS.md §6).
+        // A new PolicyRule.kind must be wired here; the rule cannot
+        // silently become a no-op. The cast lets the compiler narrow
+        // `rule.kind` to `never` when every case is covered.
+        const exhaustive: never = rule.kind as never;
+        matched.push("policy_kind_unhandled");
+        reasons.push(
+          `policy_kind_unhandled:${String(exhaustive)} (rule ${rule.rule_id}). ` +
+            "PolicyGuard fails closed for unknown rule kinds.",
+        );
+        blocked = true;
+        break;
+      }
     }
   }
 

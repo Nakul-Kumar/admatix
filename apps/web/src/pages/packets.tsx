@@ -83,10 +83,10 @@ export function PacketsPage(): JSX.Element {
 function buildPreviewDiff(packet: H0Packet | undefined): ExecutionDiff | null {
   if (!packet) return null;
   const targetBudget = 500;
-  const reduction = typeof packet.proposal.params["max_reduction_pct"] === "number"
-    ? (packet.proposal.params["max_reduction_pct"] as number)
-    : 0.2;
-  const proposedBudget = Math.round(targetBudget * (1 - reduction));
+  const deltaPct = typeof packet.proposal.params["delta_pct"] === "number"
+    ? (packet.proposal.params["delta_pct"] as number)
+    : -20;
+  const proposedBudget = Math.round(targetBudget * (1 + deltaPct / 100));
   return {
     diff_id: `diff_preview_${packet.packet_id}`,
     action_id: `action_${packet.packet_id}`,

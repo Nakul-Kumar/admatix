@@ -55,6 +55,14 @@ export const ApprovalReceipt = z.object({
   role: z.string(),
   decided_at: z.string(),
   note: z.string().optional(),
+  /**
+   * HMAC-SHA256 (hex) of `{packet_id, action_id, decided_by, decided_at,
+   * decision}` keyed by the tenant secret. Required when produced by the
+   * API; activate_dry_run rejects receipts whose signature does not verify.
+   * Optional only because the CLI demo path can mint local receipts before
+   * the secret is set.
+   */
+  signature: z.string().optional(),
 });
 export type ApprovalReceipt = z.infer<typeof ApprovalReceipt>;
 

@@ -56,6 +56,45 @@ describe("detectors", () => {
     }
   });
 
+  // QA finding #11 (HIGH): pacing detector divided by zero when a
+  // campaign's daily_budget was 0, producing Infinity drift and a
+  // "NaN%" description. Reproduce the input shape directly.
+  it("F11: pacing skips campaigns whose daily_budget is 0 (no Infinity)", () => {
+    const input = {
+      account: {
+        account_id: "acc_test",
+        platform: "google_ads" as const,
+        tenant_id: "tenant_t",
+        name: "test",
+        currency: "USD",
+        timezone: "UTC",
+      },
+      campaigns: [
+        {
+          campaign_id: "campaign_zero",
+          account_id: "acc_test",
+          platform: "google_ads" as const,
+          name: "Zero-budget campaign",
+          status: "active" as const,
+          objective: "conversions",
+          daily_budget: 0,
+        },
+      ],
+      metrics: [],
+      firstParty: [],
+      daily: [
+        { date: "2026-05-12", account_id: "acc_test", campaign_id: "campaign_zero", platform: "google_ads" as const, spend: 50, impressions: 1000, clicks: 40, conversions: 1, platform_revenue: 100 },
+        { date: "2026-05-13", account_id: "acc_test", campaign_id: "campaign_zero", platform: "google_ads" as const, spend: 60, impressions: 1100, clicks: 45, conversions: 1, platform_revenue: 110 },
+        { date: "2026-05-14", account_id: "acc_test", campaign_id: "campaign_zero", platform: "google_ads" as const, spend: 70, impressions: 1200, clicks: 50, conversions: 1, platform_revenue: 120 },
+      ],
+    };
+    const findings = pacingDetector(input);
+    expect(findings).toEqual([]);
+    for (const f of findings) {
+      expect(f.description).not.toMatch(/NaN|Infinity/);
+    }
+  });
+
   it("detectors do not mutate their input", () => {
     const cases = [
       [trackingDetector, loadCampaignInput("google_ads", "demo_tracking_break.json")] as const,
