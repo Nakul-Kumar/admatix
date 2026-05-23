@@ -1,0 +1,37 @@
+{
+  "version": "v1",
+  "rules": [
+    {
+      "rule_id": "prohibited_action_v1",
+      "description": "Block any action that is not a dry-run. The MVP has no live write path.",
+      "kind": "prohibited_action",
+      "params": {},
+      "severity": "block"
+    },
+    {
+      "rule_id": "budget_cap_v1",
+      "description": "Block budget_shift actions whose |delta_pct| exceeds the account's max_daily_budget_delta_pct guardrail. If no guardrail is supplied, falls back to the default cap of 25%.",
+      "kind": "budget_cap",
+      "params": {
+        "max_daily_budget_delta_pct": 25
+      },
+      "severity": "block"
+    },
+    {
+      "rule_id": "approval_required_v1",
+      "description": "Mark any spend-touching action as needs_approval so a human signs the activation.",
+      "kind": "approval_required",
+      "params": {
+        "spend_touching_actions": [
+          "budget_shift",
+          "bid_adjust",
+          "pause_entity",
+          "resume_entity",
+          "creative_rotate",
+          "add_negative_keyword"
+        ]
+      },
+      "severity": "warn"
+    }
+  ]
+}
