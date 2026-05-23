@@ -16,7 +16,11 @@ data/datasets/
 data/raw/
 data/.cache/
 data/sim/
+data/benchmark/
 services/uplift/output/
+services/benchmark/results/run.log
+services/benchmark/results/run.stdout
+services/benchmark/results/run.stderr
 coverage/
 *.log
 .DS_Store

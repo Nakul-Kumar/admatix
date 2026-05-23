@@ -1,0 +1,2792 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-23T15:25:40+00:00",
+  "runs": [
+    {
+      "run_id": "A__confounded__seed=17__buyer=policy__tier=basic",
+      "arm": "A",
+      "world_type": "confounded",
+      "seed": 17,
+      "buyer_kind": "policy",
+      "skill_tier": "basic",
+      "env_config_summary": {
+        "account_id": "confounded__seed17",
+        "n_campaigns": 3,
+        "n_periods": 28,
+        "decision_every_n_days": 7,
+        "campaign_specs": [
+          {
+            "campaign_id": "c_real_lift",
+            "world_type": "confounded",
+            "true_lift": 0.015,
+            "confound_strength": 0.4,
+            "revealed_world_label": "real_lift_with_confounding",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_trap",
+            "world_type": "confounded",
+            "true_lift": 0.0,
+            "confound_strength": 2.0,
+            "revealed_world_label": "zero_lift_high_confound_trap",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_baseline",
+            "world_type": "confounded",
+            "true_lift": 0.005,
+            "confound_strength": 0.2,
+            "revealed_world_label": "small_lift_low_confound",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          }
+        ]
+      },
+      "final_scores": {
+        "total_spend": 12992.7,
+        "reported_revenue": 57886.615,
+        "true_incremental_revenue": 7929.0826,
+        "reported_roas": 4.455318,
+        "true_iroas": 0.610272,
+        "net_incremental_value": -5063.6174,
+        "wasted_spend": 4330.9,
+        "true_lift_captured": 7929.0826,
+        "campaigns": [
+          {
+            "campaign_id": "c_real_lift",
+            "true_iroas": 1.360449,
+            "reported_roas": 4.278923,
+            "cumulative_spend": 4330.9,
+            "cumulative_reported_revenue": 18531.5858,
+            "cumulative_true_incremental_revenue": 5891.9676,
+            "budget_multiplier_final": 2.1970000000000005,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_trap",
+            "true_iroas": 0.0,
+            "reported_roas": 5.64583,
+            "cumulative_spend": 4330.9,
+            "cumulative_reported_revenue": 24451.5253,
+            "cumulative_true_incremental_revenue": 0.0,
+            "budget_multiplier_final": 2.1970000000000005,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_baseline",
+            "true_iroas": 0.470368,
+            "reported_roas": 3.441202,
+            "cumulative_spend": 4330.9,
+            "cumulative_reported_revenue": 14903.5039,
+            "cumulative_true_incremental_revenue": 2037.115,
+            "budget_multiplier_final": 2.1970000000000005,
+            "status_final": "active"
+          }
+        ]
+      },
+      "counts": {
+        "decisions": 4,
+        "proposals": 12,
+        "scale_up_proposals": 9,
+        "scale_ups_applied": 9,
+        "scale_ups_blocked_by_gate": 0,
+        "false_scale_ups_prevented": 0,
+        "true_scale_ups_prevented": 0,
+        "pause_proposals": 0,
+        "pauses_applied": 0
+      },
+      "notes": [],
+      "timeline": [
+        {
+          "day": 0,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3257.37,
+              "lifetime_reported_conversions": 26.0,
+              "lifetime_reported_roas": 4.6534,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3257.37,
+              "last_window_reported_conversions": 26.0,
+              "last_window_reported_roas": 4.6534,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3979.01,
+              "lifetime_reported_conversions": 31.0,
+              "lifetime_reported_roas": 5.6843,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3979.01,
+              "last_window_reported_conversions": 31.0,
+              "last_window_reported_roas": 5.6843,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 2420.6,
+              "lifetime_reported_conversions": 17.0,
+              "lifetime_reported_roas": 3.458,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2420.6,
+              "last_window_reported_conversions": 17.0,
+              "last_window_reported_roas": 3.458,
+              "days_active": 7
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.65 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 5.68 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 3.46 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.576759,
+              "true_incremental_revenue_to_date": 1103.731,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.3,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.3,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.491657,
+              "true_incremental_revenue_to_date": 344.1596,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.3,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 14,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 130.0,
+              "lifetime_spend": 1610.0,
+              "lifetime_reported_revenue": 6350.1,
+              "lifetime_reported_conversions": 50.7,
+              "lifetime_reported_roas": 3.9442,
+              "last_window_days": 7,
+              "last_window_spend": 910.0,
+              "last_window_reported_revenue": 3092.73,
+              "last_window_reported_conversions": 24.7,
+              "last_window_reported_roas": 3.3986,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 130.0,
+              "lifetime_spend": 1610.0,
+              "lifetime_reported_revenue": 8175.71,
+              "lifetime_reported_conversions": 67.4,
+              "lifetime_reported_roas": 5.0781,
+              "last_window_days": 7,
+              "last_window_spend": 910.0,
+              "last_window_reported_revenue": 4196.7,
+              "last_window_reported_conversions": 36.4,
+              "last_window_reported_roas": 4.6118,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 130.0,
+              "lifetime_spend": 1610.0,
+              "lifetime_reported_revenue": 4435.83,
+              "lifetime_reported_conversions": 36.5,
+              "lifetime_reported_roas": 2.7552,
+              "last_window_days": 7,
+              "last_window_spend": 910.0,
+              "last_window_reported_revenue": 2015.23,
+              "last_window_reported_conversions": 19.5,
+              "last_window_reported_roas": 2.2145,
+              "days_active": 14
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 3.40 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.61 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 2.21 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.285452,
+              "true_incremental_revenue_to_date": 2069.578,
+              "cumulative_spend": 1610.0,
+              "budget_multiplier": 1.6900000000000002,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 1610.0,
+              "budget_multiplier": 1.6900000000000002,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.388544,
+              "true_incremental_revenue_to_date": 625.5564,
+              "cumulative_spend": 1610.0,
+              "budget_multiplier": 1.6900000000000002,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 21,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 169.0,
+              "lifetime_spend": 2793.0,
+              "lifetime_reported_revenue": 11874.44,
+              "lifetime_reported_conversions": 98.02,
+              "lifetime_reported_roas": 4.2515,
+              "last_window_days": 7,
+              "last_window_spend": 1183.0,
+              "last_window_reported_revenue": 5524.34,
+              "last_window_reported_conversions": 47.32,
+              "last_window_reported_roas": 4.6698,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 169.0,
+              "lifetime_spend": 2793.0,
+              "lifetime_reported_revenue": 17237.39,
+              "lifetime_reported_conversions": 138.38,
+              "lifetime_reported_roas": 6.1716,
+              "last_window_days": 7,
+              "last_window_spend": 1183.0,
+              "last_window_reported_revenue": 9061.68,
+              "last_window_reported_conversions": 70.98,
+              "last_window_reported_roas": 7.6599,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 169.0,
+              "lifetime_spend": 2793.0,
+              "lifetime_reported_revenue": 9931.34,
+              "lifetime_reported_conversions": 78.75,
+              "lifetime_reported_roas": 3.5558,
+              "last_window_days": 7,
+              "last_window_spend": 1183.0,
+              "last_window_reported_revenue": 5495.51,
+              "last_window_reported_conversions": 42.25,
+              "last_window_reported_roas": 4.6454,
+              "days_active": 21
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.67 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 7.66 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.65 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.368153,
+              "true_incremental_revenue_to_date": 3821.2506,
+              "cumulative_spend": 2793.0,
+              "budget_multiplier": 2.1970000000000005,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 2793.0,
+              "budget_multiplier": 2.1970000000000005,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.475376,
+              "true_incremental_revenue_to_date": 1327.7262,
+              "cumulative_spend": 2793.0,
+              "budget_multiplier": 2.1970000000000005,
+              "status": "active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": "B__confounded__seed=17__buyer=policy__tier=basic",
+      "arm": "B",
+      "world_type": "confounded",
+      "seed": 17,
+      "buyer_kind": "policy",
+      "skill_tier": "basic",
+      "env_config_summary": {
+        "account_id": "confounded__seed17",
+        "n_campaigns": 3,
+        "n_periods": 28,
+        "decision_every_n_days": 7,
+        "campaign_specs": [
+          {
+            "campaign_id": "c_real_lift",
+            "world_type": "confounded",
+            "true_lift": 0.015,
+            "confound_strength": 0.4,
+            "revealed_world_label": "real_lift_with_confounding",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_trap",
+            "world_type": "confounded",
+            "true_lift": 0.0,
+            "confound_strength": 2.0,
+            "revealed_world_label": "zero_lift_high_confound_trap",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_baseline",
+            "world_type": "confounded",
+            "true_lift": 0.005,
+            "confound_strength": 0.2,
+            "revealed_world_label": "small_lift_low_confound",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          }
+        ]
+      },
+      "final_scores": {
+        "total_spend": 8400.0,
+        "reported_revenue": 37273.8702,
+        "true_incremental_revenue": 5124.6967,
+        "reported_roas": 4.437365,
+        "true_iroas": 0.610083,
+        "net_incremental_value": -3275.3033,
+        "wasted_spend": 2800.0,
+        "true_lift_captured": 5124.6967,
+        "campaigns": [
+          {
+            "campaign_id": "c_real_lift",
+            "true_iroas": 1.366323,
+            "reported_roas": 4.262621,
+            "cumulative_spend": 2800.0,
+            "cumulative_reported_revenue": 11935.3396,
+            "cumulative_true_incremental_revenue": 3825.7031,
+            "budget_multiplier_final": 1.0,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_trap",
+            "true_iroas": 0.0,
+            "reported_roas": 5.661718,
+            "cumulative_spend": 2800.0,
+            "cumulative_reported_revenue": 15852.8115,
+            "cumulative_true_incremental_revenue": 0.0,
+            "budget_multiplier_final": 1.0,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_baseline",
+            "true_iroas": 0.463926,
+            "reported_roas": 3.387757,
+            "cumulative_spend": 2800.0,
+            "cumulative_reported_revenue": 9485.7191,
+            "cumulative_true_incremental_revenue": 1298.9935,
+            "budget_multiplier_final": 1.0,
+            "status_final": "active"
+          }
+        ]
+      },
+      "counts": {
+        "decisions": 4,
+        "proposals": 12,
+        "scale_up_proposals": 9,
+        "scale_ups_applied": 0,
+        "scale_ups_blocked_by_gate": 9,
+        "false_scale_ups_prevented": 3,
+        "true_scale_ups_prevented": 6,
+        "pause_proposals": 0,
+        "pauses_applied": 0
+      },
+      "notes": [],
+      "timeline": [
+        {
+          "day": 0,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3257.37,
+              "lifetime_reported_conversions": 26.0,
+              "lifetime_reported_roas": 4.6534,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3257.37,
+              "last_window_reported_conversions": 26.0,
+              "last_window_reported_roas": 4.6534,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3979.01,
+              "lifetime_reported_conversions": 31.0,
+              "lifetime_reported_roas": 5.6843,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3979.01,
+              "last_window_reported_conversions": 31.0,
+              "last_window_reported_roas": 5.6843,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 2420.6,
+              "lifetime_reported_conversions": 17.0,
+              "lifetime_reported_roas": 3.458,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2420.6,
+              "last_window_reported_conversions": 17.0,
+              "last_window_reported_roas": 3.458,
+              "days_active": 7
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.65 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 5.68 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 3.46 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.008934385834438898,
+              "verifier_ci": [
+                -0.004144312286866186,
+                0.02201308395574398
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.006114558578467817,
+              "verifier_ci": [
+                -0.009173827935703663,
+                0.0214029450926393
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.0040003984357992,
+              "verifier_ci": [
+                -0.007321711251650571,
+                0.015322508123248969
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.576759,
+              "true_incremental_revenue_to_date": 1103.731,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.491657,
+              "true_incremental_revenue_to_date": 344.1596,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 14,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 5636.39,
+              "lifetime_reported_conversions": 45.0,
+              "lifetime_reported_roas": 4.026,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2379.02,
+              "last_window_reported_conversions": 19.0,
+              "last_window_reported_roas": 3.3986,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 7207.24,
+              "lifetime_reported_conversions": 59.0,
+              "lifetime_reported_roas": 5.148,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3228.23,
+              "last_window_reported_conversions": 28.0,
+              "last_window_reported_roas": 4.6118,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 3970.78,
+              "lifetime_reported_conversions": 32.0,
+              "lifetime_reported_roas": 2.8363,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 1550.18,
+              "last_window_reported_conversions": 15.0,
+              "last_window_reported_roas": 2.2145,
+              "days_active": 14
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 3.40 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.61 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 2.21 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.008934385834438898,
+              "verifier_ci": [
+                -0.004144312286866186,
+                0.02201308395574398
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.006114558578467817,
+              "verifier_ci": [
+                -0.009173827935703663,
+                0.0214029450926393
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.0040003984357992,
+              "verifier_ci": [
+                -0.007321711251650571,
+                0.015322508123248969
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.319064,
+              "true_incremental_revenue_to_date": 1846.6902,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.400442,
+              "true_incremental_revenue_to_date": 560.6187,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 21,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 2100.0,
+              "lifetime_reported_revenue": 8905.23,
+              "lifetime_reported_conversions": 73.0,
+              "lifetime_reported_roas": 4.2406,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3268.84,
+              "last_window_reported_conversions": 28.0,
+              "last_window_reported_roas": 4.6698,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 2100.0,
+              "lifetime_reported_revenue": 12569.18,
+              "lifetime_reported_conversions": 101.0,
+              "lifetime_reported_roas": 5.9853,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 5361.94,
+              "last_window_reported_conversions": 42.0,
+              "last_window_reported_roas": 7.6599,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 2100.0,
+              "lifetime_reported_revenue": 7222.56,
+              "lifetime_reported_conversions": 57.0,
+              "lifetime_reported_roas": 3.4393,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3251.78,
+              "last_window_reported_conversions": 25.0,
+              "last_window_reported_roas": 4.6454,
+              "days_active": 21
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.67 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 7.66 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.65 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.008934385834438898,
+              "verifier_ci": [
+                -0.004144312286866186,
+                0.02201308395574398
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.006114558578467817,
+              "verifier_ci": [
+                -0.009173827935703663,
+                0.0214029450926393
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.0040003984357992,
+              "verifier_ci": [
+                -0.007321711251650571,
+                0.015322508123248969
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.372944,
+              "true_incremental_revenue_to_date": 2883.1829,
+              "cumulative_spend": 2100.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 2100.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.464811,
+              "true_incremental_revenue_to_date": 976.1038,
+              "cumulative_spend": 2100.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": "C__confounded__seed=17__buyer=policy__tier=modern",
+      "arm": "C",
+      "world_type": "confounded",
+      "seed": 17,
+      "buyer_kind": "policy",
+      "skill_tier": "modern",
+      "env_config_summary": {
+        "account_id": "confounded__seed17",
+        "n_campaigns": 3,
+        "n_periods": 28,
+        "decision_every_n_days": 7,
+        "campaign_specs": [
+          {
+            "campaign_id": "c_real_lift",
+            "world_type": "confounded",
+            "true_lift": 0.015,
+            "confound_strength": 0.4,
+            "revealed_world_label": "real_lift_with_confounding",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_trap",
+            "world_type": "confounded",
+            "true_lift": 0.0,
+            "confound_strength": 2.0,
+            "revealed_world_label": "zero_lift_high_confound_trap",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_baseline",
+            "world_type": "confounded",
+            "true_lift": 0.005,
+            "confound_strength": 0.2,
+            "revealed_world_label": "small_lift_low_confound",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          }
+        ]
+      },
+      "final_scores": {
+        "total_spend": 9436.0,
+        "reported_revenue": 42230.7032,
+        "true_incremental_revenue": 5811.2821,
+        "reported_roas": 4.475488,
+        "true_iroas": 0.615863,
+        "net_incremental_value": -3624.7179,
+        "wasted_spend": 3248.0,
+        "true_lift_captured": 5811.2821,
+        "campaigns": [
+          {
+            "campaign_id": "c_real_lift",
+            "true_iroas": 1.369369,
+            "reported_roas": 4.286439,
+            "cumulative_spend": 3248.0,
+            "cumulative_reported_revenue": 13922.355,
+            "cumulative_true_incremental_revenue": 4447.7106,
+            "budget_multiplier_final": 1.44,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_trap",
+            "true_iroas": 0.0,
+            "reported_roas": 5.655787,
+            "cumulative_spend": 3248.0,
+            "cumulative_reported_revenue": 18369.9971,
+            "cumulative_true_incremental_revenue": 0.0,
+            "budget_multiplier_final": 1.44,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_baseline",
+            "true_iroas": 0.4638,
+            "reported_roas": 3.380392,
+            "cumulative_spend": 2940.0,
+            "cumulative_reported_revenue": 9938.3511,
+            "cumulative_true_incremental_revenue": 1363.5715,
+            "budget_multiplier_final": 1.2,
+            "status_final": "active"
+          }
+        ]
+      },
+      "counts": {
+        "decisions": 4,
+        "proposals": 12,
+        "scale_up_proposals": 5,
+        "scale_ups_applied": 5,
+        "scale_ups_blocked_by_gate": 0,
+        "false_scale_ups_prevented": 0,
+        "true_scale_ups_prevented": 0,
+        "pause_proposals": 0,
+        "pauses_applied": 0
+      },
+      "notes": [],
+      "timeline": [
+        {
+          "day": 0,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend in window; need data"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend in window; need data"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend in window; need data"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3257.37,
+              "lifetime_reported_conversions": 26.0,
+              "lifetime_reported_roas": 4.6534,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3257.37,
+              "last_window_reported_conversions": 26.0,
+              "last_window_reported_roas": 4.6534,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3979.01,
+              "lifetime_reported_conversions": 31.0,
+              "lifetime_reported_roas": 5.6843,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3979.01,
+              "last_window_reported_conversions": 31.0,
+              "last_window_reported_roas": 5.6843,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 2420.6,
+              "lifetime_reported_conversions": 17.0,
+              "lifetime_reported_roas": 3.458,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2420.6,
+              "last_window_reported_conversions": 17.0,
+              "last_window_reported_roas": 3.458,
+              "days_active": 7
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "only 7d active; need 14d before any move"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "only 7d active; need 14d before any move"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "only 7d active; need 14d before any move"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.576759,
+              "true_incremental_revenue_to_date": 1103.731,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.491657,
+              "true_incremental_revenue_to_date": 344.1596,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 14,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 5636.39,
+              "lifetime_reported_conversions": 45.0,
+              "lifetime_reported_roas": 4.026,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2379.02,
+              "last_window_reported_conversions": 19.0,
+              "last_window_reported_roas": 3.3986,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 7207.24,
+              "lifetime_reported_conversions": 59.0,
+              "lifetime_reported_roas": 5.148,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3228.23,
+              "last_window_reported_conversions": 28.0,
+              "last_window_reported_roas": 4.6118,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 3970.78,
+              "lifetime_reported_conversions": 32.0,
+              "lifetime_reported_roas": 2.8363,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 1550.18,
+              "last_window_reported_conversions": 15.0,
+              "last_window_reported_roas": 2.2145,
+              "days_active": 14
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 4.03 > 3.0 and window 3.40 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 5.15 > 3.0 and window 4.61 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "reported ROAS 2.21, lifetime 2.84; neither a clear scale nor a clear cut \u2014 hold"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 20.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 20.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.319064,
+              "true_incremental_revenue_to_date": 1846.6902,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.2,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.2,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.400442,
+              "true_incremental_revenue_to_date": 560.6187,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 21,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 120.0,
+              "lifetime_spend": 2240.0,
+              "lifetime_reported_revenue": 9559.0,
+              "lifetime_reported_conversions": 78.6,
+              "lifetime_reported_roas": 4.2674,
+              "last_window_days": 7,
+              "last_window_spend": 840.0,
+              "last_window_reported_revenue": 3922.61,
+              "last_window_reported_conversions": 33.6,
+              "last_window_reported_roas": 4.6698,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 120.0,
+              "lifetime_spend": 2240.0,
+              "lifetime_reported_revenue": 13641.57,
+              "lifetime_reported_conversions": 109.4,
+              "lifetime_reported_roas": 6.09,
+              "last_window_days": 7,
+              "last_window_spend": 840.0,
+              "last_window_reported_revenue": 6434.33,
+              "last_window_reported_conversions": 50.4,
+              "last_window_reported_roas": 7.6599,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 2100.0,
+              "lifetime_reported_revenue": 7222.56,
+              "lifetime_reported_conversions": 57.0,
+              "lifetime_reported_roas": 3.4393,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3251.78,
+              "last_window_reported_conversions": 25.0,
+              "last_window_reported_roas": 4.6454,
+              "days_active": 21
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 4.27 > 3.0 and window 4.67 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 6.09 > 3.0 and window 7.66 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 3.44 > 3.0 and window 4.65 > 2.5; scale 20%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 20.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 20.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 20.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.379679,
+              "true_incremental_revenue_to_date": 3090.4814,
+              "cumulative_spend": 2240.0,
+              "budget_multiplier": 1.44,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 2240.0,
+              "budget_multiplier": 1.44,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.464811,
+              "true_incremental_revenue_to_date": 976.1038,
+              "cumulative_spend": 2100.0,
+              "budget_multiplier": 1.2,
+              "status": "active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run_id": "D__confounded__seed=17__buyer=policy__tier=modern",
+      "arm": "D",
+      "world_type": "confounded",
+      "seed": 17,
+      "buyer_kind": "policy",
+      "skill_tier": "modern",
+      "env_config_summary": {
+        "account_id": "confounded__seed17",
+        "n_campaigns": 3,
+        "n_periods": 28,
+        "decision_every_n_days": 7,
+        "campaign_specs": [
+          {
+            "campaign_id": "c_real_lift",
+            "world_type": "confounded",
+            "true_lift": 0.015,
+            "confound_strength": 0.4,
+            "revealed_world_label": "real_lift_with_confounding",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_trap",
+            "world_type": "confounded",
+            "true_lift": 0.0,
+            "confound_strength": 2.0,
+            "revealed_world_label": "zero_lift_high_confound_trap",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_baseline",
+            "world_type": "confounded",
+            "true_lift": 0.005,
+            "confound_strength": 0.2,
+            "revealed_world_label": "small_lift_low_confound",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          }
+        ]
+      },
+      "final_scores": {
+        "total_spend": 8400.0,
+        "reported_revenue": 37273.8702,
+        "true_incremental_revenue": 5124.6967,
+        "reported_roas": 4.437365,
+        "true_iroas": 0.610083,
+        "net_incremental_value": -3275.3033,
+        "wasted_spend": 2800.0,
+        "true_lift_captured": 5124.6967,
+        "campaigns": [
+          {
+            "campaign_id": "c_real_lift",
+            "true_iroas": 1.366323,
+            "reported_roas": 4.262621,
+            "cumulative_spend": 2800.0,
+            "cumulative_reported_revenue": 11935.3396,
+            "cumulative_true_incremental_revenue": 3825.7031,
+            "budget_multiplier_final": 1.0,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_trap",
+            "true_iroas": 0.0,
+            "reported_roas": 5.661718,
+            "cumulative_spend": 2800.0,
+            "cumulative_reported_revenue": 15852.8115,
+            "cumulative_true_incremental_revenue": 0.0,
+            "budget_multiplier_final": 1.0,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_baseline",
+            "true_iroas": 0.463926,
+            "reported_roas": 3.387757,
+            "cumulative_spend": 2800.0,
+            "cumulative_reported_revenue": 9485.7191,
+            "cumulative_true_incremental_revenue": 1298.9935,
+            "budget_multiplier_final": 1.0,
+            "status_final": "active"
+          }
+        ]
+      },
+      "counts": {
+        "decisions": 4,
+        "proposals": 12,
+        "scale_up_proposals": 5,
+        "scale_ups_applied": 0,
+        "scale_ups_blocked_by_gate": 5,
+        "false_scale_ups_prevented": 2,
+        "true_scale_ups_prevented": 3,
+        "pause_proposals": 0,
+        "pauses_applied": 0
+      },
+      "notes": [],
+      "timeline": [
+        {
+          "day": 0,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend in window; need data"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend in window; need data"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend in window; need data"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3257.37,
+              "lifetime_reported_conversions": 26.0,
+              "lifetime_reported_roas": 4.6534,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3257.37,
+              "last_window_reported_conversions": 26.0,
+              "last_window_reported_roas": 4.6534,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3979.01,
+              "lifetime_reported_conversions": 31.0,
+              "lifetime_reported_roas": 5.6843,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3979.01,
+              "last_window_reported_conversions": 31.0,
+              "last_window_reported_roas": 5.6843,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 2420.6,
+              "lifetime_reported_conversions": 17.0,
+              "lifetime_reported_roas": 3.458,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2420.6,
+              "last_window_reported_conversions": 17.0,
+              "last_window_reported_roas": 3.458,
+              "days_active": 7
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "only 7d active; need 14d before any move"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "only 7d active; need 14d before any move"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "only 7d active; need 14d before any move"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.576759,
+              "true_incremental_revenue_to_date": 1103.731,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.491657,
+              "true_incremental_revenue_to_date": 344.1596,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 14,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 5636.39,
+              "lifetime_reported_conversions": 45.0,
+              "lifetime_reported_roas": 4.026,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2379.02,
+              "last_window_reported_conversions": 19.0,
+              "last_window_reported_roas": 3.3986,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 7207.24,
+              "lifetime_reported_conversions": 59.0,
+              "lifetime_reported_roas": 5.148,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3228.23,
+              "last_window_reported_conversions": 28.0,
+              "last_window_reported_roas": 4.6118,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 1400.0,
+              "lifetime_reported_revenue": 3970.78,
+              "lifetime_reported_conversions": 32.0,
+              "lifetime_reported_roas": 2.8363,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 1550.18,
+              "last_window_reported_conversions": 15.0,
+              "last_window_reported_roas": 2.2145,
+              "days_active": 14
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 4.03 > 3.0 and window 3.40 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 5.15 > 3.0 and window 4.61 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "reported ROAS 2.21, lifetime 2.84; neither a clear scale nor a clear cut \u2014 hold"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.008934385834438898,
+              "verifier_ci": [
+                -0.004144312286866186,
+                0.02201308395574398
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.006114558578467817,
+              "verifier_ci": [
+                -0.009173827935703663,
+                0.0214029450926393
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "non_scale_up_passthrough"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.319064,
+              "true_incremental_revenue_to_date": 1846.6902,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.400442,
+              "true_incremental_revenue_to_date": 560.6187,
+              "cumulative_spend": 1400.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 21,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_real_lift",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 2100.0,
+              "lifetime_reported_revenue": 8905.23,
+              "lifetime_reported_conversions": 73.0,
+              "lifetime_reported_roas": 4.2406,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3268.84,
+              "last_window_reported_conversions": 28.0,
+              "last_window_reported_roas": 4.6698,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_trap",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 2100.0,
+              "lifetime_reported_revenue": 12569.18,
+              "lifetime_reported_conversions": 101.0,
+              "lifetime_reported_roas": 5.9853,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 5361.94,
+              "last_window_reported_conversions": 42.0,
+              "last_window_reported_roas": 7.6599,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_baseline",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 2100.0,
+              "lifetime_reported_revenue": 7222.56,
+              "lifetime_reported_conversions": 57.0,
+              "lifetime_reported_roas": 3.4393,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3251.78,
+              "last_window_reported_conversions": 25.0,
+              "last_window_reported_roas": 4.6454,
+              "days_active": 21
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 4.24 > 3.0 and window 4.67 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 5.99 > 3.0 and window 7.66 > 2.5; scale 20%"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "rationale": "lifetime ROAS 3.44 > 3.0 and window 4.65 > 2.5; scale 20%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_real_lift",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.008934385834438898,
+              "verifier_ci": [
+                -0.004144312286866186,
+                0.02201308395574398
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_trap",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.006114558578467817,
+              "verifier_ci": [
+                -0.009173827935703663,
+                0.0214029450926393
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "action": "scale_up",
+              "delta_pct": 20.0,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": true,
+              "verifier_verdict": "inconclusive",
+              "verifier_estimate": 0.0040003984357992,
+              "verifier_ci": [
+                -0.007321711251650571,
+                0.015322508123248969
+              ],
+              "verifier_method": "cate_meta_learner",
+              "outcome": "held",
+              "reason": "verifier_inconclusive"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_real_lift",
+              "world_type": "confounded",
+              "revealed_world_label": "real_lift_with_confounding",
+              "true_iroas": 1.372944,
+              "true_incremental_revenue_to_date": 2883.1829,
+              "cumulative_spend": 2100.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_trap",
+              "world_type": "confounded",
+              "revealed_world_label": "zero_lift_high_confound_trap",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 2100.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_baseline",
+              "world_type": "confounded",
+              "revealed_world_label": "small_lift_low_confound",
+              "true_iroas": 0.464811,
+              "true_incremental_revenue_to_date": 976.1038,
+              "cumulative_spend": 2100.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
