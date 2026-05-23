@@ -3,7 +3,7 @@ import {
   TrustScore,
   type PolicyDecision,
 } from "@admatix/schemas";
-import { newId, nowIso, sha256 } from "@admatix/core";
+import { nowIso, sha256 } from "@admatix/core";
 import type { Agent } from "../agent.js";
 
 export type Outcome = "validated" | "invalidated" | "blocked_unsafe";
@@ -75,6 +75,16 @@ export function makeReflectionAgent(opts: { traceId: string }): {
       outcomes: input.outcomes,
       blocked_unsafe_count: blocked,
     });
+    // QA finding #13: the trust note id was previously `newId("note")`,
+    // which contains a ULID (random + clock). That made the enclosing
+    // `AgentOutput`'s `output_hash` non-deterministic, contradicting the
+    // workflow contract. Derive the note id from the same input that
+    // drives `input_hash` so identical inputs produce identical outputs.
+    const noteId = sha256({
+      subject_type: input.subject_type,
+      subject_id: input.subject_id,
+      outcomes: input.outcomes,
+    }).slice(0, 12);
     const output = AgentOutput.parse({
       agent_id: "reflection",
       agent_version: "0.1.0",
@@ -83,7 +93,7 @@ export function makeReflectionAgent(opts: { traceId: string }): {
       confidence: 1,
       evidence_refs: [
         `trust:${input.subject_type}:${input.subject_id}`,
-        `trust_note:${newId("note")}`,
+        `trust_note:${noteId}`,
       ],
       proposed_actions: [],
       blocked_actions: [],
