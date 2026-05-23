@@ -327,11 +327,29 @@ def test_world_is_deterministic_across_two_runs(tmp_path: Path) -> None:
     """
     for world_type in WorldType:
         kwargs: dict = {"world_type": world_type, "n_users": 400, "seed": 13}
-        if world_type in (WorldType.CONFOUNDED, WorldType.ZERO_LIFT_PLACEBO):
+        if world_type in (
+            WorldType.CONFOUNDED,
+            WorldType.ZERO_LIFT_PLACEBO,
+            WorldType.ADVERSARIAL_MISSPECIFIED,
+        ):
             kwargs["confound_strength"] = 0.7
         if world_type == WorldType.GEO_STRUCTURED:
             kwargs["n_geos"] = 8
             kwargs["n_periods"] = 5
+        if world_type == WorldType.NON_STATIONARY:
+            kwargs["effect_decay_rate"] = 0.05
+            kwargs["learning_phase_periods"] = 3
+            kwargs["learning_phase_noise_multiplier"] = 2.0
+            kwargs["learning_phase_drift"] = 0.4
+        if world_type == WorldType.CROSS_CAMPAIGN_INTERFERENCE:
+            kwargs["n_campaigns"] = 3
+            kwargs["interference_strength"] = 0.4
+        if world_type == WorldType.ADVERSARIAL_MISSPECIFIED:
+            kwargs["noise_dist"] = "student_t"
+            kwargs["noise_df"] = 4
+            kwargs["time_varying_confound_amplitude"] = 0.5
+            kwargs["hidden_confounder_strength"] = 0.6
+            kwargs["spillover_strength"] = 0.3
         config = SimulationConfig(**kwargs)
         first = generate_world(config, tmp_path / f"{world_type.value}_a")
         second = generate_world(config, tmp_path / f"{world_type.value}_b")
