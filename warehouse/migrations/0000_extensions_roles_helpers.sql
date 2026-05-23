@@ -49,7 +49,7 @@ RETURNS char(64)
 LANGUAGE sql
 IMMUTABLE
 AS $$
-  SELECT encode(digest(convert_to((p_payload || '{}'::jsonb)::text, 'UTF8'), 'sha256'), 'hex')::char(64);
+  SELECT encode(extensions.digest(convert_to((p_payload || '{}'::jsonb)::text, 'UTF8'), 'sha256'), 'hex')::char(64);
 $$;
 
 COMMENT ON FUNCTION public.admatix_sha256_jsonb(jsonb) IS
@@ -63,7 +63,7 @@ RETURNS char(64)
 LANGUAGE sql
 IMMUTABLE
 AS $$
-  SELECT encode(digest(convert_to(coalesce(p_text, ''), 'UTF8'), 'sha256'), 'hex')::char(64);
+  SELECT encode(extensions.digest(convert_to(coalesce(p_text, ''), 'UTF8'), 'sha256'), 'hex')::char(64);
 $$;
 
 COMMENT ON FUNCTION public.admatix_sha256_text(text) IS
