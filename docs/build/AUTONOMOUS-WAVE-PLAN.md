@@ -18,7 +18,7 @@ Two pieces, both on the always-on VPS:
    Each reads its spec, implements its package, runs typecheck + tests, commits,
    and pushes its branch to GitHub.
 2. **The orchestrator** — a cron job (`*/20 * * * *`) that runs Claude Opus as a
-   "tick": it polls the agents, verifies finished branches (`pnpm -r test`),
+   "tick": it polls the agents, verifies finished branches (`pnpm exec turbo run test --concurrency=1`),
    merges the green ones into `main`, dispatches the next wave, advances across
    phase gates, and writes `.build/STATUS.md`.
 
@@ -52,7 +52,7 @@ Specs already in `docs/build/WP-*.md`.
 | J | `apps/api` + `apps/web` | 3 | opus | HTTP API + the cockpit |
 | K | `tests/e2e` + demo | 4 | opus | integration, the 5-minute demo |
 
-**Phase 1 gate:** on `main`, `pnpm -r typecheck && pnpm -r test` green, and the
+**Phase 1 gate:** on `main`, `pnpm -r typecheck && pnpm exec turbo run test --concurrency=1` green, and the
 demo runs end-to-end: `admatix audit` → findings → `admatix plan` → H0 packets →
 `admatix activate --dry-run` → a diff (never a mutation) → PolicyGuard **blocks**
 an unsafe action → `admatix benchmark run` → a scorecard → an agent drives it via

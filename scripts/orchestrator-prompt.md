@@ -13,7 +13,7 @@ do anything destructive when unsure.
 - Per-work-package logs: `/tmp/<wpid>_status.log` (STARTED…/EXIT=…), `/tmp/<wpid>_out.log`, `/tmp/<wpid>_err.log`.
 - Dispatcher: `scripts/dispatch-wp.sh <wpid> <branch> <pkgpath> <spec> <model>` — creates a worktree and launches a headless build agent.
 - Secrets: `.build/secrets.env` (e.g. `SUPABASE_DB_URL=…`). May be absent.
-- You run locally on the VPS, so you MAY run long commands (`pnpm -r test`, `pytest`) directly and wait for them.
+- You run locally on the VPS, so you MAY run long commands (`pnpm exec turbo run test --concurrency=1`, `pytest`) directly and wait for them.
 
 ## Tick procedure
 1. `cd /opt/admatix && git fetch origin -q`. Read `.build/STATE.md` and `docs/build/AUTONOMOUS-WAVE-PLAN.md`.
@@ -21,7 +21,7 @@ do anything destructive when unsure.
 3. **For each finished work package** (`EXIT=0` and its branch pushed to origin and not yet merged into `main`):
    - `git checkout main && git pull -q && git merge --no-ff origin/<branch> -m "merge <branch>"`.
    - If the merge conflicts: `git merge --abort`, write a NEED-HUMAN note, skip it.
-   - If clean: run `pnpm install && pnpm -r typecheck && pnpm -r test` (and `pytest` for Python work). If green: `git push origin main`, mark the WP `merged`. If red: `git reset --hard origin/main`, and re-dispatch the WP ONCE via `dispatch-wp.sh` (mark `reworking`). If it was already reworked once and still fails: mark `BLOCKED`, write a NEED-HUMAN note.
+   - If clean: run `pnpm install && pnpm -r typecheck && pnpm exec turbo run test --concurrency=1` (and `pytest` for Python work). If green: `git push origin main`, mark the WP `merged`. If red: `git reset --hard origin/main`, and re-dispatch the WP ONCE via `dispatch-wp.sh` (mark `reworking`). If it was already reworked once and still fails: mark `BLOCKED`, write a NEED-HUMAN note.
 4. **For each failed work package** (`EXIT` non-zero, or agent error in `/tmp/<wpid>_err.log`): re-dispatch once; if already retried, mark `BLOCKED` + NEED-HUMAN.
 5. **Work packages still running** (no `EXIT`): leave them.
 6. **If every work package of the current wave is `merged`:** dispatch the next wave — for each of its work packages run `scripts/dispatch-wp.sh` with the model named in the plan. Update STATE.
