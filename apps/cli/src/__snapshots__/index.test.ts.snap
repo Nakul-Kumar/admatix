@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`admatix CLI acceptance > audit --json golden output is stable 1`] = `
+"{
+  "account_id": "acc_demo",
+  "caveats": [
+    "Platform-reported metrics are directional, not causal."
+  ],
+  "findings": [
+    {
+      "causal_status": "directional_until_lift_test",
+      "created_at": "2026-05-21T00:00:00.000Z",
+      "description": "Spend rose 36% while conversions stayed flat or declined, making platform-attributed efficiency directional only.",
+      "detector": "budget-waste",
+      "entity_id": "campaign_a",
+      "estimated_waste": 856.9999999999999,
+      "evidence": [
+        {
+          "entity_id": "campaign_a",
+          "hash": "cf10afa046f3c7ca97cda2a9a60792c38a0b2022cfebde109668380147676ceb",
+          "metric": "baseline_spend_per_day",
+          "ref": "metric:campaign_daily:acc_demo:campaign_a:2026-05-12",
+          "source": "google_ads_fixture",
+          "value": 481
+        },
+        {
+          "entity_id": "campaign_a",
+          "hash": "d7dc2ff1c77715d9b89a0830658ab13c5a0794467170f2f2e48f3f2e8522c584",
+          "metric": "recent_spend_per_day",
+          "ref": "metric:campaign_daily:acc_demo:campaign_a:2026-05-21",
+          "source": "google_ads_fixture",
+          "value": 652.4
+        },
+        {
+          "entity_id": "campaign_a",
+          "hash": "d7dc2ff1c77715d9b89a0830658ab13c5a0794467170f2f2e48f3f2e8522c584",
+          "metric": "recent_conversions_per_day",
+          "ref": "metric:campaign_daily:acc_demo:campaign_a:2026-05-21",
+          "source": "google_ads_fixture",
+          "value": 12
+        }
+      ],
+      "finding_id": "finding_budget_waste_0413f77849d7",
+      "severity": "high",
+      "title": "Spend increased without conversion lift"
+    },
+    {
+      "causal_status": "directional_until_lift_test",
+      "created_at": "2026-05-21T00:00:00.000Z",
+      "description": "Recent average spend is 40% above the configured daily budget.",
+      "detector": "pacing",
+      "entity_id": "campaign_a",
+      "estimated_waste": 607.0000000000001,
+      "evidence": [
+        {
+          "entity_id": "campaign_a",
+          "hash": "88d20dd5128c1408c61a9f97b7f6dc146ad1d7bcefae1aa391033530e3ee05c6",
+          "ref": "campaign:acc_demo:campaign_a",
+          "source": "google_ads_fixture"
+        },
+        {
+          "entity_id": "campaign_a",
+          "hash": "d7dc2ff1c77715d9b89a0830658ab13c5a0794467170f2f2e48f3f2e8522c584",
+          "metric": "recent_average_spend",
+          "ref": "metric:campaign_daily:acc_demo:campaign_a:2026-05-21",
+          "source": "google_ads_fixture",
+          "value": 702.3333333333334
+        }
+      ],
+      "finding_id": "finding_pacing_0d70124c228d",
+      "severity": "high",
+      "title": "Campaign is pacing above daily budget"
+    },
+    {
+      "causal_status": "directional_until_lift_test",
+      "created_at": "2026-05-21T00:00:00.000Z",
+      "description": "Recent CAC is 36% higher than the baseline window.",
+      "detector": "budget-waste",
+      "entity_id": "campaign_a",
+      "estimated_waste": 856.9999999999999,
+      "evidence": [
+        {
+          "entity_id": "campaign_a",
+          "hash": "cf10afa046f3c7ca97cda2a9a60792c38a0b2022cfebde109668380147676ceb",
+          "metric": "baseline_cac",
+          "ref": "metric:campaign_daily:acc_demo:campaign_a:2026-05-12",
+          "source": "google_ads_fixture",
+          "value": 40.083333333333336
+        },
+        {
+          "entity_id": "campaign_a",
+          "hash": "d7dc2ff1c77715d9b89a0830658ab13c5a0794467170f2f2e48f3f2e8522c584",
+          "metric": "recent_cac",
+          "ref": "metric:campaign_daily:acc_demo:campaign_a:2026-05-21",
+          "source": "google_ads_fixture",
+          "value": 54.36666666666667
+        }
+      ],
+      "finding_id": "finding_budget_waste_c887ed3998f6",
+      "severity": "medium",
+      "title": "CAC deteriorated materially"
+    }
+  ],
+  "generated_at": "2026-05-21T00:00:00.000Z",
+  "report_id": "audit_e593e2c0d2f5cf86",
+  "total_estimated_waste": 2321,
+  "window": "2026-05-12..2026-05-21"
+}
+"
+`;
