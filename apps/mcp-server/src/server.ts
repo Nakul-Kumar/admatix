@@ -2,6 +2,7 @@
 import { pathToFileURL } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import type { VerifierClient } from "@admatix/agents";
 import type { Connector } from "@admatix/connectors";
 import type { Store } from "@admatix/core";
 import { ApprovalReceipt, z } from "@admatix/schemas";
@@ -16,6 +17,7 @@ import {
 import { runBenchmarkTool } from "./tools/run-benchmark.js";
 import { showH0PacketTool } from "./tools/show-h0-packet.js";
 import { validateH0PacketTool } from "./tools/validate-h0-packet.js";
+import { verifyTool, VerifyInputSchema } from "./tools/verify.js";
 
 export const APPROVED_TOOL_NAMES = [
   "audit_account",
@@ -24,6 +26,7 @@ export const APPROVED_TOOL_NAMES = [
   "validate_h0_packet",
   "activate_dry_run",
   "run_benchmark",
+  "verify",
 ] as const;
 
 export type AdmatixToolName = (typeof APPROVED_TOOL_NAMES)[number];
@@ -33,6 +36,13 @@ export interface AdmatixMcpDeps {
   store?: Store;
   connector?: Connector;
   dataDir?: string;
+  /**
+   * Optional verifier client. When supplied, the `verify` tool is
+   * registered and forwards `POST /verify` calls to the verifier
+   * service. When absent, the tool is **not** registered — Phase 1
+   * demos that never boot the verifier stay unaffected.
+   */
+  verifierClient?: VerifierClient;
 }
 
 const AuditAccountInputSchema = z.object({
@@ -141,6 +151,23 @@ export function createAdmatixMcpServer(deps: AdmatixMcpDeps = {}): McpServer {
     },
     async (input) => toMcpResult(await runBenchmarkTool(input, ctx)),
   );
+
+  if (deps.verifierClient) {
+    const verifierClient = deps.verifierClient;
+    server.registerTool(
+      "verify",
+      {
+        title: "Verify H0 Packet",
+        description:
+          "Forward an H0 packet plus a post-period data URI to the independent verifier and return the seven canonical fields (estimate, ci_low, ci_high, method, causal_status, verdict, confounders).",
+        inputSchema: VerifyInputSchema,
+        outputSchema: ToolResultEnvelopeSchema,
+        annotations: readOnlyAnnotations(),
+      },
+      async (input) =>
+        toMcpResult(await verifyTool(input, { ...ctx, verifierClient })),
+    );
+  }
 
   return server;
 }

@@ -1,5 +1,6 @@
 import {
   AgentRun,
+  OutcomeMeasurement,
   type AgentOutput,
   type AuditReport,
   type Campaign,
@@ -36,12 +37,26 @@ import {
   type MediaAnalystDeps,
 } from "./agents/media-analyst-agent.js";
 import { makeMeasurementScientistAgent } from "./agents/measurement-scientist-agent.js";
+import type { VerifierClient, VerifyResponsePayload } from "./verifier-client.js";
 import { makePlatformAdapterAgent } from "./agents/platform-adapter-agent.js";
 import { makeDiffBuilderAgent } from "./agents/diff-builder-agent.js";
 import { makeReflectionAgent } from "./agents/reflection-agent.js";
 import type { WorkflowIntent, WorkflowResult } from "./types.js";
 
 const POLICY_VERSION = "v1";
+
+/**
+ * Shape of the value returned by `WorkflowDeps.postPeriodDataUriFor` —
+ * a URI plus optional metadata/action-log URIs and a verifier hint. Used
+ * by the Phase 3 E2E test to point at a simulator world without forcing a
+ * connector dep.
+ */
+export interface PostPeriodDataUri {
+  data_uri: string;
+  metadata_uri?: string;
+  action_log_uri?: string;
+  hint?: { design?: string };
+}
 
 export interface WorkflowDeps {
   store: Store;
@@ -53,6 +68,21 @@ export interface WorkflowDeps {
    * the production detectors and packet builder land in WP-D.
    */
   evidence?: MediaAnalystDeps;
+  /**
+   * When supplied, MeasurementScientist calls the verifier, the response is
+   * persisted into the `outcome_measurements` collection, and an
+   * `AdmatixEvent` of type `measurement.verified` is appended with the
+   * payload hash. Phase 3 wiring; absent on Phase 1 demos so they keep
+   * running unchanged.
+   */
+  verifierClient?: VerifierClient;
+  /**
+   * When supplied, the orchestrator passes this URI as the verifier's
+   * `data_uri` for each H0 packet. Returning `null` (or no callback) skips
+   * the verifier call for that packet — used by the Phase 3 E2E test to
+   * point at a simulator world without forcing a connector dep.
+   */
+  postPeriodDataUriFor?: (packet: H0Packet) => PostPeriodDataUri | null;
 }
 
 /**
@@ -87,7 +117,12 @@ export async function runWorkflow(
     deps: deps.evidence,
   });
   const evidenceLedger = makeEvidenceLedgerAgent({ traceId: trace_id });
-  const measurementScientist = makeMeasurementScientistAgent({ traceId: trace_id });
+  const measurementScientist = makeMeasurementScientistAgent({
+    traceId: trace_id,
+    ...(deps.verifierClient !== undefined
+      ? { deps: { verifierClient: deps.verifierClient } }
+      : {}),
+  });
   const policyGuard = makePolicyGuardAgent({ traceId: trace_id });
   const approvalCoordinator = makeApprovalCoordinatorAgent({ traceId: trace_id });
   const platformAdapter = makePlatformAdapterAgent({ traceId: trace_id });
@@ -164,6 +199,7 @@ export async function runWorkflow(
   const decisions: PolicyDecision[] = [];
   const diffs: ExecutionDiff[] = [];
   const acceptedPackets: H0Packet[] = [];
+  const verifierVerdicts: VerifyResponsePayload["verdict"][] = [];
 
   for (const draftPacket of packets) {
     // ---------- EvidenceLedger gate (mandatory) ----------
@@ -197,7 +233,7 @@ export async function runWorkflow(
       continue;
     }
 
-    // ---------- MeasurementScientist (causal caveats) ----------
+    // ---------- MeasurementScientist (causal caveats + optional verifier) ----------
     const entityMetrics = metrics.find(
       (m) => m.entity_id === (draftPacket.proposal.target_entity_id ?? ""),
     );
@@ -207,9 +243,26 @@ export async function runWorkflow(
     if (entityMetrics !== undefined) {
       reviewArgs.metricsForEntity = entityMetrics;
     }
-    const { output: msOutput, packet: annotatedPacket } = await measurementScientist.review(
-      reviewArgs,
-    );
+    const verifyUri = deps.verifierClient && deps.postPeriodDataUriFor
+      ? deps.postPeriodDataUriFor(draftPacket)
+      : null;
+    if (deps.verifierClient && verifyUri) {
+      reviewArgs.verifyInput = {
+        data_uri: verifyUri.data_uri,
+        ...(verifyUri.metadata_uri !== undefined
+          ? { metadata_uri: verifyUri.metadata_uri }
+          : {}),
+        ...(verifyUri.action_log_uri !== undefined
+          ? { action_log_uri: verifyUri.action_log_uri }
+          : {}),
+        ...(verifyUri.hint !== undefined ? { hint: verifyUri.hint } : {}),
+      };
+    }
+    const {
+      output: msOutput,
+      packet: annotatedPacket,
+      verification,
+    } = await measurementScientist.review(reviewArgs);
     await persistRun({
       store,
       output: msOutput,
@@ -328,12 +381,59 @@ export async function runWorkflow(
     });
     await store.put("h0_packets", packetWithApproval.packet_id, packetWithApproval);
     acceptedPackets.push(packetWithApproval);
+
+    // ---------- Verifier outcome persistence + emit ----------
+    // Per WP-S §Acceptance 8 the event order is
+    //   evidence.ok → policy.allow → diff.built → measurement.verified
+    // so the verifier's persistence + emit live at the bottom of the
+    // packet loop (after diff.built), even though the call itself
+    // happened during MeasurementScientist.review above.
+    if (verification) {
+      const measurement = buildOutcomeMeasurement(
+        packetWithApproval,
+        verification,
+      );
+      await store.put(
+        "outcome_measurements",
+        measurement.measurement_id,
+        measurement,
+      );
+      const payload_hash = sha256(canonicalVerifierPayload(verification));
+      await emit(store, {
+        workflow_id,
+        trace_id,
+        step: "measure",
+        agent_id: "measurement-scientist",
+        type: "measurement.verified",
+        payload_hash,
+        level: "info",
+      });
+      verifierVerdicts.push(verification.verdict);
+    }
   }
 
   // ---------- Reflect ----------
-  const outcomes = decisions.map((d) =>
-    d.result === "block" ? ("blocked_unsafe" as const) : ("validated" as const),
-  );
+  // Default (pre-WP-S): one optimistic `validated` per allowed policy
+  // decision; `blocked_unsafe` per blocked one.
+  // WP-S extension: when the verifier weighed in on at least one packet,
+  // its verdicts (`lift_detected → "validated"`, `no_effect →
+  // "invalidated"`, `inconclusive →` no-op) replace the optimistic
+  // "validated" outcomes; `blocked_unsafe` is always kept.
+  const outcomes: ("validated" | "invalidated" | "blocked_unsafe")[] = [];
+  for (const d of decisions) {
+    if (d.result === "block") outcomes.push("blocked_unsafe");
+  }
+  if (verifierVerdicts.length === 0) {
+    for (const d of decisions) {
+      if (d.result !== "block") outcomes.push("validated");
+    }
+  } else {
+    for (const v of verifierVerdicts) {
+      if (v === "lift_detected") outcomes.push("validated");
+      else if (v === "no_effect") outcomes.push("invalidated");
+      // inconclusive → no-op (no trust update)
+    }
+  }
   const { output: refOutput, trust } = await reflection.reflect({
     subject_type: "agent",
     subject_id: "media-analyst",
@@ -467,6 +567,93 @@ async function resolveAccount(
 
 function deriveWindow(): string {
   return "2026-05-12..2026-05-21";
+}
+
+/**
+ * Map a verifier response onto the frozen `OutcomeMeasurement` schema.
+ * The schema fields are reused — not extended — per WP-S §"Files this WP
+ * MUST NOT touch":
+ *
+ *   verifier.estimate         → observed_value (and delta_pct as a copy)
+ *   [ci_low, ci_high]         → confidence_interval (only set when both
+ *                                are numeric; guardrail_only paths omit it)
+ *   verifier.method           → notes["method:<name>"]
+ *   verifier.verdict          → notes["verdict:<name>"] and passed
+ *   verifier.causal_status    → notes["causal_status:<name>"]
+ *   verifier.confounders[]    → notes["confounder:<name>"]
+ *   verifier.tx_id            → notes["tx_id:<tx_id>"] (trace correlation)
+ *
+ * The five required-for-round-trip fields (estimate, ci_low, ci_high,
+ * method, verdict) are recoverable from the persisted row by reading
+ * `observed_value`, `confidence_interval`, and the `method:` / `verdict:`
+ * note prefixes.
+ */
+function buildOutcomeMeasurement(
+  packet: H0Packet,
+  verification: VerifyResponsePayload,
+): OutcomeMeasurement {
+  const notes: string[] = [
+    `method:${verification.method}`,
+    `verdict:${verification.verdict}`,
+    `causal_status:${verification.causal_status}`,
+    `tx_id:${verification.tx_id}`,
+    `ci_level:${verification.ci_level}`,
+  ];
+  for (const c of verification.confounders) notes.push(`confounder:${c}`);
+  const measurement: Record<string, unknown> = {
+    measurement_id: `om_${sha256({
+      packet_id: packet.packet_id,
+      tx_id: verification.tx_id,
+      method: verification.method,
+    }).slice(0, 16)}`,
+    packet_id: packet.packet_id,
+    success_metric: packet.success_metric,
+    baseline_value: null,
+    observed_value: verification.estimate,
+    delta_pct: verification.estimate,
+    passed: verification.verdict === "lift_detected",
+    notes,
+    evidence: [
+      {
+        source: "verifier",
+        ref: `verify:${verification.tx_id}`,
+        hash: sha256(canonicalVerifierPayload(verification)),
+      },
+    ],
+    measured_at: nowIso(),
+  };
+  if (
+    typeof verification.ci_low === "number" &&
+    typeof verification.ci_high === "number"
+  ) {
+    measurement["confidence_interval"] = [
+      verification.ci_low,
+      verification.ci_high,
+    ];
+  }
+  return OutcomeMeasurement.parse(measurement);
+}
+
+/**
+ * Canonicalised verifier payload used for the event-stream `payload_hash`
+ * and the persisted-evidence hash. Sorted keys via the same JSON form the
+ * Postgres ledger trigger expects when WP-M's Supabase store is wired in,
+ * so a hash computed here equals the one a future trigger will compute
+ * server-side.
+ */
+function canonicalVerifierPayload(v: VerifyResponsePayload): unknown {
+  return {
+    causal_status: v.causal_status,
+    ci_high: v.ci_high,
+    ci_level: v.ci_level,
+    ci_low: v.ci_low,
+    confounders: [...v.confounders],
+    estimate: v.estimate,
+    method: v.method,
+    packet_id: v.packet_id,
+    tx_id: v.tx_id,
+    verdict: v.verdict,
+  };
 }
 
 // Re-export helpers used by tests / callers that want to compose pieces.

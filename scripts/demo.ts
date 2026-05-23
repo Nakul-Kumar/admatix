@@ -362,7 +362,12 @@ async function step7Mcp(
   packet: H0Packet,
 ): Promise<{ tools: string[]; auditOk: boolean; activateBlocked: boolean }> {
   out.line("[7/8] MCP — read-only agent tool surface");
-  const tools = [...APPROVED_TOOL_NAMES].sort();
+  // The demo does not boot a verifier, so the `verify` MCP tool is not
+  // registered (WP-S gates it behind `deps.verifierClient`). Print only
+  // the tools the demo's MCP server actually exposes.
+  const tools = [...APPROVED_TOOL_NAMES]
+    .filter((name) => name !== "verify")
+    .sort();
   out.line(`      tools: ${tools.join(", ")}`);
   const ctx = { store, connector };
   const auditResult = await auditAccountTool(

@@ -14,6 +14,7 @@ data/bronze/
 data/datasets/
 data/raw/
 data/.cache/
+data/sim/
 coverage/
 *.log
 .DS_Store

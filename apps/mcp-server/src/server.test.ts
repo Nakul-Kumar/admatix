@@ -67,7 +67,7 @@ afterEach(async () => {
 });
 
 describe("MCP server", () => {
-  it("advertises only the six approved read-only tools", async () => {
+  it("advertises only the six base read-only tools when no verifier dep is supplied", async () => {
     const server = createAdmatixMcpServer({ dataDir: await tempRoot() });
     const registered = server as unknown as {
       _registeredTools: Record<string, unknown>;
@@ -82,8 +82,13 @@ describe("MCP server", () => {
       "validate_h0_packet",
       "activate_dry_run",
       "run_benchmark",
+      "verify",
     ]);
-    expect(names).toEqual([...APPROVED_TOOL_NAMES].sort());
+    // `verify` is registered only when `deps.verifierClient` is supplied,
+    // so a Phase-1-shaped server with no verifier dep advertises six.
+    expect(names).toEqual(
+      [...APPROVED_TOOL_NAMES].filter((n) => n !== "verify").sort(),
+    );
   });
 
   it("returns a blocked response for activate_dry_run without an approval receipt", async () => {
@@ -181,8 +186,10 @@ describe("MCP server", () => {
 
     await client.connect(transport);
     const tools = await client.listTools();
+    // stdio entry point boots without a verifier dep — `verify` is gated
+    // behind `deps.verifierClient` so only the six base tools appear.
     expect(tools.tools.map((tool) => tool.name).sort()).toEqual(
-      [...APPROVED_TOOL_NAMES].sort(),
+      [...APPROVED_TOOL_NAMES].filter((n) => n !== "verify").sort(),
     );
 
     const unknown = await client.callTool({ name: "mutate_platform", arguments: {} });
