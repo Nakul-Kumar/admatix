@@ -1,0 +1,235 @@
+{
+  "origin": {
+    "kind": "demo",
+    "label": "Bundled CX-1 demo worlds",
+    "description": "Synthetic sample shipped with the standalone dashboard. Not live account proof.",
+    "produced_by": "CX-1 dashboard fixture pack",
+    "artifact_uri": "proof-dashboard/public/data/worlds.json"
+  },
+  "generated_at": "2026-05-22T08:00:00Z",
+  "worlds": [
+    {
+      "id": "clean",
+      "name": "Clean A/B World",
+      "tagline": "Textbook RCT — no confounders.",
+      "description": "Perfect randomization, stationary outcomes, no carryover. The easy case where every approach should land near the true lift. Establishes the noise floor of each estimator.",
+      "true_lift_pct": 12.0,
+      "estimates": {
+        "platform_reported_pct": 15.4,
+        "agent_alone_pct": 11.6,
+        "agent_admatix_pct": 12.2
+      },
+      "abs_error": {
+        "platform_reported": 3.4,
+        "agent_alone": 0.4,
+        "agent_admatix": 0.2
+      },
+      "difficulty": "easy",
+      "verdict": "agent_admatix_wins",
+      "series": [
+        { "t": 1,  "truth": 12.0, "platform_reported": 14.6, "agent_alone": 10.9, "agent_admatix": 11.9 },
+        { "t": 2,  "truth": 12.1, "platform_reported": 15.1, "agent_alone": 11.2, "agent_admatix": 12.0 },
+        { "t": 3,  "truth": 12.0, "platform_reported": 15.8, "agent_alone": 11.4, "agent_admatix": 12.1 },
+        { "t": 4,  "truth": 11.9, "platform_reported": 15.4, "agent_alone": 11.6, "agent_admatix": 12.0 },
+        { "t": 5,  "truth": 12.0, "platform_reported": 15.2, "agent_alone": 11.5, "agent_admatix": 12.1 },
+        { "t": 6,  "truth": 12.1, "platform_reported": 15.6, "agent_alone": 11.8, "agent_admatix": 12.2 },
+        { "t": 7,  "truth": 12.0, "platform_reported": 15.3, "agent_alone": 11.6, "agent_admatix": 12.1 },
+        { "t": 8,  "truth": 12.0, "platform_reported": 15.5, "agent_alone": 11.7, "agent_admatix": 12.2 },
+        { "t": 9,  "truth": 11.9, "platform_reported": 15.4, "agent_alone": 11.5, "agent_admatix": 12.0 },
+        { "t": 10, "truth": 12.0, "platform_reported": 15.7, "agent_alone": 11.9, "agent_admatix": 12.3 },
+        { "t": 11, "truth": 12.1, "platform_reported": 15.2, "agent_alone": 11.6, "agent_admatix": 12.2 },
+        { "t": 12, "truth": 12.0, "platform_reported": 15.4, "agent_alone": 11.7, "agent_admatix": 12.1 },
+        { "t": 13, "truth": 12.0, "platform_reported": 15.3, "agent_alone": 11.5, "agent_admatix": 12.0 },
+        { "t": 14, "truth": 12.0, "platform_reported": 15.6, "agent_alone": 11.8, "agent_admatix": 12.2 },
+        { "t": 15, "truth": 12.0, "platform_reported": 15.4, "agent_alone": 11.6, "agent_admatix": 12.2 },
+        { "t": 16, "truth": 12.0, "platform_reported": 15.4, "agent_alone": 11.6, "agent_admatix": 12.2 }
+      ]
+    },
+    {
+      "id": "confounded",
+      "name": "Confounded World",
+      "tagline": "Organic spike masks the true effect.",
+      "description": "A site-wide promotion concurrent with the campaign inflates baseline conversions. Platform-reported ROAS attributes it all to ads; the verifier deconfounds via the held-out control.",
+      "true_lift_pct": 8.0,
+      "estimates": {
+        "platform_reported_pct": 22.3,
+        "agent_alone_pct": 13.2,
+        "agent_admatix_pct": 7.7
+      },
+      "abs_error": {
+        "platform_reported": 14.3,
+        "agent_alone": 5.2,
+        "agent_admatix": 0.3
+      },
+      "difficulty": "hard",
+      "verdict": "agent_admatix_wins",
+      "series": [
+        { "t": 1,  "truth": 8.0,  "platform_reported": 11.2, "agent_alone": 9.8,  "agent_admatix": 8.1 },
+        { "t": 2,  "truth": 8.0,  "platform_reported": 13.4, "agent_alone": 10.5, "agent_admatix": 8.0 },
+        { "t": 3,  "truth": 8.1,  "platform_reported": 16.8, "agent_alone": 11.4, "agent_admatix": 7.9 },
+        { "t": 4,  "truth": 8.0,  "platform_reported": 20.6, "agent_alone": 12.6, "agent_admatix": 7.8 },
+        { "t": 5,  "truth": 8.0,  "platform_reported": 24.1, "agent_alone": 13.9, "agent_admatix": 7.7 },
+        { "t": 6,  "truth": 8.0,  "platform_reported": 26.8, "agent_alone": 14.7, "agent_admatix": 7.6 },
+        { "t": 7,  "truth": 7.9,  "platform_reported": 27.2, "agent_alone": 14.8, "agent_admatix": 7.7 },
+        { "t": 8,  "truth": 8.0,  "platform_reported": 25.4, "agent_alone": 14.1, "agent_admatix": 7.8 },
+        { "t": 9,  "truth": 8.0,  "platform_reported": 23.6, "agent_alone": 13.8, "agent_admatix": 7.7 },
+        { "t": 10, "truth": 8.0,  "platform_reported": 22.1, "agent_alone": 13.2, "agent_admatix": 7.6 },
+        { "t": 11, "truth": 8.1,  "platform_reported": 21.0, "agent_alone": 12.9, "agent_admatix": 7.8 },
+        { "t": 12, "truth": 8.0,  "platform_reported": 20.4, "agent_alone": 12.7, "agent_admatix": 7.7 },
+        { "t": 13, "truth": 8.0,  "platform_reported": 21.6, "agent_alone": 13.1, "agent_admatix": 7.7 },
+        { "t": 14, "truth": 8.0,  "platform_reported": 22.0, "agent_alone": 13.2, "agent_admatix": 7.6 },
+        { "t": 15, "truth": 8.0,  "platform_reported": 22.4, "agent_alone": 13.3, "agent_admatix": 7.7 },
+        { "t": 16, "truth": 8.0,  "platform_reported": 22.3, "agent_alone": 13.2, "agent_admatix": 7.7 }
+      ]
+    },
+    {
+      "id": "geo",
+      "name": "Geo Holdout World",
+      "tagline": "Effect is real, but only in select metros.",
+      "description": "Campaign runs in 14 DMAs while 6 DMAs are held out. Aggregate platform-reported numbers misattribute organic activity in the holdout regions to the ads when geo-randomization is ignored.",
+      "true_lift_pct": 5.0,
+      "estimates": {
+        "platform_reported_pct": 11.0,
+        "agent_alone_pct": 8.5,
+        "agent_admatix_pct": 5.1
+      },
+      "abs_error": {
+        "platform_reported": 6.0,
+        "agent_alone": 3.5,
+        "agent_admatix": 0.1
+      },
+      "difficulty": "medium",
+      "verdict": "agent_admatix_wins",
+      "series": [
+        { "t": 1,  "truth": 5.0, "platform_reported": 9.8,  "agent_alone": 7.6, "agent_admatix": 5.3 },
+        { "t": 2,  "truth": 5.1, "platform_reported": 10.4, "agent_alone": 8.0, "agent_admatix": 5.2 },
+        { "t": 3,  "truth": 5.0, "platform_reported": 11.1, "agent_alone": 8.2, "agent_admatix": 5.0 },
+        { "t": 4,  "truth": 5.0, "platform_reported": 11.4, "agent_alone": 8.4, "agent_admatix": 5.1 },
+        { "t": 5,  "truth": 5.0, "platform_reported": 11.6, "agent_alone": 8.6, "agent_admatix": 5.1 },
+        { "t": 6,  "truth": 4.9, "platform_reported": 11.2, "agent_alone": 8.5, "agent_admatix": 5.0 },
+        { "t": 7,  "truth": 5.0, "platform_reported": 10.9, "agent_alone": 8.4, "agent_admatix": 5.1 },
+        { "t": 8,  "truth": 5.0, "platform_reported": 11.0, "agent_alone": 8.5, "agent_admatix": 5.1 },
+        { "t": 9,  "truth": 5.1, "platform_reported": 10.8, "agent_alone": 8.3, "agent_admatix": 5.2 },
+        { "t": 10, "truth": 5.0, "platform_reported": 11.0, "agent_alone": 8.5, "agent_admatix": 5.0 },
+        { "t": 11, "truth": 5.0, "platform_reported": 11.3, "agent_alone": 8.7, "agent_admatix": 5.1 },
+        { "t": 12, "truth": 5.0, "platform_reported": 11.2, "agent_alone": 8.6, "agent_admatix": 5.1 },
+        { "t": 13, "truth": 5.0, "platform_reported": 11.0, "agent_alone": 8.4, "agent_admatix": 5.0 },
+        { "t": 14, "truth": 5.0, "platform_reported": 10.9, "agent_alone": 8.5, "agent_admatix": 5.1 },
+        { "t": 15, "truth": 5.0, "platform_reported": 11.1, "agent_alone": 8.5, "agent_admatix": 5.1 },
+        { "t": 16, "truth": 5.0, "platform_reported": 11.0, "agent_alone": 8.5, "agent_admatix": 5.1 }
+      ]
+    },
+    {
+      "id": "placebo",
+      "name": "Placebo World",
+      "tagline": "No real effect — should return zero.",
+      "description": "Treatment is identical to control. Any positive lift is noise. False positives here translate directly to wasted spend in production. AdMatix returns ~0; the platform falsely claims positive lift.",
+      "true_lift_pct": 0.0,
+      "estimates": {
+        "platform_reported_pct": 6.4,
+        "agent_alone_pct": 4.7,
+        "agent_admatix_pct": 0.3
+      },
+      "abs_error": {
+        "platform_reported": 6.4,
+        "agent_alone": 4.7,
+        "agent_admatix": 0.3
+      },
+      "difficulty": "very_hard",
+      "verdict": "agent_admatix_wins",
+      "series": [
+        { "t": 1,  "truth": 0.0, "platform_reported": 5.4, "agent_alone": 3.6, "agent_admatix": 0.4 },
+        { "t": 2,  "truth": 0.0, "platform_reported": 6.0, "agent_alone": 4.1, "agent_admatix": 0.2 },
+        { "t": 3,  "truth": 0.0, "platform_reported": 6.6, "agent_alone": 4.6, "agent_admatix": 0.5 },
+        { "t": 4,  "truth": 0.0, "platform_reported": 7.1, "agent_alone": 4.9, "agent_admatix": 0.3 },
+        { "t": 5,  "truth": 0.0, "platform_reported": 7.0, "agent_alone": 5.0, "agent_admatix": 0.4 },
+        { "t": 6,  "truth": 0.0, "platform_reported": 6.8, "agent_alone": 4.8, "agent_admatix": 0.2 },
+        { "t": 7,  "truth": 0.0, "platform_reported": 6.2, "agent_alone": 4.6, "agent_admatix": 0.4 },
+        { "t": 8,  "truth": 0.0, "platform_reported": 6.4, "agent_alone": 4.7, "agent_admatix": 0.3 },
+        { "t": 9,  "truth": 0.0, "platform_reported": 6.6, "agent_alone": 4.8, "agent_admatix": 0.1 },
+        { "t": 10, "truth": 0.0, "platform_reported": 6.3, "agent_alone": 4.5, "agent_admatix": 0.4 },
+        { "t": 11, "truth": 0.0, "platform_reported": 6.5, "agent_alone": 4.7, "agent_admatix": 0.3 },
+        { "t": 12, "truth": 0.0, "platform_reported": 6.4, "agent_alone": 4.8, "agent_admatix": 0.2 },
+        { "t": 13, "truth": 0.0, "platform_reported": 6.5, "agent_alone": 4.6, "agent_admatix": 0.4 },
+        { "t": 14, "truth": 0.0, "platform_reported": 6.3, "agent_alone": 4.7, "agent_admatix": 0.3 },
+        { "t": 15, "truth": 0.0, "platform_reported": 6.4, "agent_alone": 4.7, "agent_admatix": 0.3 },
+        { "t": 16, "truth": 0.0, "platform_reported": 6.4, "agent_alone": 4.7, "agent_admatix": 0.3 }
+      ]
+    },
+    {
+      "id": "non_stationary",
+      "name": "Non-Stationary World",
+      "tagline": "True lift drifts over time.",
+      "description": "Seasonality, audience fatigue and creative wear cause the true causal effect to drift between 4% and 9%. The verifier's Bayesian update tracks the drift; static estimators over- or under-shoot.",
+      "true_lift_pct": 6.4,
+      "true_lift_range": [4.0, 9.0],
+      "estimates": {
+        "platform_reported_pct": 12.1,
+        "agent_alone_pct": 9.3,
+        "agent_admatix_pct": 6.7
+      },
+      "abs_error": {
+        "platform_reported": 5.7,
+        "agent_alone": 2.9,
+        "agent_admatix": 0.6
+      },
+      "difficulty": "hard",
+      "verdict": "agent_admatix_wins",
+      "series": [
+        { "t": 1,  "truth": 4.2, "platform_reported": 8.4,  "agent_alone": 6.8, "agent_admatix": 4.6 },
+        { "t": 2,  "truth": 4.8, "platform_reported": 9.6,  "agent_alone": 7.3, "agent_admatix": 5.1 },
+        { "t": 3,  "truth": 5.6, "platform_reported": 10.8, "agent_alone": 8.0, "agent_admatix": 5.9 },
+        { "t": 4,  "truth": 6.4, "platform_reported": 12.0, "agent_alone": 8.8, "agent_admatix": 6.6 },
+        { "t": 5,  "truth": 7.2, "platform_reported": 13.4, "agent_alone": 9.6, "agent_admatix": 7.4 },
+        { "t": 6,  "truth": 8.1, "platform_reported": 14.8, "agent_alone": 10.5, "agent_admatix": 8.2 },
+        { "t": 7,  "truth": 8.6, "platform_reported": 15.4, "agent_alone": 10.9, "agent_admatix": 8.7 },
+        { "t": 8,  "truth": 8.9, "platform_reported": 15.8, "agent_alone": 11.2, "agent_admatix": 9.0 },
+        { "t": 9,  "truth": 8.4, "platform_reported": 15.2, "agent_alone": 10.8, "agent_admatix": 8.5 },
+        { "t": 10, "truth": 7.5, "platform_reported": 14.0, "agent_alone": 10.1, "agent_admatix": 7.7 },
+        { "t": 11, "truth": 6.4, "platform_reported": 12.6, "agent_alone": 9.4, "agent_admatix": 6.6 },
+        { "t": 12, "truth": 5.5, "platform_reported": 11.2, "agent_alone": 8.6, "agent_admatix": 5.7 },
+        { "t": 13, "truth": 4.8, "platform_reported": 10.0, "agent_alone": 7.9, "agent_admatix": 5.0 },
+        { "t": 14, "truth": 4.4, "platform_reported": 9.0,  "agent_alone": 7.3, "agent_admatix": 4.6 },
+        { "t": 15, "truth": 4.6, "platform_reported": 9.4,  "agent_alone": 7.5, "agent_admatix": 4.8 },
+        { "t": 16, "truth": 5.2, "platform_reported": 10.2, "agent_alone": 8.0, "agent_admatix": 5.4 }
+      ]
+    },
+    {
+      "id": "adversarial",
+      "name": "Adversarial World",
+      "tagline": "Campaign is losing money.",
+      "description": "True incremental lift is negative — the campaign cannibalizes organic conversions. Platform-reported numbers still look positive due to last-click attribution. Agent alone scales up; AdMatix cuts.",
+      "true_lift_pct": -2.0,
+      "estimates": {
+        "platform_reported_pct": 5.1,
+        "agent_alone_pct": 3.4,
+        "agent_admatix_pct": -2.1
+      },
+      "abs_error": {
+        "platform_reported": 7.1,
+        "agent_alone": 5.4,
+        "agent_admatix": 0.1
+      },
+      "difficulty": "very_hard",
+      "verdict": "agent_admatix_wins",
+      "series": [
+        { "t": 1,  "truth": -1.8, "platform_reported": 4.2, "agent_alone": 2.6, "agent_admatix": -1.6 },
+        { "t": 2,  "truth": -1.9, "platform_reported": 4.6, "agent_alone": 3.0, "agent_admatix": -1.8 },
+        { "t": 3,  "truth": -2.0, "platform_reported": 4.8, "agent_alone": 3.2, "agent_admatix": -2.0 },
+        { "t": 4,  "truth": -2.1, "platform_reported": 5.0, "agent_alone": 3.4, "agent_admatix": -2.0 },
+        { "t": 5,  "truth": -2.0, "platform_reported": 5.2, "agent_alone": 3.5, "agent_admatix": -2.1 },
+        { "t": 6,  "truth": -2.0, "platform_reported": 5.4, "agent_alone": 3.6, "agent_admatix": -2.0 },
+        { "t": 7,  "truth": -2.1, "platform_reported": 5.6, "agent_alone": 3.7, "agent_admatix": -2.2 },
+        { "t": 8,  "truth": -2.0, "platform_reported": 5.3, "agent_alone": 3.5, "agent_admatix": -2.1 },
+        { "t": 9,  "truth": -2.0, "platform_reported": 5.1, "agent_alone": 3.3, "agent_admatix": -2.0 },
+        { "t": 10, "truth": -2.1, "platform_reported": 5.0, "agent_alone": 3.4, "agent_admatix": -2.1 },
+        { "t": 11, "truth": -2.0, "platform_reported": 5.2, "agent_alone": 3.5, "agent_admatix": -2.0 },
+        { "t": 12, "truth": -2.0, "platform_reported": 5.1, "agent_alone": 3.4, "agent_admatix": -2.1 },
+        { "t": 13, "truth": -2.0, "platform_reported": 5.0, "agent_alone": 3.3, "agent_admatix": -2.0 },
+        { "t": 14, "truth": -2.0, "platform_reported": 5.1, "agent_alone": 3.4, "agent_admatix": -2.1 },
+        { "t": 15, "truth": -2.0, "platform_reported": 5.2, "agent_alone": 3.5, "agent_admatix": -2.1 },
+        { "t": 16, "truth": -2.0, "platform_reported": 5.1, "agent_alone": 3.4, "agent_admatix": -2.1 }
+      ]
+    }
+  ]
+}
