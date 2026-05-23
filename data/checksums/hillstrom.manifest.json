@@ -1,0 +1,28 @@
+{
+  "accessed_at": "2026-05-23T05:55:35+00:00",
+  "byte_size": 3964977,
+  "citation": "Kevin Hillstrom, MineThatData E-Mail Analytics Data Mining Challenge, 2008",
+  "columns": [
+    "recency",
+    "history_segment",
+    "history",
+    "mens",
+    "womens",
+    "zip_code",
+    "newbie",
+    "channel",
+    "segment",
+    "visit",
+    "conversion",
+    "spend"
+  ],
+  "dataset": "hillstrom",
+  "expected_rows": 64000,
+  "license": "Public challenge dataset; attribution to Kevin Hillstrom / MineThatData recommended",
+  "original_filename": "Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv",
+  "redistribution": "permissive_with_attribution_recommended",
+  "rows": 64000,
+  "schema_ok": true,
+  "sha256": "0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+  "source_url": "http://www.minethatdata.com/Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv"
+}

@@ -1,0 +1,32 @@
+{
+  "accessed_at": "2026-05-23T05:56:42+00:00",
+  "byte_size": 311422618,
+  "citation": "Diemert et al., A Large Scale Benchmark for Uplift Modeling, AdKDD 2018",
+  "columns": [
+    "f0",
+    "f1",
+    "f2",
+    "f3",
+    "f4",
+    "f5",
+    "f6",
+    "f7",
+    "f8",
+    "f9",
+    "f10",
+    "f11",
+    "treatment",
+    "conversion",
+    "visit",
+    "exposure"
+  ],
+  "dataset": "criteo_uplift_v2.1",
+  "expected_rows": 13979592,
+  "license": "Creative Commons BY-NC-SA 4.0; non-commercial, share-alike, attribution required",
+  "original_filename": "criteo-research-uplift-v2.1.csv.gz",
+  "redistribution": "internal_non_commercial_only",
+  "rows": 13979592,
+  "schema_ok": true,
+  "sha256": "2716e1bf0fd157a93b5bf86924d9088419dfbac2022c6cd90030220634f616dc",
+  "source_url": "http://go.criteo.net/criteo-research-uplift-v2.1.csv.gz"
+}

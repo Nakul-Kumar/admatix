@@ -2,10 +2,17 @@ node_modules/
 dist/
 .turbo/
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
+.venv/
+.venv*/
+services/*/.venv/
 .env
 .env.local
 .env.*.local
 data/bronze/
+data/datasets/
+data/raw/
 data/.cache/
 coverage/
 *.log
