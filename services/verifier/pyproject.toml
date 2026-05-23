@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "admatix-verifier"
+version = "0.1.0"
+description = "AdMatix independent verification engine (FastAPI)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "AdMatix" }]
+dependencies = [
+  "fastapi>=0.115,<0.116",
+  "uvicorn[standard]>=0.32,<0.33",
+  "pydantic>=2.9,<2.10",
+  "numpy>=2.1,<2.2",
+  "pandas>=2.2,<2.3",
+  "scipy>=1.14,<1.17",
+  "statsmodels>=0.14,<0.15",
+  "econml==0.16.0",
+  "causalml==0.16.0",
+  "httpx>=0.27,<0.28",
+]
+
+[project.optional-dependencies]
+bsts-tfp = ["tfp-causalimpact"]
+dev = ["pytest>=8.3,<9"]
+
+[project.scripts]
+admatix-verifier = "admatix_verifier.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
