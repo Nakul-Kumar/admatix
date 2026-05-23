@@ -5,6 +5,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type { Connector } from "@admatix/connectors";
 import type { Store } from "@admatix/core";
 import { ApprovalReceipt, z } from "@admatix/schemas";
+import { assertFixturesMode } from "./fixtures-mode.js";
 import { activateDryRunTool } from "./tools/activate-dry-run.js";
 import { auditAccountTool } from "./tools/audit-account.js";
 import { createPlanTool } from "./tools/create-plan.js";
@@ -60,6 +61,7 @@ const RunBenchmarkInputSchema = z.object({
 }).strict();
 
 export function createAdmatixMcpServer(deps: AdmatixMcpDeps = {}): McpServer {
+  assertFixturesMode();
   const ctx = createToolContext(deps);
   const server = new McpServer(
     { name: "admatix-mcp-server", version: "0.1.0" },

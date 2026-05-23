@@ -15,6 +15,8 @@ let app: FastifyInstance;
 let store: Store;
 let tmpRoot: string;
 
+const MANAGER_AUTH = { authorization: "Bearer tok_demo_media_manager" };
+
 beforeAll(async () => {
   tmpRoot = mkdtempSync(join(tmpdir(), "admatix-api-"));
   store = createStore(tmpRoot);
@@ -27,15 +29,28 @@ afterAll(async () => {
   rmSync(tmpRoot, { recursive: true, force: true });
 });
 
+describe("F8: API entry point enforces ADMATIX_MODE=fixtures", () => {
+  it("buildServer throws if ADMATIX_MODE is not fixtures", async () => {
+    const prev = process.env["ADMATIX_MODE"];
+    process.env["ADMATIX_MODE"] = "live";
+    try {
+      await expect(buildServer({ logger: false })).rejects.toThrow(/ADMATIX_MODE/);
+    } finally {
+      if (prev === undefined) delete process.env["ADMATIX_MODE"];
+      else process.env["ADMATIX_MODE"] = prev;
+    }
+  });
+});
+
 describe("WP-J API acceptance", () => {
   it("acceptance #1a: /api/v1/audit returns a schema-valid AuditReport + packets", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/v1/audit",
+      headers: MANAGER_AUTH,
       payload: {
         accountRef: "fixture:acc_demo",
         goal: "reduce_cac",
-        tenantId: "tenant_demo",
         window: "2026-05-12..2026-05-21",
       },
     });
@@ -49,7 +64,11 @@ describe("WP-J API acceptance", () => {
   });
 
   it("acceptance #1b: /api/v1/packets lists schema-valid packets", async () => {
-    const res = await app.inject({ method: "GET", url: "/api/v1/packets" });
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/v1/packets",
+      headers: MANAGER_AUTH,
+    });
     expect(res.statusCode).toBe(200);
     const body = res.json() as { packets: unknown[] };
     expect(Array.isArray(body.packets)).toBe(true);
@@ -62,6 +81,7 @@ describe("WP-J API acceptance", () => {
     const runRes = await app.inject({
       method: "POST",
       url: "/api/v1/benchmarks/run",
+      headers: MANAGER_AUTH,
       payload: { suite: "safety-v1" },
     });
     expect(runRes.statusCode).toBe(200);
@@ -71,6 +91,7 @@ describe("WP-J API acceptance", () => {
     const latest = await app.inject({
       method: "GET",
       url: "/api/v1/benchmarks/latest?suite=safety-v1",
+      headers: MANAGER_AUTH,
     });
     expect(latest.statusCode).toBe(200);
     expect(() => BenchmarkRun.parse(latest.json())).not.toThrow();
@@ -107,10 +128,10 @@ describe("WP-J API acceptance", () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/v1/approvals",
+      headers: MANAGER_AUTH,
       payload: {
         packetId: invalid.packet_id,
         decision: "approved",
-        decidedBy: "media_manager_demo",
       },
     });
     expect(res.statusCode).toBe(409);
@@ -120,21 +141,126 @@ describe("WP-J API acceptance", () => {
   });
 
   it("approves a valid packet end-to-end", async () => {
-    const listed = await app.inject({ method: "GET", url: "/api/v1/packets" });
+    const listed = await app.inject({
+      method: "GET",
+      url: "/api/v1/packets",
+      headers: MANAGER_AUTH,
+    });
     const { packets } = listed.json() as { packets: { packet_id: string }[] };
     const target = packets.find((p) => p.packet_id !== "h0_invalid_test");
     expect(target).toBeDefined();
     const res = await app.inject({
       method: "POST",
       url: "/api/v1/approvals",
+      headers: MANAGER_AUTH,
       payload: {
         packetId: target!.packet_id,
         decision: "approved",
-        decidedBy: "media_manager_demo",
       },
     });
     expect(res.statusCode).toBe(200);
-    const body = res.json() as { receipt: { decision: string } };
+    const body = res.json() as { receipt: { decision: string; signature?: string } };
     expect(body.receipt.decision).toBe("approved");
+    expect(typeof body.receipt.signature).toBe("string");
+    expect(body.receipt.signature!.length).toBeGreaterThan(16);
+  });
+
+  describe("F5: approvals cannot forge identity (QA finding)", () => {
+    it("rejects approval with no Authorization header (401)", async () => {
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/v1/approvals",
+        payload: { packetId: "anything", decision: "approved" },
+      });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it("ignores a body-supplied decidedBy/role and uses the token identity", async () => {
+      const listed = await app.inject({
+        method: "GET",
+        url: "/api/v1/packets",
+        headers: MANAGER_AUTH,
+      });
+      const { packets } = listed.json() as { packets: { packet_id: string }[] };
+      const target = packets[0];
+      expect(target).toBeDefined();
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/v1/approvals",
+        headers: MANAGER_AUTH,
+        payload: {
+          packetId: target!.packet_id,
+          decision: "approved",
+          // QA finding #5 attack: caller tries to manufacture an
+          // approval as "finance_director" without holding that role.
+          decidedBy: "evil_user",
+          role: "finance_director",
+        } as unknown as Record<string, unknown>,
+      });
+      // The endpoint accepts the request (extra fields are ignored), but
+      // the resulting receipt records the *token's* identity, NOT the
+      // body's. role = media_manager (from MANAGER_AUTH), not
+      // finance_director.
+      expect(res.statusCode).toBe(200);
+      const body = res.json() as { receipt: { role: string; decided_by: string } };
+      expect(body.receipt.role).toBe("media_manager");
+      expect(body.receipt.decided_by).not.toBe("evil_user");
+    });
+
+    it("F7: /api/v1/packets filters by the caller's tenant", async () => {
+      // Plant a packet belonging to a foreign tenant. With tenant
+      // isolation in place, the demo-tenant token must NOT see it.
+      const foreignPacket = {
+        packet_id: "h0_foreign_tenant",
+        tenant_id: "tenant_other",
+        goal: "reduce_cac",
+        hypothesis: "h",
+        null_hypothesis: "n",
+        baseline_window: "2026-05-12..2026-05-21",
+        success_metric: "estimated_waste_reduction",
+        guardrails: { max_daily_budget_delta_pct: 20, requires_human_approval: true },
+        evidence: [{ source: "google_ads_fixture", ref: "campaign:acc_demo:campaign_a" }],
+        causal_status: "directional_until_lift_test",
+        proposal: {
+          action: "no_op",
+          target_entity_id: "campaign_a",
+          params: {},
+          dry_run_only: true,
+        },
+        rollback: { method: "noop", checkpoint_id: "ckpt_x" },
+        approval: { status: "pending", required_role: "media_manager" },
+        created_by_agent: "test",
+        created_at: "2026-05-22T00:00:00.000Z",
+        trace_id: "trace_foreign",
+      };
+      await store.put("h0_packets", foreignPacket.packet_id, foreignPacket);
+      const res = await app.inject({
+        method: "GET",
+        url: "/api/v1/packets",
+        headers: MANAGER_AUTH,
+      });
+      const { packets } = res.json() as { packets: { packet_id: string }[] };
+      expect(packets.some((p) => p.packet_id === foreignPacket.packet_id)).toBe(
+        false,
+      );
+    });
+
+    it("forbids a viewer-role token from approving (403)", async () => {
+      const listed = await app.inject({
+        method: "GET",
+        url: "/api/v1/packets",
+        headers: MANAGER_AUTH,
+      });
+      const { packets } = listed.json() as { packets: { packet_id: string }[] };
+      const target = packets[0];
+      expect(target).toBeDefined();
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/v1/approvals",
+        headers: { authorization: "Bearer tok_demo_viewer" },
+        payload: { packetId: target!.packet_id, decision: "approved" },
+      });
+      expect(res.statusCode).toBe(403);
+    });
   });
 });

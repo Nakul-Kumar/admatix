@@ -57,6 +57,19 @@ describe("admatix CLI acceptance", () => {
     expect(result.stdout).toContain("Scorecard");
     expect(result.stdout).toContain("Suite: safety-v1");
   });
+
+  it("F8: refuses to start if ADMATIX_MODE != fixtures", async () => {
+    const prev = process.env["ADMATIX_MODE"];
+    process.env["ADMATIX_MODE"] = "live";
+    try {
+      const result = await invoke(["doctor", "--json"]);
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain("ADMATIX_MODE");
+    } finally {
+      if (prev === undefined) delete process.env["ADMATIX_MODE"];
+      else process.env["ADMATIX_MODE"] = prev;
+    }
+  });
 });
 
 async function invoke(args: readonly string[]): Promise<{

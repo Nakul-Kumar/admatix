@@ -13,6 +13,7 @@ import { registerReflectCommand } from "./commands/reflect.js";
 import { registerReportCommand } from "./commands/report.js";
 import { registerRollbackCommand } from "./commands/rollback.js";
 import { CliError, printError } from "./support.js";
+import { assertFixturesMode } from "./fixtures-mode.js";
 
 export interface CliOptions {
   readonly storeRoot?: string;
@@ -58,6 +59,14 @@ export function createProgram(_opts: CliOptions = {}): Command {
 }
 
 export async function runCli(argv: readonly string[], opts: CliOptions = {}): Promise<void> {
+  try {
+    assertFixturesMode();
+  } catch (error) {
+    const err = opts.errorOutput ?? process.stderr;
+    err.write(`${(error as Error).message}\n`);
+    process.exitCode = 2;
+    return;
+  }
   const program = createProgram(opts);
   try {
     await program.parseAsync([...argv], { from: "user" });
