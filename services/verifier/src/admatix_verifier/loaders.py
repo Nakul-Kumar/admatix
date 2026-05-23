@@ -7,6 +7,7 @@ absolute paths. No other schemes are supported in this WP.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -19,9 +20,14 @@ def _uri_to_path(uri: str) -> Path:
         parsed = urlparse(uri)
         # netloc is empty for absolute file:// URIs; the path holds the abs path.
         path = unquote(parsed.path)
+        if os.name == "nt" and path.startswith("/") and len(path) >= 3 and path[2] == ":":
+            path = path[1:]
+        if os.name == "nt" and parsed.netloc not in {"", "localhost"}:
+            path = f"//{parsed.netloc}{path}"
         return Path(path)
-    if uri.startswith("/"):
-        return Path(uri)
+    path = Path(uri)
+    if path.is_absolute():
+        return path
     raise ValueError(
         f"unsupported URI {uri!r}: verifier accepts file:// or absolute paths only"
     )
