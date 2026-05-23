@@ -52,7 +52,7 @@ Aggregated metrics per arm × world × seed and rolled up per arm.
   ],
   "by_arm": {                              // mean ± sd over all seeds, all worlds, all buyer kinds
     "A": {
-      "total_spend": {"mean": f, "sd": f, "n": i},
+      "total_spend": {"mean": f|null, "sd": f|null, "n": i},
       "true_iroas":  {"mean": f, "sd": f, "n": i},
       "reported_roas":{"mean": f, "sd": f, "n": i},
       "net_incremental_value": {"mean": f, "sd": f, "n": i},
@@ -88,7 +88,9 @@ Aggregated metrics per arm × world × seed and rolled up per arm.
 ```
 
 `mean`, `sd`, `n` follow numpy conventions; `sd` is sample standard deviation
-(ddof=1), reported as 0.0 when `n < 2`.
+(ddof=1), reported as 0.0 when `n == 1`. Arms or comparisons with no
+observations use `null` for mean/sd/delta fields so no-data is not confused
+with real zero performance.
 
 `proof_readiness.status` is a hard gate. Phase 5 proof claims require
 `llm_lane_accounting.real_llm_rows > 0`; deterministic fallback, failed, and

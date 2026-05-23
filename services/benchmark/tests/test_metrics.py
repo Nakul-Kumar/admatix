@@ -111,6 +111,14 @@ def test_aggregate_by_arm_mean_sd_n():
     assert agg["total_spend"]["n"] == 3
 
 
+def test_aggregate_by_arm_uses_nulls_for_no_data():
+    agg = aggregate_by_arm([], "D")
+
+    assert agg["n_runs"] == 0
+    assert agg["total_spend"] == {"mean": None, "sd": None, "n": 0}
+    assert agg["net_incremental_value"] == {"mean": None, "sd": None, "n": 0}
+
+
 def test_head_to_head_pairs_on_world_seed_buyer_tier():
     rows = [
         {
@@ -142,6 +150,18 @@ def test_head_to_head_pairs_on_world_seed_buyer_tier():
     assert h2h["delta_net_incremental_value_mean"] == 75.0
     # Mean delta wasted = ((20-50)+(30-100))/2 = -50
     assert h2h["delta_wasted_spend_mean"] == -50.0
+
+
+def test_head_to_head_uses_nulls_when_unpaired():
+    h2h = head_to_head([], "B", "A")
+
+    assert h2h == {
+        "delta_net_incremental_value_mean": None,
+        "delta_wasted_spend_mean": None,
+        "delta_true_iroas_mean": None,
+        "win_rate_over_worlds": None,
+        "n_paired": 0,
+    }
 
 
 def test_per_world_breakdown_buckets_correctly():

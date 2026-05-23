@@ -15,6 +15,8 @@ input branch, then repaired the audit-failed proof surfaces:
   failed, skipped, and policy rows.
 - Added a hard `proof_readiness` gate. Phase 5 proof claims require
   `real_llm_rows > 0`; fallback/skipped rows cannot satisfy the gate.
+- No-data arms and unpaired head-to-head comparisons serialize as `null`,
+  not `0.0`, so missing evidence cannot be misread as measured zero effect.
 - Kept claim limits narrow: calibrated simulator/public RCT proof only, no live
   spend lift claim.
 
@@ -38,11 +40,11 @@ credentials/access in the local environment.
 Commands run:
 
 ```powershell
-$env:PYTHONPATH='services/simulator/src'
+$env:PYTHONPATH='services/benchmark/src;services/simulator/src'
 services\benchmark\.venv\Scripts\python.exe -m pytest services\benchmark\tests -q
 ```
 
-Result: `40 passed`.
+Result: `42 passed`.
 
 ```powershell
 pnpm -r typecheck

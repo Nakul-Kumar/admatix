@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "run_id": "bench_50680815341e",
-  "generated_at": "2026-05-23T18:43:42+00:00",
+  "run_id": "bench_1ddaeaab39d8",
+  "generated_at": "2026-05-23T18:52:17+00:00",
   "config": {
     "seeds_llm": [
       17
@@ -23,7 +23,7 @@
     "models": {
       "llm": "claude-haiku-4-5-20251001"
     },
-    "code_version": "8352a5ed16738d95170a908ac17a2c8914067e8b",
+    "code_version": "4868549f2c45c38c98bd21a3ba43742a72a16be9",
     "env_config_fingerprints": {
       "clean_ab__seed17": "92b4ffa9029b1a999189f3602ae3505fa292edeb79ee1ab61f321e3fd2fe77d4"
     }
@@ -39,13 +39,13 @@
       "row_status": "completed",
       "skill_tier": "basic",
       "total_spend": 12992.7,
-      "reported_revenue": 46744.3469,
-      "reported_roas": 3.597739,
-      "true_incremental_revenue": 9197.9731,
-      "true_iroas": 0.707934,
-      "net_incremental_value": -3794.7269,
+      "reported_revenue": 47584.4893,
+      "reported_roas": 3.662402,
+      "true_incremental_revenue": 9528.107,
+      "true_iroas": 0.733343,
+      "net_incremental_value": -3464.593,
       "wasted_spend": 4330.9,
-      "true_lift_captured": 9197.9731,
+      "true_lift_captured": 9528.107,
       "scale_up_proposals": 9,
       "scale_ups_applied": 9,
       "scale_ups_blocked_by_gate": 0,
@@ -65,13 +65,13 @@
       "row_status": "fallback",
       "skill_tier": "basic",
       "total_spend": 12992.7,
-      "reported_revenue": 46744.3469,
-      "reported_roas": 3.597739,
-      "true_incremental_revenue": 9197.9731,
-      "true_iroas": 0.707934,
-      "net_incremental_value": -3794.7269,
+      "reported_revenue": 47584.4893,
+      "reported_roas": 3.662402,
+      "true_incremental_revenue": 9528.107,
+      "true_iroas": 0.733343,
+      "net_incremental_value": -3464.593,
       "wasted_spend": 4330.9,
-      "true_lift_captured": 9197.9731,
+      "true_lift_captured": 9528.107,
       "scale_up_proposals": 9,
       "scale_ups_applied": 9,
       "scale_ups_blocked_by_gate": 0,
@@ -90,17 +90,17 @@
         "n": 2
       },
       "true_iroas": {
-        "mean": 0.707934,
+        "mean": 0.733343,
         "sd": 0.0,
         "n": 2
       },
       "reported_roas": {
-        "mean": 3.597739,
+        "mean": 3.662402,
         "sd": 0.0,
         "n": 2
       },
       "net_incremental_value": {
-        "mean": -3794.7269,
+        "mean": -3464.593,
         "sd": 0.0,
         "n": 2
       },
@@ -110,7 +110,7 @@
         "n": 2
       },
       "true_lift_captured": {
-        "mean": 9197.9731,
+        "mean": 9528.107,
         "sd": 0.0,
         "n": 2
       },
@@ -123,114 +123,114 @@
     },
     "B": {
       "total_spend": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "true_iroas": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "reported_roas": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "net_incremental_value": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "wasted_spend": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "true_lift_captured": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "false_scale_ups_prevented": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "n_runs": 0
     },
     "C": {
       "total_spend": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "true_iroas": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "reported_roas": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "net_incremental_value": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "wasted_spend": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "true_lift_captured": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "false_scale_ups_prevented": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "n_runs": 0
     },
     "D": {
       "total_spend": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "true_iroas": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "reported_roas": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "net_incremental_value": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "wasted_spend": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "true_lift_captured": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "false_scale_ups_prevented": {
-        "mean": 0.0,
-        "sd": 0.0,
+        "mean": null,
+        "sd": null,
         "n": 0
       },
       "n_runs": 0
@@ -241,8 +241,8 @@
       "A": {
         "n_runs": 2,
         "mean_total_spend": 12992.7,
-        "mean_true_iroas": 0.707934,
-        "mean_net_incremental_value": -3794.7269,
+        "mean_true_iroas": 0.733343,
+        "mean_net_incremental_value": -3464.593,
         "mean_wasted_spend": 4330.9,
         "mean_false_scale_ups_prevented": 0.0
       }
@@ -272,17 +272,17 @@
   ],
   "head_to_head": {
     "B_vs_A": {
-      "delta_net_incremental_value_mean": 0.0,
-      "delta_wasted_spend_mean": 0.0,
-      "delta_true_iroas_mean": 0.0,
-      "win_rate_over_worlds": 0.0,
+      "delta_net_incremental_value_mean": null,
+      "delta_wasted_spend_mean": null,
+      "delta_true_iroas_mean": null,
+      "win_rate_over_worlds": null,
       "n_paired": 0
     },
     "D_vs_C": {
-      "delta_net_incremental_value_mean": 0.0,
-      "delta_wasted_spend_mean": 0.0,
-      "delta_true_iroas_mean": 0.0,
-      "win_rate_over_worlds": 0.0,
+      "delta_net_incremental_value_mean": null,
+      "delta_wasted_spend_mean": null,
+      "delta_true_iroas_mean": null,
+      "win_rate_over_worlds": null,
       "n_paired": 0
     }
   }

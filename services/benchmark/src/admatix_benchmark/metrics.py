@@ -55,10 +55,10 @@ def _row_for_run(run: RunResult) -> dict[str, Any]:
     }
 
 
-def _mean_sd(values: list[float]) -> dict[str, float | int]:
+def _mean_sd(values: list[float]) -> dict[str, float | int | None]:
     n = len(values)
     if n == 0:
-        return {"mean": 0.0, "sd": 0.0, "n": 0}
+        return {"mean": None, "sd": None, "n": 0}
     mean = sum(values) / n
     sd = statistics.stdev(values) if n >= 2 else 0.0
     return {
@@ -90,10 +90,10 @@ def head_to_head(rows: list[dict[str, Any]], left: str, right: str) -> dict[str,
     paired_keys = sorted(left_map.keys() & right_map.keys())
     if not paired_keys:
         return {
-            "delta_net_incremental_value_mean": 0.0,
-            "delta_wasted_spend_mean": 0.0,
-            "delta_true_iroas_mean": 0.0,
-            "win_rate_over_worlds": 0.0,
+            "delta_net_incremental_value_mean": None,
+            "delta_wasted_spend_mean": None,
+            "delta_true_iroas_mean": None,
+            "win_rate_over_worlds": None,
             "n_paired": 0,
         }
 
