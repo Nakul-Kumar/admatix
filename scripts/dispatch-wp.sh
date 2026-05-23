@@ -17,6 +17,16 @@ git -C "$R" worktree remove --force "$WT" 2>/dev/null
 git -C "$R" branch -D "$BR" 2>/dev/null
 git -C "$R" worktree add "$WT" -b "$BR" origin/main >/tmp/${WP}_wt.log 2>&1
 
+# Phase 4 datasets (Criteo Uplift v2.1, Hillstrom) live in a shared,
+# worktree-external staging dir so every WP can run real-data tests
+# without re-downloading. Loaders (services/uplift) and conftests look
+# for them under data/datasets/ — symlink the worktree's path at it.
+DATA_SHARED=/opt/admatix-data/datasets
+if [ -d "$DATA_SHARED" ] && [ ! -e "$WT/data/datasets" ]; then
+  mkdir -p "$WT/data"
+  ln -s "$DATA_SHARED" "$WT/data/datasets"
+fi
+
 cat > "$WT/_prompt.md" <<PEOF
 You are building ONE work package of the AdMatix monorepo, autonomously and to completion.
 Working directory: $WT  (a git worktree of github.com/Nakul-Kumar/admatix on branch $BR; git push auth is configured).
