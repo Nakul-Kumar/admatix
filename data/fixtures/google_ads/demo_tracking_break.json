@@ -1,0 +1,44 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account": {
+    "account_id": "acc_demo_tracking",
+    "platform": "google_ads",
+    "tenant_id": "tenant_demo",
+    "name": "Agency Demo — Google Ads (Tracking Break)",
+    "currency": "USD",
+    "timezone": "America/New_York"
+  },
+  "campaigns": [
+    {
+      "campaign_id": "campaign_track_break",
+      "account_id": "acc_demo_tracking",
+      "platform": "google_ads",
+      "name": "Prospecting - Search (Tracking Break)",
+      "status": "active",
+      "objective": "conversions",
+      "daily_budget": 600,
+      "raw": {
+        "final_url": "https://shop.example.com/landing",
+        "utm_pattern_present": false,
+        "tracking_template": null
+      }
+    }
+  ],
+  "campaign_daily_metrics": [
+    { "date": "2026-05-08", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 595, "impressions": 30100, "clicks": 1180, "conversions": 32, "platform_revenue": 3200 },
+    { "date": "2026-05-09", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 610, "impressions": 30500, "clicks": 1200, "conversions": 34, "platform_revenue": 3400 },
+    { "date": "2026-05-10", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 600, "impressions": 30200, "clicks": 1185, "conversions": 31, "platform_revenue": 3100 },
+    { "date": "2026-05-11", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 605, "impressions": 30350, "clicks": 1190, "conversions": 33, "platform_revenue": 3300 },
+    { "date": "2026-05-12", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 615, "impressions": 30700, "clicks": 1210, "conversions": 35, "platform_revenue": 3500 },
+    { "date": "2026-05-13", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 600, "impressions": 30100, "clicks": 1180, "conversions": 32, "platform_revenue": 3200 },
+    { "date": "2026-05-14", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 610, "impressions": 30400, "clicks": 1195, "conversions": 33, "platform_revenue": 3300 },
+    { "date": "2026-05-15", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 605, "impressions": 30250, "clicks": 1188, "conversions": 4, "platform_revenue": 420 },
+    { "date": "2026-05-16", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 600, "impressions": 30100, "clicks": 1180, "conversions": 3, "platform_revenue": 320 },
+    { "date": "2026-05-17", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 612, "impressions": 30500, "clicks": 1200, "conversions": 5, "platform_revenue": 510 },
+    { "date": "2026-05-18", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 608, "impressions": 30350, "clicks": 1195, "conversions": 3, "platform_revenue": 310 },
+    { "date": "2026-05-19", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 615, "impressions": 30650, "clicks": 1210, "conversions": 4, "platform_revenue": 415 },
+    { "date": "2026-05-20", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 600, "impressions": 30150, "clicks": 1182, "conversions": 4, "platform_revenue": 410 },
+    { "date": "2026-05-21", "account_id": "acc_demo_tracking", "campaign_id": "campaign_track_break", "platform": "google_ads", "spend": 605, "impressions": 30250, "clicks": 1188, "conversions": 3, "platform_revenue": 305 }
+  ],
+  "_notes": "Positive case for the tracking detector: spend and clicks stay flat from 2026-05-08 → 2026-05-21, but conversions collapse from ~33/day to ~3-5/day starting 2026-05-15. The campaign's final_url carries no UTM and the tracking_template is null, matching a likely tag-loss root cause. Paired with demo_tracking_clean.json."
+}

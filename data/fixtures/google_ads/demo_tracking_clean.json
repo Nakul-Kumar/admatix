@@ -1,0 +1,44 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account": {
+    "account_id": "acc_demo_tracking_clean",
+    "platform": "google_ads",
+    "tenant_id": "tenant_demo",
+    "name": "Agency Demo — Google Ads (Tracking Clean)",
+    "currency": "USD",
+    "timezone": "America/New_York"
+  },
+  "campaigns": [
+    {
+      "campaign_id": "campaign_track_clean",
+      "account_id": "acc_demo_tracking_clean",
+      "platform": "google_ads",
+      "name": "Prospecting - Search (Tracking Clean)",
+      "status": "active",
+      "objective": "conversions",
+      "daily_budget": 600,
+      "raw": {
+        "final_url": "https://shop.example.com/landing?utm_source=google&utm_medium=cpc&utm_campaign=track_clean",
+        "utm_pattern_present": true,
+        "tracking_template": "{lpurl}?utm_source=google&utm_medium=cpc&utm_campaign={_campaign}"
+      }
+    }
+  ],
+  "campaign_daily_metrics": [
+    { "date": "2026-05-08", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 595, "impressions": 30100, "clicks": 1180, "conversions": 32, "platform_revenue": 3200 },
+    { "date": "2026-05-09", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 610, "impressions": 30500, "clicks": 1200, "conversions": 34, "platform_revenue": 3400 },
+    { "date": "2026-05-10", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 600, "impressions": 30200, "clicks": 1185, "conversions": 31, "platform_revenue": 3100 },
+    { "date": "2026-05-11", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 605, "impressions": 30350, "clicks": 1190, "conversions": 33, "platform_revenue": 3300 },
+    { "date": "2026-05-12", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 615, "impressions": 30700, "clicks": 1210, "conversions": 35, "platform_revenue": 3500 },
+    { "date": "2026-05-13", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 600, "impressions": 30100, "clicks": 1180, "conversions": 32, "platform_revenue": 3200 },
+    { "date": "2026-05-14", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 610, "impressions": 30400, "clicks": 1195, "conversions": 33, "platform_revenue": 3300 },
+    { "date": "2026-05-15", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 605, "impressions": 30250, "clicks": 1188, "conversions": 32, "platform_revenue": 3200 },
+    { "date": "2026-05-16", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 600, "impressions": 30100, "clicks": 1180, "conversions": 31, "platform_revenue": 3100 },
+    { "date": "2026-05-17", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 612, "impressions": 30500, "clicks": 1200, "conversions": 34, "platform_revenue": 3400 },
+    { "date": "2026-05-18", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 608, "impressions": 30350, "clicks": 1195, "conversions": 33, "platform_revenue": 3300 },
+    { "date": "2026-05-19", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 615, "impressions": 30650, "clicks": 1210, "conversions": 35, "platform_revenue": 3500 },
+    { "date": "2026-05-20", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 600, "impressions": 30150, "clicks": 1182, "conversions": 32, "platform_revenue": 3200 },
+    { "date": "2026-05-21", "account_id": "acc_demo_tracking_clean", "campaign_id": "campaign_track_clean", "platform": "google_ads", "spend": 605, "impressions": 30250, "clicks": 1188, "conversions": 33, "platform_revenue": 3300 }
+  ],
+  "_notes": "Negative case for the tracking detector: conversions stay at ~32/day across the full window with a UTM-tagged final_url and a populated tracking_template. Pairs with demo_tracking_break.json."
+}

@@ -1,0 +1,31 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account": {
+    "account_id": "acc_demo_meta",
+    "platform": "meta_ads",
+    "tenant_id": "tenant_demo",
+    "name": "Agency Demo — Meta Ads",
+    "currency": "USD",
+    "timezone": "America/New_York"
+  },
+  "campaigns": [
+    { "campaign_id": "meta_camp_fatigue", "account_id": "acc_demo_meta", "platform": "meta_ads", "name": "Prospecting - Static Hero", "status": "active", "objective": "conversions", "daily_budget": 200 }
+  ],
+  "creative_daily_metrics": [
+    { "date": "2026-05-08", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 200, "impressions": 10000, "clicks": 250, "conversions": 12, "frequency": 1.10 },
+    { "date": "2026-05-09", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 205, "impressions": 10800, "clicks": 254, "conversions": 12, "frequency": 1.25 },
+    { "date": "2026-05-10", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 210, "impressions": 11500, "clicks": 253, "conversions": 11, "frequency": 1.40 },
+    { "date": "2026-05-11", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 212, "impressions": 12100, "clicks": 242, "conversions": 10, "frequency": 1.55 },
+    { "date": "2026-05-12", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 214, "impressions": 12500, "clicks": 225, "conversions": 9, "frequency": 1.70 },
+    { "date": "2026-05-13", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 215, "impressions": 12800, "clicks": 205, "conversions": 8, "frequency": 1.85 },
+    { "date": "2026-05-14", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 215, "impressions": 13000, "clicks": 195, "conversions": 7, "frequency": 2.00 },
+    { "date": "2026-05-15", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 216, "impressions": 13100, "clicks": 170, "conversions": 6, "frequency": 2.15 },
+    { "date": "2026-05-16", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 216, "impressions": 13150, "clicks": 158, "conversions": 5, "frequency": 2.30 },
+    { "date": "2026-05-17", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 217, "impressions": 13200, "clicks": 145, "conversions": 5, "frequency": 2.45 },
+    { "date": "2026-05-18", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 217, "impressions": 13180, "clicks": 132, "conversions": 4, "frequency": 2.60 },
+    { "date": "2026-05-19", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 218, "impressions": 13200, "clicks": 119, "conversions": 4, "frequency": 2.75 },
+    { "date": "2026-05-20", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 218, "impressions": 13200, "clicks": 106, "conversions": 3, "frequency": 2.95 },
+    { "date": "2026-05-21", "creative_id": "creative_fatigue_1", "campaign_id": "meta_camp_fatigue", "spend": 219, "impressions": 13200, "clicks": 92, "conversions": 3, "frequency": 3.10 }
+  ],
+  "_notes": "Positive case for the creative-fatigue detector: frequency rises from 1.10 → 3.10 while CTR falls from 2.50% → 0.70% over 14 days, with conversions dropping in tandem. Paired with demo_creative_healthy.json as a clean negative."
+}
