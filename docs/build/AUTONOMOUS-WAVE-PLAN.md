@@ -144,3 +144,20 @@ monitor task and only steps in twice: to drop in the Supabase URL before Phase 2
 and to review the proof at the end. The end state is a production-grade AdMatix
 with a research-grade simulation that demonstrates evidence-gated verification
 works — the proof for the YC application.
+
+---
+
+## Supabase — CONNECTED (2026-05-23)
+
+Phase 2 is unblocked. Project **Solenode** (`vmpclnajlyjywqyuifmj`, us-west-1,
+Postgres 17). A dedicated `admatix` Postgres role is provisioned (LOGIN,
+CREATEDB, CREATE on database — it can create the ledger / app / warehouse
+schemas and all their tables).
+
+**Phase 2 build agents:** read the connection string from the ABSOLUTE path
+`/opt/admatix/.build/secrets.env` — keys `SUPABASE_DB_URL`, `SUPABASE_URL`,
+`SUPABASE_PROJECT_REF`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_REGION`. That file
+is gitignored and is NOT present inside git worktrees — always use the absolute
+path. `SUPABASE_DB_URL` is the direct connection (IPv6 + `sslmode=require`),
+which works from the VPS. dbt targets it with `dbt-postgres`; migrations apply
+with `psql "$SUPABASE_DB_URL"`.
