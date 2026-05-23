@@ -43,8 +43,8 @@ Branch: `codex/cx1-dashboard-live`
 - The dashboard remains standalone and is not added to `pnpm-workspace.yaml`, so
   it is verified with targeted `npm` commands in addition to root workspace
   gates.
-- `npm install` for the standalone dashboard reported two moderate dependency
-  audit findings. No dependency upgrade was made in this proof-visibility scope.
+- The standalone dashboard's Vite/esbuild development-server advisory was fixed
+  by upgrading to `vite@8.0.14` and `@vitejs/plugin-react@6.0.2`.
 - Browser QA saw React Router v7 future-flag warnings from
   `react-router-dom`; no app runtime errors were reported.
 
@@ -63,12 +63,17 @@ exit 0
 
 ```text
 > npm run build
-vite v5.4.21 building for production...
-846 modules transformed.
+vite v8.0.14 building client environment for production...
+611 modules transformed.
 dist/index.html                 1.00 kB │ gzip:   0.52 kB
 dist/assets/index-DeXLZdl9.css 15.17 kB │ gzip:   3.84 kB
 dist/assets/index-Dk9hQCFt.js 610.23 kB │ gzip: 172.92 kB
-built in 3.71s
+built in 275ms
+```
+
+```text
+> npm audit --audit-level=moderate
+found 0 vulnerabilities
 ```
 
 ```text
