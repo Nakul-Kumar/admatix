@@ -2,9 +2,55 @@ version: 2
 
 models:
   - name: mart_verification
-    description: Stub mart for H0 verification outcomes.
+    description: H0 outcome verification mart with lift estimates, confidence intervals, methods, and verdicts.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [date_key, h0_packet_id]
     columns:
-      - name: date_key
-        description: Calendar date key.
-      - name: h0_packet_id
-        description: H0 packet id.
+      - {name: date_key, description: Smart YYYYMMDD key for the measurement date., tests: [not_null]}
+      - {name: measured_date, description: Calendar date the outcome was measured.}
+      - {name: h0_packet_id, description: H0 packet UUID measured by the verifier., tests: [not_null]}
+      - {name: tx_id, description: Ledger transaction id joining the packet to action events.}
+      - {name: account_key, description: Account dimension surrogate key.}
+      - {name: tenant_id, description: Tenant UUID that owns the account.}
+      - {name: platform, description: Platform enum code for the account.}
+      - {name: account_name, description: Human-readable account name.}
+      - {name: platform_key, description: Platform dimension surrogate key.}
+      - {name: platform_name, description: Human-readable platform name.}
+      - {name: campaign_key, description: Campaign dimension surrogate key when the outcome maps to a campaign.}
+      - {name: campaign_business_key, description: Stable conformed campaign business key.}
+      - {name: external_campaign_id, description: Platform-native campaign identifier.}
+      - {name: campaign_name, description: Human-readable campaign name.}
+      - {name: proposed_action_id, description: Proposed action UUID associated with the H0 packet.}
+      - {name: action_type, description: Proposed action type.}
+      - name: policy_result
+        description: PolicyGuard result for the associated action.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [allow, block, needs_approval]
+      - {name: approval_decision, description: Human approval decision when present.}
+      - {name: success_metric, description: Metric measured by the outcome.}
+      - {name: baseline_value, description: Baseline metric value before the action.}
+      - {name: observed_value, description: Observed metric value after the action.}
+      - {name: delta_pct, description: Percent delta from baseline to observed.}
+      - {name: estimated_lift, description: Estimated lift reported by the verifier.}
+      - {name: lift_ci_low, description: Lower confidence interval bound for lift.}
+      - {name: lift_ci_high, description: Upper confidence interval bound for lift.}
+      - {name: ground_truth_lift, description: Simulator ground truth lift when available to the scorer.}
+      - {name: method, description: Verification method recorded on the packet body, or not_recorded.}
+      - name: causal_status
+        description: Causal claim strength attached to the H0 packet.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [directional_until_lift_test, experimental, causal]
+      - name: verdict
+        description: Outcome verdict derived from the measurement pass flag.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [validated, invalidated]
+      - {name: passed, description: True when the measured outcome met the success criterion.}
+      - {name: _loaded_at, description: Timestamp when the mart row was materialized.}

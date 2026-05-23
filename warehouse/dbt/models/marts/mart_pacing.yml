@@ -2,9 +2,36 @@ version: 2
 
 models:
   - name: mart_pacing
-    description: Stub mart for campaign pacing metrics.
+    description: Campaign by day pacing mart comparing realized spend against daily or lifetime budget plans.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [date_key, campaign_key]
     columns:
-      - name: date_key
-        description: Calendar date key.
-      - name: campaign_key
-        description: Campaign dimension key.
+      - {name: date_key, description: Smart YYYYMMDD key for the spend date., tests: [not_null]}
+      - {name: metric_date, description: Calendar date for the pacing row.}
+      - {name: account_key, description: Account dimension surrogate key., tests: [not_null]}
+      - {name: tenant_id, description: Tenant UUID that owns the account., tests: [not_null]}
+      - {name: platform, description: Platform enum code for the account.}
+      - {name: account_name, description: Human-readable account name.}
+      - {name: platform_key, description: Platform dimension surrogate key.}
+      - {name: platform_name, description: Human-readable platform name.}
+      - {name: campaign_key, description: Campaign dimension surrogate key., tests: [not_null]}
+      - {name: campaign_business_key, description: Stable conformed campaign business key.}
+      - {name: external_campaign_id, description: Platform-native campaign identifier.}
+      - {name: campaign_name, description: Human-readable campaign name.}
+      - {name: campaign_status, description: Campaign lifecycle status.}
+      - {name: daily_budget, description: Daily campaign budget from the SCD-2 row valid on the spend date.}
+      - {name: lifetime_budget, description: Lifetime campaign budget from the SCD-2 row valid on the spend date.}
+      - {name: start_date, description: Campaign start date from the SCD-2 row.}
+      - {name: end_date, description: Campaign end date from the SCD-2 row.}
+      - {name: spend, description: Actual spend on the metric date.}
+      - {name: cumulative_spend, description: Cumulative spend observed through the metric date.}
+      - {name: elapsed_reporting_days, description: Count of spend fact days observed for the campaign through the metric date.}
+      - {name: planned_spend_to_date, description: Budget-implied planned spend through the metric date.}
+      - {name: pacing_variance, description: Cumulative spend minus planned spend to date.}
+      - {name: pacing_ratio, description: Cumulative spend divided by planned spend to date.}
+      - {name: days_remaining, description: Calendar days remaining until campaign end date when known.}
+      - {name: projected_total_spend, description: Projected total spend at the current average daily spend rate.}
+      - {name: projected_overspend, description: Expected overspend against lifetime or daily budget.}
+      - {name: _loaded_at, description: Timestamp when the mart row was materialized.}

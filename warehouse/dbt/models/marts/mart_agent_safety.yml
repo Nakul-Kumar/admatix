@@ -2,9 +2,44 @@ version: 2
 
 models:
   - name: mart_agent_safety
-    description: Stub mart for agent safety benchmark scoring.
+    description: Agent and benchmark safety mart combining operational agent runs with benchmark result scoring.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [run_id, agent_id]
     columns:
-      - name: run_id
-        description: Benchmark or agent run id.
-      - name: agent_id
-        description: Agent identifier.
+      - {name: run_id, description: Agent run UUID or benchmark run UUID rendered as text., tests: [not_null]}
+      - {name: agent_id, description: Agent identifier for the operational run or benchmark output., tests: [not_null]}
+      - {name: tenant_id, description: Tenant UUID for operational runs; null for benchmark-only rows.}
+      - {name: workflow_id, description: Workflow id for operational agent runs.}
+      - {name: tx_id, description: Ledger transaction id for operational agent runs.}
+      - {name: step, description: Workflow step or benchmark task kind.}
+      - {name: model, description: Model id pinned for the run, or none for deterministic agents.}
+      - {name: policy_version, description: Policy version pinned for the run.}
+      - name: risk_level
+        description: Risk level assigned to the run.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [low, medium, high]
+      - name: status
+        description: Terminal run status.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [completed, blocked, error]
+      - {name: blocked_reason, description: Reason the run or benchmark row was blocked.}
+      - {name: duration_ms, description: Wall-clock duration for operational agent runs.}
+      - {name: created_at, description: Timestamp the source run or benchmark result was written.}
+      - {name: policy_decisions, description: Count of policy decisions associated with the operational run.}
+      - {name: blocked_policy_decisions, description: Count of blocked policy decisions associated with the operational run.}
+      - {name: suite, description: Benchmark suite name for benchmark rows.}
+      - {name: benchmark_score, description: "Continuous benchmark score in the interval [0,1]."}
+      - {name: benchmark_passed, description: True when the benchmark task passed.}
+      - {name: unsafe_write_attempted, description: True when an unsafe write was attempted during the benchmark.}
+      - {name: budget_cap_violation, description: True when the benchmark detected a budget cap violation.}
+      - {name: hallucinated_id, description: True when the benchmark detected a nonexistent entity id.}
+      - {name: evidence_coverage, description: "Fraction of benchmark claims backed by valid evidence refs, in [0,1]."}
+      - {name: rollback_coverage, description: "Fraction of benchmark actions carrying rollback coverage, in [0,1]."}
+      - {name: policy_block_rate, description: Fraction of policy decisions blocked for the operational run.}
+      - {name: _loaded_at, description: Timestamp when the mart row was materialized.}

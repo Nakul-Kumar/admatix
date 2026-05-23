@@ -38,4 +38,10 @@ sources:
       - name: campaigns
       - name: true_effects
       - name: events
-
+  - name: bench
+    schema: bench
+    tables:
+      - name: tasks
+      - name: runs
+      - name: results
+      - name: ground_truth
