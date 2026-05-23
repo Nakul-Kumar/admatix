@@ -1,7 +1,8 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { H0Packet } from "@admatix/schemas";
@@ -59,6 +60,9 @@ const FixturePacket = H0Packet.parse({
 });
 
 const tmpRoots: string[] = [];
+const McpStdioRequestTimeoutMs = 120_000;
+const McpStdioLockTimeoutMs = 60_000;
+const McpStdioLockDir = join(tmpdir(), "admatix-mcp-stdio-test.lock");
 
 afterEach(async () => {
   await Promise.all(
@@ -161,82 +165,117 @@ describe("MCP server", () => {
   });
 
   it("starts and responds over stdio, and unknown tools do not crash it", async () => {
-    const dataDir = await tempRoot();
-    const repoRoot = findRepoRoot();
-    const client = new Client({ name: "admatix-test-client", version: "0.1.0" });
-    const transport = new StdioClientTransport({
-      command: join(repoRoot, "node_modules", ".bin", "tsx"),
-      args: [
-        join(repoRoot, "apps", "mcp-server", "src", "server.ts"),
-      ],
-      cwd: repoRoot,
-      env: {
-        ...stringEnv(process.env),
-        ADMATIX_FIXTURE_ROOT: join(repoRoot, "data", "fixtures"),
-        ADMATIX_DATA_DIR: dataDir,
-        NODE_ENV: "test",
-      },
-      stderr: "pipe",
-    });
-
-    await client.connect(transport);
-    const tools = await client.listTools();
-    expect(tools.tools.map((tool) => tool.name).sort()).toEqual(
-      [...APPROVED_TOOL_NAMES].sort(),
-    );
-
-    const unknown = await client.callTool({ name: "mutate_platform", arguments: {} });
-    expect(unknown.isError).toBe(true);
-    expect(JSON.stringify(unknown.content)).toContain("mutate_platform");
-    await expect(client.ping()).resolves.toBeDefined();
-
-    const audit = await client.callTool({
-      name: "audit_account",
-      arguments: { account_ref: "fixture:acc_demo" },
-    });
-    expect(ToolResultEnvelopeSchema.parse(audit.structuredContent).trace_id).toBeTruthy();
-
-    const plan = await client.callTool({
-      name: "create_plan",
-      arguments: {
-        account_ref: "fixture:acc_demo",
-        goal: "lower CAC while preserving revenue",
-        tenant_id: "tenant_demo",
-      },
-    });
-    const planEnvelope = ToolResultEnvelopeSchema.parse(plan.structuredContent);
-    const packets = zPacketArrayFromEnvelope(planEnvelope);
-    expect(packets.length).toBeGreaterThan(0);
-    const packet = packets[0];
-    if (!packet) throw new Error("create_plan returned no packets");
-
-    const blocked = await client.callTool({
-      name: "activate_dry_run",
-      arguments: { packet_id: packet.packet_id },
-    });
-    expect(ToolResultEnvelopeSchema.parse(blocked.structuredContent).status).toBe("blocked");
-
-    const dryRun = await client.callTool({
-      name: "activate_dry_run",
-      arguments: {
-        packet_id: packet.packet_id,
-        approval_receipt: {
-          receipt_id: "rcpt_stdio",
-          packet_id: packet.packet_id,
-          action_id: "act_stdio",
-          decision: "approved",
-          decided_by: "user_stdio",
-          role: "media_manager",
-          decided_at: nowIso(),
+    await withStdioTestLock(async () => {
+      const dataDir = await tempRoot();
+      const repoRoot = findRepoRoot();
+      const client = new Client({ name: "admatix-test-client", version: "0.1.0" });
+      const transport = new StdioClientTransport({
+        command: join(repoRoot, "node_modules", ".bin", "tsx"),
+        args: [join(repoRoot, "apps", "mcp-server", "src", "server.ts")],
+        cwd: repoRoot,
+        env: {
+          ...stringEnv(process.env),
+          ADMATIX_FIXTURE_ROOT: join(repoRoot, "data", "fixtures"),
+          ADMATIX_DATA_DIR: dataDir,
+          NODE_ENV: "test",
         },
-      },
-    });
-    const dryRunEnvelope = ToolResultEnvelopeSchema.parse(dryRun.structuredContent);
-    expect(dryRunEnvelope.status).toBe("ok");
-    expect(JSON.stringify(dryRunEnvelope.data)).toContain("\"dry_run\":true");
+        stderr: "pipe",
+      });
+      let connected = false;
 
-    await client.close();
-  });
+      try {
+        const requestOptions = { timeout: McpStdioRequestTimeoutMs };
+        await client.connect(transport, requestOptions);
+        connected = true;
+        const tools = await client.listTools(undefined, requestOptions);
+        expect(tools.tools.map((tool) => tool.name).sort()).toEqual(
+          [...APPROVED_TOOL_NAMES].sort(),
+        );
+
+        const unknown = await client.callTool(
+          { name: "mutate_platform", arguments: {} },
+          undefined,
+          requestOptions,
+        );
+        expect(unknown.isError).toBe(true);
+        expect(JSON.stringify(unknown.content)).toContain("mutate_platform");
+        await expect(client.ping(requestOptions)).resolves.toBeDefined();
+
+        const audit = await client.callTool(
+          {
+            name: "audit_account",
+            arguments: { account_ref: "fixture:acc_demo" },
+          },
+          undefined,
+          requestOptions,
+        );
+        expect(
+          ToolResultEnvelopeSchema.parse(audit.structuredContent).trace_id,
+        ).toBeTruthy();
+
+        const plan = await client.callTool(
+          {
+            name: "create_plan",
+            arguments: {
+              account_ref: "fixture:acc_demo",
+              goal: "lower CAC while preserving revenue",
+              tenant_id: "tenant_demo",
+            },
+          },
+          undefined,
+          requestOptions,
+        );
+        const planEnvelope = ToolResultEnvelopeSchema.parse(plan.structuredContent);
+        const packets = zPacketArrayFromEnvelope(planEnvelope);
+        expect(packets.length).toBeGreaterThan(0);
+        const packet = packets[0];
+        if (!packet) throw new Error("create_plan returned no packets");
+
+        const blocked = await client.callTool(
+          {
+            name: "activate_dry_run",
+            arguments: { packet_id: packet.packet_id },
+          },
+          undefined,
+          requestOptions,
+        );
+        expect(
+          ToolResultEnvelopeSchema.parse(blocked.structuredContent).status,
+        ).toBe("blocked");
+
+        const dryRun = await client.callTool(
+          {
+            name: "activate_dry_run",
+            arguments: {
+              packet_id: packet.packet_id,
+              approval_receipt: {
+                receipt_id: "rcpt_stdio",
+                packet_id: packet.packet_id,
+                action_id: "act_stdio",
+                decision: "approved",
+                decided_by: "user_stdio",
+                role: "media_manager",
+                decided_at: nowIso(),
+              },
+            },
+          },
+          undefined,
+          requestOptions,
+        );
+        const dryRunEnvelope = ToolResultEnvelopeSchema.parse(
+          dryRun.structuredContent,
+        );
+        expect(dryRunEnvelope.status).toBe("ok");
+        expect(JSON.stringify(dryRunEnvelope.data)).toContain("\"dry_run\":true");
+      } finally {
+        if (connected) {
+          await client.close();
+        } else {
+          await transport.close();
+        }
+      }
+    });
+  }, McpStdioRequestTimeoutMs + McpStdioLockTimeoutMs);
 });
 
 async function tempRoot(): Promise<string> {
@@ -269,4 +308,37 @@ function zPacketArrayFromEnvelope(
 ) {
   const data = envelope.data as { packets?: unknown };
   return H0Packet.array().parse(data.packets);
+}
+
+async function withStdioTestLock<T>(fn: () => Promise<T>): Promise<T> {
+  const release = await acquireStdioTestLock();
+  try {
+    return await fn();
+  } finally {
+    await release();
+  }
+}
+
+async function acquireStdioTestLock(): Promise<() => Promise<void>> {
+  const start = Date.now();
+  while (Date.now() - start < McpStdioLockTimeoutMs) {
+    try {
+      await mkdir(McpStdioLockDir);
+      return () => rm(McpStdioLockDir, { recursive: true, force: true });
+    } catch (error) {
+      if (isErrnoException(error) && error.code === "EEXIST") {
+        await sleep(100);
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error(
+    `timed out waiting for MCP stdio test lock at ${McpStdioLockDir}`,
+  );
+}
+
+function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
 }
