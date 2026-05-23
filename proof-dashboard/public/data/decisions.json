@@ -1,0 +1,495 @@
+{
+  "generated_at": "2026-05-22T08:00:00Z",
+  "decisions": [
+    {
+      "id": "dec-2026-0522-014",
+      "ts": "2026-05-22T07:42:00Z",
+      "campaign": "spring_handbag_relaunch",
+      "channel": "meta",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 60,
+        "rationale": "Platform-reported ROAS 5.8× over 4 days. Agent proposes +60% daily budget."
+      },
+      "evidence": {
+        "sample_size": 42180,
+        "effective_n": 28100,
+        "confounders_detected": ["promo_email_overlap", "weekend_seasonality"]
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 12.4,
+        "posterior_ci": [8.6, 16.1],
+        "calibration_score": 0.94
+      },
+      "gate": {
+        "outcome": "approved_with_guardrails",
+        "note": "Verifier confirms positive lift. Promo overlap reduces magnitude; cap delta at +35% pending one more refresh."
+      },
+      "final_action": {
+        "summary": "Scaled up +35% with weekly re-verify",
+        "delta_pct": 35
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 33.8,
+        "note": "Realized incremental return tracked the calibrated forecast within the 80% CI."
+      }
+    },
+    {
+      "id": "dec-2026-0521-013",
+      "ts": "2026-05-21T15:18:00Z",
+      "campaign": "performance_max_us_acquisition",
+      "channel": "google",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 80,
+        "rationale": "Platform-reported ROAS 6.2×, conversion rate +18% week-over-week."
+      },
+      "evidence": {
+        "sample_size": 84200,
+        "effective_n": 9800,
+        "confounders_detected": ["organic_search_spike", "brand_term_overlap"]
+      },
+      "verifier": {
+        "verdict": "fail",
+        "posterior_lift_pct": 1.1,
+        "posterior_ci": [-2.4, 4.6],
+        "calibration_score": 0.91
+      },
+      "gate": {
+        "outcome": "blocked",
+        "note": "Brand-term cannibalization explains 78% of conversion lift. Incremental effect indistinguishable from zero."
+      },
+      "final_action": {
+        "summary": "Scale-up blocked. Geo-holdout test queued for next week.",
+        "delta_pct": 0
+      },
+      "outcome": {
+        "judged": "saved_money",
+        "realized_delta_pct": 0,
+        "note": "Estimated $48,400/wk that would have been spent on incremental zero."
+      }
+    },
+    {
+      "id": "dec-2026-0520-012",
+      "ts": "2026-05-20T11:02:00Z",
+      "campaign": "youtube_tutorial_series_q2",
+      "channel": "youtube",
+      "proposal": {
+        "action": "expand_audience",
+        "delta_pct": 25,
+        "rationale": "Lookalike audience added based on top-funnel viewers."
+      },
+      "evidence": {
+        "sample_size": 312000,
+        "effective_n": 188400,
+        "confounders_detected": []
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 6.8,
+        "posterior_ci": [4.9, 8.7],
+        "calibration_score": 0.96
+      },
+      "gate": {
+        "outcome": "approved",
+        "note": "Clean evidence, ample sample, no detected confounders."
+      },
+      "final_action": {
+        "summary": "Audience expanded +25%",
+        "delta_pct": 25
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 7.1,
+        "note": "Realized incremental view-through conversions within posterior CI."
+      }
+    },
+    {
+      "id": "dec-2026-0519-011",
+      "ts": "2026-05-19T19:34:00Z",
+      "campaign": "tiktok_genz_app_install",
+      "channel": "tiktok",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 100,
+        "rationale": "CPI down 32% in last 72h. Platform suggests doubling spend."
+      },
+      "evidence": {
+        "sample_size": 14600,
+        "effective_n": 14600,
+        "confounders_detected": ["creator_collab_overlap"]
+      },
+      "verifier": {
+        "verdict": "inconclusive",
+        "posterior_lift_pct": 9.8,
+        "posterior_ci": [-1.2, 20.4],
+        "calibration_score": 0.88
+      },
+      "gate": {
+        "outcome": "modified",
+        "note": "Sample too small relative to spend doubling. Stepwise +20% with daily re-verify."
+      },
+      "final_action": {
+        "summary": "Modified to +20% with 24h re-verify",
+        "delta_pct": 20
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 18.9,
+        "note": "Stepwise plan converted to +60% over week as evidence accumulated."
+      }
+    },
+    {
+      "id": "dec-2026-0518-010",
+      "ts": "2026-05-18T09:15:00Z",
+      "campaign": "linkedin_b2b_demo_funnel",
+      "channel": "linkedin",
+      "proposal": {
+        "action": "hold",
+        "delta_pct": 0,
+        "rationale": "Platform-reported MQL volume flat. Agent suggests pausing for review."
+      },
+      "evidence": {
+        "sample_size": 7200,
+        "effective_n": 6800,
+        "confounders_detected": ["mql_definition_change"]
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 14.6,
+        "posterior_ci": [10.2, 19.0],
+        "calibration_score": 0.95
+      },
+      "gate": {
+        "outcome": "modified",
+        "note": "Downstream MQL definition was tightened — pipeline value is up, not flat. Recommend scale-up."
+      },
+      "final_action": {
+        "summary": "Reverted to scale-up +25%",
+        "delta_pct": 25
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 23.1,
+        "note": "Avoided pausing a winning campaign due to instrumentation drift."
+      }
+    },
+    {
+      "id": "dec-2026-0517-009",
+      "ts": "2026-05-17T14:48:00Z",
+      "campaign": "meta_retargeting_basket_abandon",
+      "channel": "meta",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 50,
+        "rationale": "Last-click ROAS 8.9×. Top performer of the week."
+      },
+      "evidence": {
+        "sample_size": 22400,
+        "effective_n": 4100,
+        "confounders_detected": ["email_remarketing_overlap", "session_attribution_leak"]
+      },
+      "verifier": {
+        "verdict": "fail",
+        "posterior_lift_pct": 0.3,
+        "posterior_ci": [-3.8, 4.4],
+        "calibration_score": 0.92
+      },
+      "gate": {
+        "outcome": "blocked",
+        "note": "Email is doing the heavy lifting. Last-click is misattributing it to ads."
+      },
+      "final_action": {
+        "summary": "Blocked. Recommended de-overlap test.",
+        "delta_pct": 0
+      },
+      "outcome": {
+        "judged": "saved_money",
+        "realized_delta_pct": 0,
+        "note": "$72,600 in proposed spend redirected to programs with verified lift."
+      }
+    },
+    {
+      "id": "dec-2026-0516-008",
+      "ts": "2026-05-16T10:22:00Z",
+      "campaign": "google_competitor_terms",
+      "channel": "google",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 40,
+        "rationale": "Conversion rate strong on competitor brand terms."
+      },
+      "evidence": {
+        "sample_size": 19800,
+        "effective_n": 12200,
+        "confounders_detected": []
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 8.2,
+        "posterior_ci": [5.7, 10.7],
+        "calibration_score": 0.94
+      },
+      "gate": {
+        "outcome": "approved",
+        "note": "Evidence clean. Approving full proposal."
+      },
+      "final_action": {
+        "summary": "Scaled up +40%",
+        "delta_pct": 40
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 9.4,
+        "note": "Within posterior CI; auto-approved week-over-week refresh."
+      }
+    },
+    {
+      "id": "dec-2026-0515-007",
+      "ts": "2026-05-15T18:55:00Z",
+      "campaign": "meta_brand_awareness_q2",
+      "channel": "meta",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 35,
+        "rationale": "Brand search +24% over 14 days, correlated with campaign live dates."
+      },
+      "evidence": {
+        "sample_size": 1480000,
+        "effective_n": 320000,
+        "confounders_detected": ["pr_coverage_burst", "seasonality"]
+      },
+      "verifier": {
+        "verdict": "inconclusive",
+        "posterior_lift_pct": 3.2,
+        "posterior_ci": [-0.4, 6.8],
+        "calibration_score": 0.90
+      },
+      "gate": {
+        "outcome": "modified",
+        "note": "PR burst confounds the signal. Hold spend; queue a geo-holdout test."
+      },
+      "final_action": {
+        "summary": "Hold + geo-holdout study",
+        "delta_pct": 0
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 2.8,
+        "note": "Holdout study estimated 2.8% lift — well under the proposed +35% budget commitment."
+      }
+    },
+    {
+      "id": "dec-2026-0514-006",
+      "ts": "2026-05-14T13:11:00Z",
+      "campaign": "tiktok_creator_collab_spring",
+      "channel": "tiktok",
+      "proposal": {
+        "action": "shift_budget",
+        "delta_pct": 30,
+        "rationale": "Top 3 creators are outperforming the rest 3×."
+      },
+      "evidence": {
+        "sample_size": 38400,
+        "effective_n": 26100,
+        "confounders_detected": ["creator_audience_overlap"]
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 11.2,
+        "posterior_ci": [7.4, 15.0],
+        "calibration_score": 0.93
+      },
+      "gate": {
+        "outcome": "approved",
+        "note": "Shift between creators carries no extra risk. Approved."
+      },
+      "final_action": {
+        "summary": "Shifted +30% budget to top performers",
+        "delta_pct": 30
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 12.6,
+        "note": "Net incremental revenue up; CPA down 14%."
+      }
+    },
+    {
+      "id": "dec-2026-0513-005",
+      "ts": "2026-05-13T08:30:00Z",
+      "campaign": "google_dynamic_search_long_tail",
+      "channel": "google",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 75,
+        "rationale": "DSA expansion proposed — long-tail terms showing strong CTR."
+      },
+      "evidence": {
+        "sample_size": 9400,
+        "effective_n": 3200,
+        "confounders_detected": ["query_quality_drift"]
+      },
+      "verifier": {
+        "verdict": "fail",
+        "posterior_lift_pct": -1.4,
+        "posterior_ci": [-4.2, 1.4],
+        "calibration_score": 0.91
+      },
+      "gate": {
+        "outcome": "blocked",
+        "note": "Long-tail expansion picks up low-intent queries. Negative posterior lift."
+      },
+      "final_action": {
+        "summary": "Blocked. Recommend negative-keyword pass before retry.",
+        "delta_pct": 0
+      },
+      "outcome": {
+        "judged": "saved_money",
+        "realized_delta_pct": 0,
+        "note": "Would have wasted ~$94k over the next 30 days on incremental zero."
+      }
+    },
+    {
+      "id": "dec-2026-0512-004",
+      "ts": "2026-05-12T16:04:00Z",
+      "campaign": "youtube_pre_roll_q2",
+      "channel": "youtube",
+      "proposal": {
+        "action": "cut",
+        "delta_pct": -50,
+        "rationale": "View-through conversion volume down 22%. Agent proposes 50% cut."
+      },
+      "evidence": {
+        "sample_size": 740000,
+        "effective_n": 410000,
+        "confounders_detected": ["holiday_offset"]
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 6.4,
+        "posterior_ci": [4.8, 8.0],
+        "calibration_score": 0.95
+      },
+      "gate": {
+        "outcome": "blocked",
+        "note": "VTC drop is calendar-shifted holiday window. Incremental lift remains healthy."
+      },
+      "final_action": {
+        "summary": "Cut blocked. Maintain current budget.",
+        "delta_pct": 0
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 5.9,
+        "note": "Avoided cutting a performing channel based on calendar noise."
+      }
+    },
+    {
+      "id": "dec-2026-0511-003",
+      "ts": "2026-05-11T11:48:00Z",
+      "campaign": "linkedin_thought_leadership_us",
+      "channel": "linkedin",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 45,
+        "rationale": "Engagement rate +52% on new creative set."
+      },
+      "evidence": {
+        "sample_size": 5600,
+        "effective_n": 5200,
+        "confounders_detected": []
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 9.4,
+        "posterior_ci": [6.1, 12.7],
+        "calibration_score": 0.93
+      },
+      "gate": {
+        "outcome": "approved",
+        "note": "Clean evidence. Approved."
+      },
+      "final_action": {
+        "summary": "Scaled up +45%",
+        "delta_pct": 45
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 10.1,
+        "note": "Within posterior CI. Creative set promoted to evergreen."
+      }
+    },
+    {
+      "id": "dec-2026-0510-002",
+      "ts": "2026-05-10T15:39:00Z",
+      "campaign": "meta_lookalike_value_q2",
+      "channel": "meta",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 90,
+        "rationale": "ROAS 7.4× on value-based lookalike, top of all audiences."
+      },
+      "evidence": {
+        "sample_size": 28900,
+        "effective_n": 6400,
+        "confounders_detected": ["audience_overlap_with_retargeting", "value_signal_leak"]
+      },
+      "verifier": {
+        "verdict": "fail",
+        "posterior_lift_pct": 0.9,
+        "posterior_ci": [-3.1, 4.9],
+        "calibration_score": 0.92
+      },
+      "gate": {
+        "outcome": "blocked",
+        "note": "Value lookalike is selecting users already converting through retargeting."
+      },
+      "final_action": {
+        "summary": "Blocked. Recommend exclusion of retargeting pool from lookalike seed.",
+        "delta_pct": 0
+      },
+      "outcome": {
+        "judged": "saved_money",
+        "realized_delta_pct": 0,
+        "note": "$122,800 of proposed reallocation prevented. Lookalike rebuilt with deduped seed."
+      }
+    },
+    {
+      "id": "dec-2026-0509-001",
+      "ts": "2026-05-09T09:02:00Z",
+      "campaign": "google_shopping_summer_swim",
+      "channel": "google",
+      "proposal": {
+        "action": "scale_up",
+        "delta_pct": 55,
+        "rationale": "Category up 38% week-over-week. Agent proposes +55%."
+      },
+      "evidence": {
+        "sample_size": 64200,
+        "effective_n": 41800,
+        "confounders_detected": ["category_seasonality"]
+      },
+      "verifier": {
+        "verdict": "pass",
+        "posterior_lift_pct": 18.7,
+        "posterior_ci": [14.4, 23.0],
+        "calibration_score": 0.95
+      },
+      "gate": {
+        "outcome": "approved_with_guardrails",
+        "note": "Seasonality is real but lift is also real. Approve +40% with weekly re-verify."
+      },
+      "final_action": {
+        "summary": "Scaled up +40% with weekly re-verify",
+        "delta_pct": 40
+      },
+      "outcome": {
+        "judged": "correct",
+        "realized_delta_pct": 19.4,
+        "note": "Realized lift tracked the posterior; ramped to +55% the following week."
+      }
+    }
+  ]
+}
