@@ -1,0 +1,31 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account": {
+    "account_id": "acc_demo_meta",
+    "platform": "meta_ads",
+    "tenant_id": "tenant_demo",
+    "name": "Agency Demo — Meta Ads",
+    "currency": "USD",
+    "timezone": "America/New_York"
+  },
+  "campaigns": [
+    { "campaign_id": "meta_camp_healthy", "account_id": "acc_demo_meta", "platform": "meta_ads", "name": "Prospecting - Rotating Creative", "status": "active", "objective": "conversions", "daily_budget": 200 }
+  ],
+  "creative_daily_metrics": [
+    { "date": "2026-05-08", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 200, "impressions": 10000, "clicks": 235, "conversions": 11, "frequency": 1.20 },
+    { "date": "2026-05-09", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 202, "impressions": 10200, "clicks": 238, "conversions": 11, "frequency": 1.22 },
+    { "date": "2026-05-10", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 201, "impressions": 10150, "clicks": 230, "conversions": 10, "frequency": 1.18 },
+    { "date": "2026-05-11", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 205, "impressions": 10400, "clicks": 245, "conversions": 12, "frequency": 1.25 },
+    { "date": "2026-05-12", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 203, "impressions": 10250, "clicks": 240, "conversions": 11, "frequency": 1.21 },
+    { "date": "2026-05-13", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 204, "impressions": 10300, "clicks": 242, "conversions": 11, "frequency": 1.23 },
+    { "date": "2026-05-14", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 206, "impressions": 10450, "clicks": 247, "conversions": 12, "frequency": 1.26 },
+    { "date": "2026-05-15", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 205, "impressions": 10400, "clicks": 244, "conversions": 11, "frequency": 1.24 },
+    { "date": "2026-05-16", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 207, "impressions": 10500, "clicks": 248, "conversions": 12, "frequency": 1.27 },
+    { "date": "2026-05-17", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 208, "impressions": 10550, "clicks": 250, "conversions": 12, "frequency": 1.28 },
+    { "date": "2026-05-18", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 209, "impressions": 10600, "clicks": 252, "conversions": 12, "frequency": 1.30 },
+    { "date": "2026-05-19", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 207, "impressions": 10520, "clicks": 246, "conversions": 11, "frequency": 1.26 },
+    { "date": "2026-05-20", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 208, "impressions": 10580, "clicks": 249, "conversions": 12, "frequency": 1.28 },
+    { "date": "2026-05-21", "creative_id": "creative_healthy_1", "campaign_id": "meta_camp_healthy", "spend": 210, "impressions": 10650, "clicks": 253, "conversions": 12, "frequency": 1.31 }
+  ],
+  "_notes": "Negative case for the creative-fatigue detector: frequency stays in the 1.18–1.31 band and CTR holds ~2.35% across the window. Pairs with demo_creative_fatigue.json."
+}

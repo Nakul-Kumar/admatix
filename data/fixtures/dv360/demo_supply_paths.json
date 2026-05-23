@@ -1,0 +1,21 @@
+{
+  "fixture_version": "demo-2026-05-22",
+  "account": {
+    "account_id": "acc_demo_dv360",
+    "platform": "dv360",
+    "tenant_id": "tenant_demo",
+    "name": "Agency Demo — DV360 (Supply Paths Dirty)",
+    "currency": "USD",
+    "timezone": "America/New_York"
+  },
+  "campaigns": [
+    { "campaign_id": "dv360_camp_supply", "account_id": "acc_demo_dv360", "platform": "dv360", "name": "Programmatic Display - Open Auction", "status": "active", "objective": "impressions", "daily_budget": 1500 }
+  ],
+  "programmatic_supply_paths": [
+    { "date": "2026-05-21", "account_id": "acc_demo_dv360", "campaign_id": "dv360_camp_supply", "seller_id": "ssp_alpha_mfa", "seller_name": "Alpha SSP (MFA cluster)", "spend": 4200, "impressions": 1400000, "viewability": 0.21, "mfa_flag": true, "ivt_rate": 0.18 },
+    { "date": "2026-05-21", "account_id": "acc_demo_dv360", "campaign_id": "dv360_camp_supply", "seller_id": "ssp_lowview_beta", "seller_name": "Beta SSP (low viewability)", "spend": 3100, "impressions": 1050000, "viewability": 0.34, "mfa_flag": false, "ivt_rate": 0.07 },
+    { "date": "2026-05-21", "account_id": "acc_demo_dv360", "campaign_id": "dv360_camp_supply", "seller_id": "ssp_premium_gamma", "seller_name": "Gamma SSP (premium publishers)", "spend": 2200, "impressions": 320000, "viewability": 0.78, "mfa_flag": false, "ivt_rate": 0.01 },
+    { "date": "2026-05-21", "account_id": "acc_demo_dv360", "campaign_id": "dv360_camp_supply", "seller_id": "ssp_delta_mfa", "seller_name": "Delta SSP (MFA arbitrage)", "spend": 1800, "impressions": 720000, "viewability": 0.18, "mfa_flag": true, "ivt_rate": 0.22 }
+  ],
+  "_notes": "Positive case for the supply-path detector: two sellers flagged MFA (ssp_alpha_mfa, ssp_delta_mfa) and one low-viewability seller (ssp_lowview_beta) account for the majority of spend; only ssp_premium_gamma is healthy. Pairs with demo_supply_paths_clean.json."
+}
