@@ -31,8 +31,9 @@ CRITEO_LICENSE_NOTE = (
 CRITEO_CLAIM_LIMITS = [
     "Sample smoke runs prove loader, split, bootstrap, plotting, and metrics wiring only.",
     "Do not claim the full 13.98M Criteo gate passed unless criteo_sample_rows is null and the slow gate was run.",
-    "Qini/AUUC tolerance is readiness-scored against an in-harness deterministic reference until the published-reference gate is run.",
+    "Qini/AUUC tolerance is readiness-scored against an in-harness deterministic self-reference until the published-reference gate is run.",
 ]
+REFERENCE_METHOD = "self_reference_smoke_not_published_baseline"
 
 
 @dataclass(frozen=True)
@@ -49,10 +50,12 @@ class CriteoOutcomeResult:
     qini_reference: float
     qini_relative_delta: float
     qini_within_tolerance: bool
+    qini_reference_method: str
     auuc_estimate: float
     auuc_reference: float
     auuc_relative_delta: float
     auuc_within_tolerance: bool
+    auuc_reference_method: str
     outcome_passes: bool
     bootstrap_distribution: list[float]
     reference_url: str
@@ -139,10 +142,12 @@ def run_criteo_backtest(config: BacktestConfig) -> CriteoBacktestResult:
                 qini_reference=finite_float(qini_reference),
                 qini_relative_delta=qini_delta,
                 qini_within_tolerance=bool(qini_within),
+                qini_reference_method=REFERENCE_METHOD,
                 auuc_estimate=finite_float(auuc_estimate),
                 auuc_reference=finite_float(auuc_reference),
                 auuc_relative_delta=auuc_delta,
                 auuc_within_tolerance=bool(auuc_within),
+                auuc_reference_method=REFERENCE_METHOD,
                 outcome_passes=outcome_passes,
                 bootstrap_distribution=distribution,
                 reference_url=ref.reference_url,

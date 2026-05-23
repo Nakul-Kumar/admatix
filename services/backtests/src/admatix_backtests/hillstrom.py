@@ -30,8 +30,9 @@ HILLSTROM_LICENSE_NOTE = (
 HILLSTROM_CLAIM_LIMITS = [
     "Smoke readiness reports RCT difference-in-means and deterministic Qini/AUUC harness output.",
     "A green smoke run is not a claim of commercial paid-media lift.",
-    "The AUUC reference is an in-harness deterministic baseline until the full published-reference gate is run.",
+    "The AUUC reference is an in-harness deterministic self-reference until the full published-reference gate is run.",
 ]
+REFERENCE_METHOD = "self_reference_smoke_not_published_baseline"
 ARM_TO_SEGMENT = {"mens_email": "Mens E-Mail", "womens_email": "Womens E-Mail"}
 
 
@@ -50,6 +51,7 @@ class HillstromArmResult:
     auuc_reference: float
     auuc_relative_delta: float
     auuc_within_tolerance: bool
+    auuc_reference_method: str
     secondary_conversion_ate: float
     secondary_spend_ate: float
     arm_passes: bool
@@ -124,6 +126,7 @@ def run_hillstrom_backtest(config: BacktestConfig) -> HillstromBacktestResult:
             auuc_reference=finite_float(auuc_reference),
             auuc_relative_delta=auuc_delta,
             auuc_within_tolerance=bool(abs(auuc_delta) <= config.auuc_tolerance),
+            auuc_reference_method=REFERENCE_METHOD,
             secondary_conversion_ate=secondary_conversion_ate,
             secondary_spend_ate=secondary_spend_ate,
             arm_passes=bool(ci_low > 0 and ci_high > 0 and abs(auuc_delta) <= config.auuc_tolerance),

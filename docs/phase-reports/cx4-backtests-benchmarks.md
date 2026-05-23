@@ -36,6 +36,9 @@ No raw datasets were committed.
   and JSON metrics serialization.
 - Metrics JSON embeds dataset SHA, row counts, source references, license notes,
   seed/config, tolerances, and claim limits.
+- Qini/AUUC smoke metrics are explicitly marked
+  `self_reference_smoke_not_published_baseline`; they prove wiring and
+  determinism, not the published-reference tolerance gate.
 - The Criteo full gate remains available via the slow pytest marker and
   `configs/phase4-gate.json`.
 - Backtests use local read-only loaders and metric helpers to avoid importing

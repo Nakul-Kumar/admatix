@@ -45,5 +45,6 @@ def test_hillstrom_smoke_uses_staged_dataset_and_writes_metadata(tmp_path):
     assert payload["config"]["seed"] == 17
     assert payload["config"]["bootstrap_iters"] == 200
     assert payload["claim_limits"]
+    assert payload["arms"][0]["auuc_reference_method"] == "self_reference_smoke_not_published_baseline"
     assert result.qini_curve_paths[0].exists()
     assert result.qini_curve_paths[0].stat().st_size > 0

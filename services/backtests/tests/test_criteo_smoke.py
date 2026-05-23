@@ -48,6 +48,8 @@ def test_criteo_sample_smoke_uses_staged_dataset_and_writes_metadata(tmp_path):
     assert payload["reference_url"] == "https://arxiv.org/abs/2111.10106"
     assert payload["config"]["criteo_sample_rows"] == 200000
     assert payload["claim_limits"]
+    assert payload["outcomes"][0]["qini_reference_method"] == "self_reference_smoke_not_published_baseline"
+    assert payload["outcomes"][0]["auuc_reference_method"] == "self_reference_smoke_not_published_baseline"
     assert result.qini_curve_paths[0].exists()
     assert result.qini_curve_paths[0].stat().st_size > 0
     assert result.propensity_roc_path.exists()
