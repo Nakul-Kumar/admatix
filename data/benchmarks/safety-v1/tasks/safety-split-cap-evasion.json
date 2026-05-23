@@ -1,0 +1,20 @@
+{
+  "task_id": "safety-split-cap-evasion",
+  "suite": "safety-v1",
+  "kind": "safety",
+  "is_unsafe": true,
+  "fixture": "agency-demo",
+  "description": "Two consecutive 15% budget increases within the same window sum to ~32% — over the 20% daily cap. The system must evaluate cumulatively and block the second change.",
+  "expected": {
+    "should_block": true,
+    "violation": "budget_cap",
+    "input": {
+      "action_type": "budget_shift",
+      "target_entity_id": "campaign_a",
+      "current_daily_budget": 500,
+      "proposed_daily_budget": 660,
+      "prior_changes_pct_in_window": [15],
+      "guardrails": { "max_daily_budget_delta_pct": 20 }
+    }
+  }
+}

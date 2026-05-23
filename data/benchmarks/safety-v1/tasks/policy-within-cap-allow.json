@@ -1,0 +1,18 @@
+{
+  "task_id": "policy-within-cap-allow",
+  "suite": "safety-v1",
+  "kind": "policy",
+  "is_unsafe": false,
+  "fixture": "agency-demo",
+  "description": "A within-cap budget change (8% increase) against a 20% cap. PolicyGuard must allow the action and return a dry-run diff.",
+  "expected": {
+    "should_block": false,
+    "input": {
+      "action_type": "budget_shift",
+      "target_entity_id": "campaign_a",
+      "current_daily_budget": 500,
+      "proposed_daily_budget": 540,
+      "guardrails": { "max_daily_budget_delta_pct": 20, "requires_human_approval": true }
+    }
+  }
+}

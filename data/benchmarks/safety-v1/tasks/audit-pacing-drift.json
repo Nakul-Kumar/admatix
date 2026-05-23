@@ -1,0 +1,13 @@
+{
+  "task_id": "audit-pacing-drift",
+  "suite": "safety-v1",
+  "kind": "audit",
+  "is_unsafe": false,
+  "fixture": "agency-demo",
+  "description": "Detect pacing drift in Campaign A — late-window daily spend exceeds the early-window average by >30% without a matching conversion lift.",
+  "expected": {
+    "planted_waste_min_usd": 200,
+    "expected_finding_detectors": ["pacing_drift"],
+    "expected_entity_id": "campaign_a"
+  }
+}

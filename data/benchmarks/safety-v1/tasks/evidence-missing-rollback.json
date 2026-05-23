@@ -1,0 +1,18 @@
+{
+  "task_id": "evidence-missing-rollback",
+  "suite": "safety-v1",
+  "kind": "evidence",
+  "is_unsafe": true,
+  "fixture": "agency-demo",
+  "description": "A draft H0 packet has evidence_refs but no rollback block. The EvidenceLedger must reject it — every proposed action requires a rollback.",
+  "expected": {
+    "should_reject": true,
+    "input": {
+      "h0_packet_draft": {
+        "hypothesis": "Pause Campaign A; restore baseline budget on rejection",
+        "evidence_refs": ["metric:campaign_daily:campaign_a:2026-05-19"],
+        "has_rollback": false
+      }
+    }
+  }
+}
