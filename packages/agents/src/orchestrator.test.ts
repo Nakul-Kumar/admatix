@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createStore, sha256 } from "@admatix/core";
 import { AgentRun, ExecutionDiff } from "@admatix/schemas";
-import { runWorkflow } from "./index.js";
+import { runActivation, runWorkflow } from "./index.js";
+import { signApprovalReceipt } from "@admatix/policy";
 import {
   makeTestEvidenceDeps,
   makeUnsafeEvidenceDeps,
@@ -240,6 +241,115 @@ describe("runWorkflow (acceptance suite — WP-F §Acceptance tests)", () => {
     expect(sha256(reduceDecisions(b.decisions))).toBe(
       sha256(reduceDecisions(a.decisions)),
     );
+  });
+});
+
+describe("F6: runWorkflow stops at needs_approval (no diff until approved)", () => {
+  it("does NOT build a diff for budget_shift packets that need approval", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "wf-needs-approval-"));
+    const store = createStore(dir);
+    const result = await runWorkflow(
+      {
+        accountRef: "fixture:acc_demo",
+        goal: "reduce_cac",
+        tenantId: "tenant_demo",
+      },
+      { store, evidence: makeTestEvidenceDeps() },
+    );
+    rmSync(dir, { recursive: true, force: true });
+
+    // Every `needs_approval` packet must NOT have produced an
+    // ExecutionDiff. That contract is the QA finding #6 fix.
+    const needsApproval = result.decisions.filter(
+      (d) => d.result === "needs_approval",
+    );
+    expect(needsApproval.length).toBeGreaterThan(0);
+    const diffActionIds = new Set(result.diffs.map((d) => d.action_id));
+    for (const d of needsApproval) {
+      expect(diffActionIds.has(d.action_id)).toBe(false);
+    }
+  });
+
+  it("runActivation builds a diff once a signed receipt is supplied", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "wf-activation-"));
+    const store = createStore(dir);
+    const result = await runWorkflow(
+      {
+        accountRef: "fixture:acc_demo",
+        goal: "reduce_cac",
+        tenantId: "tenant_demo",
+      },
+      { store, evidence: makeTestEvidenceDeps() },
+    );
+    const packet = result.packets.find(
+      (p) => p.proposal.action === "budget_shift",
+    );
+    expect(packet).toBeDefined();
+    const decided_at = new Date().toISOString();
+    const baseReceipt = {
+      packet_id: packet!.packet_id,
+      action_id: `act_${packet!.packet_id}`,
+      decided_by: "user_test",
+      decided_at,
+      decision: "approved" as const,
+    };
+    const activation = await runActivation(
+      {
+        packet_id: packet!.packet_id,
+        tenant_id: "tenant_demo",
+        receipt: {
+          receipt_id: "rec_test",
+          ...baseReceipt,
+          role: "media_manager",
+          signature: signApprovalReceipt(baseReceipt),
+        },
+      },
+      { store },
+    );
+    rmSync(dir, { recursive: true, force: true });
+    expect(activation.ok).toBe(true);
+    if (activation.ok) {
+      expect(activation.diff.dry_run).toBe(true);
+    }
+  });
+
+  it("runActivation refuses an unsigned receipt", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "wf-activation-unsigned-"));
+    const store = createStore(dir);
+    const result = await runWorkflow(
+      {
+        accountRef: "fixture:acc_demo",
+        goal: "reduce_cac",
+        tenantId: "tenant_demo",
+      },
+      { store, evidence: makeTestEvidenceDeps() },
+    );
+    const packet = result.packets.find(
+      (p) => p.proposal.action === "budget_shift",
+    );
+    expect(packet).toBeDefined();
+    const activation = await runActivation(
+      {
+        packet_id: packet!.packet_id,
+        tenant_id: "tenant_demo",
+        receipt: {
+          receipt_id: "rec_test_unsigned",
+          packet_id: packet!.packet_id,
+          action_id: `act_${packet!.packet_id}`,
+          decided_by: "user_test",
+          decided_at: new Date().toISOString(),
+          decision: "approved",
+          role: "media_manager",
+          // signature deliberately omitted
+        },
+      },
+      { store },
+    );
+    rmSync(dir, { recursive: true, force: true });
+    expect(activation.ok).toBe(false);
+    if (!activation.ok) {
+      expect(activation.reason).toMatch(/signature_invalid/);
+    }
   });
 });
 

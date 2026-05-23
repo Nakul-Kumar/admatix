@@ -25,7 +25,12 @@ import {
   resolveAccountRef,
   type Connector,
 } from "@admatix/connectors";
-import { emitEvent, type EventStore } from "@admatix/policy";
+import {
+  createEvidenceResolver,
+  emitEvent,
+  type EventStore,
+  type EvidenceResolver,
+} from "@admatix/policy";
 import type { DetectorInput } from "@admatix/evidence";
 import { makeOrchestratorAgent } from "./agents/orchestrator-agent.js";
 import { makePolicyGuardAgent } from "./agents/policy-guard-agent.js";
@@ -86,7 +91,8 @@ export async function runWorkflow(
     traceId: trace_id,
     deps: deps.evidence,
   });
-  const evidenceLedger = makeEvidenceLedgerAgent({ traceId: trace_id });
+  // EvidenceLedger resolver is wired below after we've loaded campaigns +
+  // daily metrics. We pass it into the agent factory at that point.
   const measurementScientist = makeMeasurementScientistAgent({ traceId: trace_id });
   const policyGuard = makePolicyGuardAgent({ traceId: trace_id });
   const approvalCoordinator = makeApprovalCoordinatorAgent({ traceId: trace_id });
@@ -129,6 +135,38 @@ export async function runWorkflow(
   const metrics: NormalizedMetrics[] = normalizeMetrics(daily, firstParty, {
     scope: "campaign",
     window: deriveWindow(),
+  });
+
+  // EvidenceLedger resolver: every ref must point at a real row.
+  // - campaign_daily metric: must exist in the loaded daily set with a
+  //   matching account/campaign/date triple. The expected hash is
+  //   sha256(row).
+  // - campaign: must exist in the loaded campaigns array. Hash is
+  //   sha256(campaign).
+  const dailyByRefKey = new Map<string, CampaignDailyMetric>();
+  for (const row of daily) {
+    dailyByRefKey.set(
+      `${row.account_id}|${row.campaign_id}|${row.date}`,
+      row,
+    );
+  }
+  const campaignsByKey = new Map<string, Campaign>();
+  for (const c of campaigns) {
+    campaignsByKey.set(`${c.account_id}|${c.campaign_id}`, c);
+  }
+  const evidenceResolver: EvidenceResolver = createEvidenceResolver({
+    campaignDailyMetric: ({ account_id, campaign_id, date }) => {
+      const row = dailyByRefKey.get(`${account_id}|${campaign_id}|${date}`);
+      return row ? { exists: true, hash: sha256(row) } : null;
+    },
+    campaign: ({ account_id, campaign_id }) => {
+      const c = campaignsByKey.get(`${account_id}|${campaign_id}`);
+      return c ? { exists: true, hash: sha256(c) } : null;
+    },
+  });
+  const evidenceLedger = makeEvidenceLedgerAgent({
+    traceId: trace_id,
+    resolver: evidenceResolver,
   });
 
   const { output: maOutput, audit, packets } = await mediaAnalyst.analyse({
@@ -300,6 +338,26 @@ export async function runWorkflow(
       continue;
     }
 
+    // ARCHITECTURE-DEEP §7: an H0 packet must reach `approved` before an
+    // `ExecutionDiff` is built. PolicyGuard's `needs_approval` is the
+    // documented "human must sign" gate — we MUST stop here and wait for
+    // a real ApprovalReceipt. `runActivation()` (below) re-evaluates
+    // policy with the receipt in hand and builds the diff.
+    if (decision.result === "needs_approval") {
+      await store.put("h0_packets", packetWithApproval.packet_id, packetWithApproval);
+      acceptedPackets.push(packetWithApproval);
+      await emit(store, {
+        workflow_id,
+        trace_id,
+        step: "activate",
+        agent_id: "approval-coordinator",
+        type: "approval.pending",
+        payload_hash: acOutput.input_hash,
+        level: "info",
+      });
+      continue;
+    }
+
     // ---------- DiffBuilder (dry-run diff) ----------
     const buildArgs: Parameters<typeof diffBuilder.build>[0] = {
       action,
@@ -456,17 +514,83 @@ async function resolveAccount(
   const accounts = await connector.listAccounts();
   const found = accounts.find((a) => a.account_id === accountId);
   if (found) return found;
-  if (accounts.length > 0) {
-    const first = accounts[0];
-    if (first) return first;
-  }
+  // QA finding #24: fail closed on miss. The previous "first account"
+  // fallback made mistakes look like successes (a caller asking for an
+  // unknown account would silently get the demo one).
   throw new Error(
-    `runWorkflow: could not resolve account "${accountId}" from connector ${connector.platform}`,
+    `runWorkflow: account "${accountId}" not found in connector ${connector.platform} ` +
+      `(available: ${accounts.map((a) => a.account_id).join(", ") || "<none>"}).`,
   );
 }
 
 function deriveWindow(): string {
   return "2026-05-12..2026-05-21";
+}
+
+/**
+ * Activate a packet that has been approved by a human (`runWorkflow` left
+ * it in `pending`/`needs_approval`). Re-evaluates PolicyGuard with the
+ * receipt in hand and builds the dry-run diff.
+ *
+ * Fail-closed on every branch:
+ *   - receipt must approve THIS packet and have a verified HMAC
+ *   - PolicyGuard `block` → no diff
+ *   - PolicyGuard `needs_approval` → only honoured with a verified receipt
+ */
+export async function runActivation(
+  args: {
+    packet_id: string;
+    tenant_id: string;
+    receipt: import("@admatix/schemas").ApprovalReceipt;
+  },
+  deps: WorkflowDeps,
+): Promise<
+  | { ok: true; diff: ExecutionDiff; decision: PolicyDecision }
+  | { ok: false; reason: string }
+> {
+  const { store } = deps;
+  const connector = deps.connector ?? fixtureConnector();
+  const stored = await store.get<H0Packet>("h0_packets", args.packet_id);
+  if (!stored) return { ok: false, reason: "packet_not_found" };
+  const packet = stored;
+  if (packet.tenant_id !== args.tenant_id) {
+    return { ok: false, reason: "forbidden_tenant" };
+  }
+  if (
+    args.receipt.packet_id !== packet.packet_id ||
+    args.receipt.decision !== "approved"
+  ) {
+    return { ok: false, reason: "receipt_must_approve_packet" };
+  }
+  // Lazy import so we don't hoist a heavy dep at module load.
+  const { verifyApprovalReceipt, evaluateAction } = await import("@admatix/policy");
+  const check = verifyApprovalReceipt(args.receipt);
+  if (!check.ok) {
+    return { ok: false, reason: `signature_invalid:${check.reason}` };
+  }
+  const traceId = packet.trace_id;
+  const adapter = makePlatformAdapterAgent({ traceId });
+  const { action } = await adapter.translate({ packet });
+  const accounts = await connector.listAccounts();
+  const campaigns = (
+    await Promise.all(accounts.map((a) => connector.getCampaigns(a.account_id)))
+  ).flat();
+  const campaign = campaigns.find(
+    (c) => c.campaign_id === action.target_entity_id,
+  );
+  const decision = evaluateAction(action, {
+    guardrails: packet.guardrails,
+    ...(campaign ? { campaign } : {}),
+  });
+  if (decision.result === "block") {
+    return { ok: false, reason: `policy_block:${decision.reasons.join("; ")}` };
+  }
+  // `needs_approval` is OK here — we hold a verified receipt.
+  const builder = makeDiffBuilderAgent({ traceId });
+  const { diff } = await builder.build({ action, packet, campaign });
+  await store.put("execution_diffs", diff.diff_id, diff);
+  await store.put("policy_decisions", decision.decision_id, decision);
+  return { ok: true, diff, decision };
 }
 
 // Re-export helpers used by tests / callers that want to compose pieces.
