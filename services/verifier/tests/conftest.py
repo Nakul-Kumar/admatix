@@ -18,7 +18,11 @@ import pytest
 _HERE = Path(__file__).resolve()
 _VERIFIER_ROOT = _HERE.parents[1]
 _REPO_ROOT = _HERE.parents[3]
-for candidate in (_VERIFIER_ROOT / "src", _REPO_ROOT / "services" / "simulator" / "src"):
+# `_VERIFIER_ROOT` (services/verifier) is on sys.path so the method-validation
+# harness (`services/verifier/validation/`) is importable from tests. The
+# harness is intentionally a sibling of `src/` rather than a submodule of
+# `admatix_verifier` because it ships no runtime code.
+for candidate in (_VERIFIER_ROOT, _VERIFIER_ROOT / "src", _REPO_ROOT / "services" / "simulator" / "src"):
     candidate_str = str(candidate)
     if candidate_str not in sys.path:
         sys.path.insert(0, candidate_str)

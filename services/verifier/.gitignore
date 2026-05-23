@@ -3,3 +3,11 @@ __pycache__/
 *.pyc
 .pytest_cache/
 data/
+
+# Method-validation harness — regenerable bytes are ignored; the
+# reference-library outputs are committed because they require an
+# isolated venv (see validation/scripts/run_reference_comparison.sh).
+validation/.refvenv_*/
+validation/_fixtures/*.csv
+validation/_fixtures/_bespoke_results.json
+validation/_fixtures/manifest.json

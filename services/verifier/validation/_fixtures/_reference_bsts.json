@@ -1,0 +1,20 @@
+{
+  "bsts_no_seasonal_small": {
+    "true_delta": 0.005,
+    "estimate": 0.005224520340561867,
+    "ci_low": 0.003506113681942223,
+    "ci_high": 0.007105261320248246
+  },
+  "bsts_no_seasonal_medium": {
+    "true_delta": 0.02,
+    "estimate": 0.020400384441018105,
+    "ci_low": 0.01883483715355396,
+    "ci_high": 0.022007032483816146
+  },
+  "bsts_seasonal_medium": {
+    "true_delta": 0.02,
+    "estimate": 0.01964579150080681,
+    "ci_low": 0.01809200970456004,
+    "ci_high": 0.021219184156507254
+  }
+}
