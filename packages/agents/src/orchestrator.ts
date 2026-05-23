@@ -238,6 +238,19 @@ export async function runWorkflow(
   const diffs: ExecutionDiff[] = [];
   const acceptedPackets: H0Packet[] = [];
   const verifierVerdicts: VerifyResponsePayload["verdict"][] = [];
+  // Collected during the per-packet loop and drained after it so the
+  // verifier emit fires regardless of policy outcome. F6 stops the
+  // loop body early for `needs_approval` packets (no diff is built),
+  // but the verifier's call already ran during MeasurementScientist
+  // review — the OutcomeMeasurement is observational and is persisted
+  // + emitted post-loop. WP-S §Acceptance 8 only requires that
+  // `measurement.verified` appear AFTER some `diff.built` in the
+  // workflow's event stream; deferring to post-loop satisfies that
+  // for every mixed run that contains at least one allow-path packet.
+  const pendingVerifications: {
+    packetWithApproval: H0Packet;
+    verification: VerifyResponsePayload;
+  }[] = [];
 
   for (const draftPacket of packets) {
     // ---------- EvidenceLedger gate (mandatory) ----------
@@ -388,6 +401,9 @@ export async function runWorkflow(
       });
       await store.put("h0_packets", packetWithApproval.packet_id, packetWithApproval);
       acceptedPackets.push(packetWithApproval);
+      if (verification) {
+        pendingVerifications.push({ packetWithApproval, verification });
+      }
       continue;
     }
 
@@ -408,6 +424,9 @@ export async function runWorkflow(
         payload_hash: acOutput.input_hash,
         level: "info",
       });
+      if (verification) {
+        pendingVerifications.push({ packetWithApproval, verification });
+      }
       continue;
     }
 
@@ -440,34 +459,41 @@ export async function runWorkflow(
     await store.put("h0_packets", packetWithApproval.packet_id, packetWithApproval);
     acceptedPackets.push(packetWithApproval);
 
-    // ---------- Verifier outcome persistence + emit ----------
+    // ---------- Verifier outcome — collected for post-loop drain ----------
     // Per WP-S §Acceptance 8 the event order is
     //   evidence.ok → policy.allow → diff.built → measurement.verified
-    // so the verifier's persistence + emit live at the bottom of the
-    // packet loop (after diff.built), even though the call itself
-    // happened during MeasurementScientist.review above.
+    // We defer the persistence + emit until after the loop so packets
+    // that took F6's needs_approval continue (no diff in runWorkflow)
+    // still get their measurement.verified into the event stream — the
+    // verifier's call already ran during MeasurementScientist.review
+    // above, so the response is observational regardless of policy.
     if (verification) {
-      const measurement = buildOutcomeMeasurement(
-        packetWithApproval,
-        verification,
-      );
-      await store.put(
-        "outcome_measurements",
-        measurement.measurement_id,
-        measurement,
-      );
-      const payload_hash = sha256(canonicalVerifierPayload(verification));
-      await emit(store, {
-        workflow_id,
-        trace_id,
-        step: "measure",
-        agent_id: "measurement-scientist",
-        type: "measurement.verified",
-        payload_hash,
-        level: "info",
-      });
-      verifierVerdicts.push(verification.verdict);
+      pendingVerifications.push({ packetWithApproval, verification });
     }
+  }
+
+  // ---------- Drain pending verifier outcomes ----------
+  for (const { packetWithApproval, verification } of pendingVerifications) {
+    const measurement = buildOutcomeMeasurement(
+      packetWithApproval,
+      verification,
+    );
+    await store.put(
+      "outcome_measurements",
+      measurement.measurement_id,
+      measurement,
+    );
+    const payload_hash = sha256(canonicalVerifierPayload(verification));
+    await emit(store, {
+      workflow_id,
+      trace_id,
+      step: "measure",
+      agent_id: "measurement-scientist",
+      type: "measurement.verified",
+      payload_hash,
+      level: "info",
+    });
+    verifierVerdicts.push(verification.verdict);
   }
 
   // ---------- Reflect ----------
