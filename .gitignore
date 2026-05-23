@@ -4,6 +4,7 @@ dist/
 *.tsbuildinfo
 __pycache__/
 *.py[cod]
+*.egg-info/
 .venv/
 .venv*/
 services/*/.venv/
@@ -15,6 +16,7 @@ data/datasets/
 data/raw/
 data/.cache/
 data/sim/
+services/uplift/output/
 coverage/
 *.log
 .DS_Store

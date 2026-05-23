@@ -1,0 +1,17 @@
+{
+  "output_dir": "../output/placebo-default",
+  "seeds": [1700, 1701, 1702, 1703, 1704, 1705, 1706, 1707, 1708, 1709],
+  "world_grid": [
+    {
+      "world_type": "zero_lift_placebo",
+      "baseline_cr": 0.03,
+      "true_lift": 0.0,
+      "n_users": 4000,
+      "noise_sd": 0.0,
+      "seasonality": 0.0,
+      "n_periods": 30,
+      "n_geos": 20
+    }
+  ],
+  "cate_model": "econml_dml"
+}

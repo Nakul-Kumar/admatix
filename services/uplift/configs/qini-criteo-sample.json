@@ -1,0 +1,7 @@
+{
+  "output_dir": "../output/qini-criteo-sample",
+  "seeds": [1300],
+  "criteo_sample_rows": 200000,
+  "train_test_split": 0.5,
+  "cate_model": "econml_dml"
+}

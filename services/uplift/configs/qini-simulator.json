@@ -1,0 +1,21 @@
+{
+  "output_dir": "../output/qini-simulator",
+  "seeds": [
+    1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009,
+    1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019,
+    1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029
+  ],
+  "world_grid": [
+    {
+      "world_type": "clean_ab",
+      "baseline_cr": 0.03,
+      "true_lift": 0.04,
+      "n_users": 4000,
+      "noise_sd": 0.0,
+      "seasonality": 0.0,
+      "n_periods": 30,
+      "n_geos": 20
+    }
+  ],
+  "cate_model": "econml_dml"
+}

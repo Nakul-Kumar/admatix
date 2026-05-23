@@ -13,7 +13,7 @@ dependencies = [
   "numpy>=2.1,<2.2",
   "pandas>=2.2,<2.3",
   "scipy>=1.14,<1.17",
-  "scikit-learn>=1.5,<1.6",
+  "scikit-learn>=1.6,<1.8",
   "statsmodels>=0.14,<0.15",
   "econml==0.16.0",
   "causalml==0.16.0",
