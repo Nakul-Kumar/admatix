@@ -6,10 +6,13 @@ Branch: `codex/cx7-prod-hygiene-ci`
 ## Shipped Changes
 
 - Added GitHub Actions CI at `.github/workflows/ci.yml`.
+  - Pushes to `main` and `codex/**` now run CI, so future Codex work branches get immediate feedback.
   - Node job: install, `pnpm -r typecheck`, `pnpm exec turbo run test --concurrency=1`, build, secret scan, production dependency audit.
-  - Python job: no-raw-dataset pytest for `services/ingest`, `services/simulator`, and `packages/evidence/test_pytest_smoke.py`.
+  - Python job: no-raw-dataset pytest for `services/ingest`, `services/simulator`, and `packages/evidence/test_pytest_smoke.py`, then installs verifier dependencies and runs `services/verifier/tests`.
 - Added deterministic root scripts:
   - `pnpm test:python`
+  - `pnpm test:python:core`
+  - `pnpm test:python:verifier`
   - `pnpm audit:prod`
 - Added production hard-fail coverage and implementation for:
   - `ADMATIX_API_TOKENS`: production boot rejects missing token config, demo default token keys, and empty production token maps.
@@ -19,6 +22,8 @@ Branch: `codex/cx7-prod-hygiene-ci`
   - Final audit output is clean.
 
 No proof-dashboard files were changed. No CX-1 data-origin behavior was changed.
+
+The branch also merged `codex/local-baseline-windows-demo-test` so it preserves the Windows `file://` verifier loader fix from the local baseline.
 
 ## Verification Output
 
@@ -119,18 +124,18 @@ Time:    254ms >>> FULL TURBO
 • turbo 2.9.14
 ```
 
-### `pnpm test:python`
+### `pnpm run test:python:core`
 
 Exit code: 0
 
 ```text
-> admatix@0.1.0 test:python C:\Users\nakul\OneDrive\Documents\Claude\Projects\admatix-codex-wt\cx7-hygiene
+> admatix@0.1.0 test:python:core C:\Users\nakul\OneDrive\Documents\Claude\Projects\admatix-codex-wt\cx7-hygiene
 > python -m pytest services/ingest/tests services/simulator/tests packages/evidence/test_pytest_smoke.py
 
 ============================= test session starts =============================
-platform win32 -- Python 3.13.2, pytest-8.4.2, pluggy-1.6.0
+platform win32 -- Python 3.12.1, pytest-8.3.5, pluggy-1.6.0
 rootdir: C:\Users\nakul\OneDrive\Documents\Claude\Projects\admatix-codex-wt\cx7-hygiene
-plugins: anyio-4.11.0
+plugins: anyio-4.13.0
 collected 45 items
 
 services\ingest\tests\test_ingest.py .......                             [ 15%]
@@ -139,7 +144,19 @@ services\simulator\tests\test_robustness_worlds.py ..................... [ 62%]
 services\simulator\tests\test_simulator.py ...............               [ 97%]
 packages\evidence\test_pytest_smoke.py .                                 [100%]
 
-============================= 45 passed in 3.33s ==============================
+============================= 45 passed in 3.56s ==============================
+```
+
+### `pnpm run test:python:verifier`
+
+Exit code: 0
+
+```text
+> admatix@0.1.0 test:python:verifier C:\Users\nakul\OneDrive\Documents\Claude\Projects\admatix-codex-wt\cx7-hygiene
+> python -m pytest services/verifier/tests
+
+.......................................                                  [100%]
+39 passed in 60.49s (0:01:00)
 ```
 
 ### `pnpm scan-secrets`

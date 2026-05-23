@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - codex/cx7-prod-hygiene-ci
+      - "codex/**"
 
 permissions:
   contents: read
@@ -67,8 +67,14 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install Python test dependencies
+      - name: Install lightweight Python test dependencies
         run: python -m pip install --upgrade pip pytest==8.3.4
 
-      - name: Run no-raw-dataset service tests
-        run: pnpm test:python
+      - name: Run ingest and simulator tests
+        run: pnpm run test:python:core
+
+      - name: Install verifier dependencies
+        run: python -m pip install --prefer-binary -r services/verifier/requirements.txt
+
+      - name: Run verifier tests
+        run: pnpm run test:python:verifier
