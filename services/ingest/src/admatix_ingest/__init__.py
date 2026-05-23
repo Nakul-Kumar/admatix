@@ -47,6 +47,12 @@ class DatasetSpec:
     compressed: bool
     output_filename: str
     citation: str = ""
+    # Pinned hashes for self-verifying re-acquires. Set to a known value once
+    # the dataset has been downloaded and inspected; subsequent runs will
+    # ABORT on mismatch instead of silently re-recording whatever bytes
+    # showed up (finding #7).
+    expected_archive_sha256: str | None = None
+    expected_landed_sha256: str | None = None
 
 
 @dataclass(frozen=True)
@@ -73,10 +79,15 @@ class AcquisitionResult:
     landed_path: Path
     checksum_path: Path
     manifest_path: Path
-    sha256: str
+    sha256: str  # hash of the LANDED file the simulator/verifier will read
+    archive_sha256: str  # hash of the upstream archive (== sha256 when not compressed)
     rows: int
     schema_ok: bool
     compressed: bool
+
+
+class DatasetIntegrityError(RuntimeError):
+    """Raised when an acquired or cached file does not match its pinned hash."""
 
 
 HILLSTROM_SPEC = DatasetSpec(
@@ -89,6 +100,10 @@ HILLSTROM_SPEC = DatasetSpec(
     compressed=False,
     output_filename="hillstrom.csv",
     citation="Kevin Hillstrom, MineThatData E-Mail Analytics Data Mining Challenge, 2008",
+    # Hillstrom is plain CSV — archive and landed bytes are identical, so the
+    # same hash pins both. Discovered on the first successful acquire.
+    expected_archive_sha256="0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+    expected_landed_sha256="0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
 )
 
 CRITEO_UPLIFT_SPEC = DatasetSpec(
@@ -101,11 +116,16 @@ CRITEO_UPLIFT_SPEC = DatasetSpec(
     compressed=True,
     output_filename="criteo-uplift-v2.1.csv",
     citation="Diemert et al., A Large Scale Benchmark for Uplift Modeling, AdKDD 2018",
+    # Pin the archive hash discovered on the first successful download. The
+    # landed (decompressed) hash will be populated once the decompressed file
+    # has been observed; leaving it None means "record but do not enforce".
+    expected_archive_sha256="2716e1bf0fd157a93b5bf86924d9088419dfbac2022c6cd90030220634f616dc",
+    expected_landed_sha256=None,
 )
 
+# One canonical key per dataset (finding #19): "criteo" was an ambiguous alias.
 DATASET_SPECS = {
     HILLSTROM_SPEC.name: HILLSTROM_SPEC,
-    "criteo": CRITEO_UPLIFT_SPEC,
     CRITEO_UPLIFT_SPEC.name: CRITEO_UPLIFT_SPEC,
 }
 
@@ -165,13 +185,25 @@ def write_checksum_record(
     *,
     rows: int,
     schema_ok: bool,
+    archive_path: Path | None = None,
 ) -> ChecksumRecord:
+    """Record a checksum for the LANDED artifact (the file the simulator and
+    verifier actually open). When the upstream archive differs (e.g., Criteo's
+    .csv.gz), its hash is recorded separately as `archive_sha256` so the
+    manifest captures both ends of the integrity chain (finding #6).
+    """
     checksum_root = Path(checksum_root)
     checksum_root.mkdir(parents=True, exist_ok=True)
     artifact = Path(artifact)
     sha256 = compute_sha256(artifact)
+    archive_path = Path(archive_path) if archive_path is not None else artifact
+    archive_sha256 = (
+        sha256 if archive_path.resolve() == artifact.resolve() else compute_sha256(archive_path)
+    )
     checksum_path = checksum_root / f"{spec.name}.sha256"
     manifest_path = checksum_root / f"{spec.name}.manifest.json"
+    # Checksum file points at the LANDED filename so `sha256sum -c` against the
+    # file the downstream code reads actually validates the right bytes.
     checksum_path.write_text(f"{sha256}  {artifact.name}\n", encoding="utf-8")
     manifest = {
         "dataset": spec.name,
@@ -179,9 +211,15 @@ def write_checksum_record(
         "license": spec.license,
         "redistribution": spec.redistribution,
         "citation": spec.citation,
-        "original_filename": artifact.name,
+        "landed_filename": artifact.name,
+        "original_filename": artifact.name,  # kept for back-compat
+        "archive_filename": archive_path.name,
         "byte_size": artifact.stat().st_size,
-        "sha256": sha256,
+        "archive_byte_size": archive_path.stat().st_size,
+        "sha256": sha256,  # landed-file hash (what `sha256sum -c` checks)
+        "archive_sha256": archive_sha256,  # upstream-archive hash
+        "expected_landed_sha256": spec.expected_landed_sha256,
+        "expected_archive_sha256": spec.expected_archive_sha256,
         "rows": rows,
         "expected_rows": spec.expected_rows,
         "columns": spec.columns,
@@ -198,19 +236,46 @@ def acquire_dataset(
     dataset_root: Path,
     checksum_root: Path,
     *,
-    enforce_expected_rows: bool = False,
+    enforce_expected_rows: bool = True,
 ) -> AcquisitionResult:
+    """Materialize a dataset: copy/decompress the source into ``dataset_root``,
+    validate its schema and row count, and write a checksum + manifest record
+    keyed on the LANDED file (the bytes downstream code reads).
+
+    Aborts via ``DatasetIntegrityError`` if either the upstream archive or the
+    landed file fails to match a pinned ``expected_*_sha256`` (finding #7).
+    """
     source_path = Path(source_path)
+    if spec.expected_archive_sha256 is not None:
+        observed = compute_sha256(source_path)
+        if observed != spec.expected_archive_sha256:
+            raise DatasetIntegrityError(
+                f"{spec.name}: archive sha256 mismatch — "
+                f"expected {spec.expected_archive_sha256}, got {observed} for {source_path}"
+            )
     dataset_dir = Path(dataset_root) / spec.name
     landed_path = dataset_dir / spec.output_filename
     _copy_or_decompress(source_path, landed_path, spec.compressed)
+    if spec.expected_landed_sha256 is not None:
+        observed_landed = compute_sha256(landed_path)
+        if observed_landed != spec.expected_landed_sha256:
+            raise DatasetIntegrityError(
+                f"{spec.name}: landed sha256 mismatch — "
+                f"expected {spec.expected_landed_sha256}, got {observed_landed} for {landed_path}"
+            )
     validation = validate_dataset(spec, landed_path, enforce_expected_rows=enforce_expected_rows)
     record = write_checksum_record(
         spec,
-        source_path,
+        landed_path,
         checksum_root,
         rows=validation.rows,
         schema_ok=validation.schema_ok,
+        archive_path=source_path,
+    )
+    archive_sha256 = (
+        record.sha256
+        if Path(source_path).resolve() == landed_path.resolve()
+        else compute_sha256(source_path)
     )
     return AcquisitionResult(
         dataset=spec.name,
@@ -219,6 +284,7 @@ def acquire_dataset(
         checksum_path=record.checksum_path,
         manifest_path=record.manifest_path,
         sha256=record.sha256,
+        archive_sha256=archive_sha256,
         rows=validation.rows,
         schema_ok=validation.schema_ok,
         compressed=spec.compressed or source_path.suffix == ".gz",
@@ -226,15 +292,35 @@ def acquire_dataset(
 
 
 def download_to_raw(spec: DatasetSpec, raw_root: Path) -> Path:
+    """Fetch ``spec.source_url`` into ``raw_root/<dataset>/``. If a cached
+    file is present and a pinned ``expected_archive_sha256`` exists, the cache
+    is validated against it; on mismatch the cached file is removed and
+    re-downloaded (finding #8). Without a pinned hash, a non-empty cached file
+    is still trusted — pin a hash in the spec to defend against partial
+    downloads.
+    """
     raw_dir = Path(raw_root) / spec.name
     raw_dir.mkdir(parents=True, exist_ok=True)
     filename = Path(spec.source_url).name or spec.output_filename
     target = raw_dir / filename
     if target.exists() and target.stat().st_size > 0:
-        return target
+        if spec.expected_archive_sha256 is None:
+            return target
+        cached_hash = compute_sha256(target)
+        if cached_hash == spec.expected_archive_sha256:
+            return target
+        # Cached file is corrupt / wrong version. Re-fetch.
+        target.unlink()
     request = urllib.request.Request(spec.source_url, headers={"User-Agent": "AdMatix dataset ingest/0.1"})
     with urllib.request.urlopen(request, timeout=120) as response, target.open("wb") as out:
         shutil.copyfileobj(response, out)
+    if spec.expected_archive_sha256 is not None:
+        observed = compute_sha256(target)
+        if observed != spec.expected_archive_sha256:
+            raise DatasetIntegrityError(
+                f"{spec.name}: downloaded archive sha256 mismatch — "
+                f"expected {spec.expected_archive_sha256}, got {observed} for {target}"
+            )
     return target
 
 
@@ -245,7 +331,7 @@ def acquire_by_name(
     checksum_root: Path = Path("data/checksums"),
     raw_root: Path = Path("data/raw"),
     source_path: Path | None = None,
-    enforce_expected_rows: bool = False,
+    enforce_expected_rows: bool = True,
 ) -> AcquisitionResult:
     if dataset_name not in DATASET_SPECS:
         valid = ", ".join(sorted(DATASET_SPECS))
@@ -268,7 +354,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--datasets-root", type=Path, default=Path("data/datasets"))
     parser.add_argument("--checksums-root", type=Path, default=Path("data/checksums"))
     parser.add_argument("--raw-root", type=Path, default=Path("data/raw"))
-    parser.add_argument("--enforce-rows", action="store_true", help="require exact published row counts")
+    parser.add_argument(
+        "--no-enforce-rows",
+        dest="enforce_rows",
+        action="store_false",
+        help="skip the published-row-count check (default: enforced)",
+    )
+    parser.set_defaults(enforce_rows=True)
     args = parser.parse_args(argv)
     result = acquire_by_name(
         args.dataset,
@@ -292,9 +384,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 __all__ = [
     "CRITEO_UPLIFT_SPEC",
+    "DATASET_SPECS",
     "HILLSTROM_SPEC",
     "AcquisitionResult",
     "ChecksumRecord",
+    "DatasetIntegrityError",
     "DatasetSpec",
     "ValidationResult",
     "acquire_by_name",
