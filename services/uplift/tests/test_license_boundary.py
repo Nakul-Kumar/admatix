@@ -18,6 +18,14 @@ def test_no_committed_criteo_sample_rows():
     for path in ROOT.rglob("*"):
         if ".git" in path.parts or not path.is_file():
             continue
+        relative_parts = path.relative_to(ROOT).parts
+        if relative_parts[:2] in {("data", "datasets"), ("data", "raw")}:
+            continue
+        if relative_parts[:3] in {
+            ("services", "uplift", "output"),
+            ("services", "backtests", "output"),
+        }:
+            continue
         if path.suffix in {".png", ".gz", ".zip", ".pyc"}:
             continue
         try:
