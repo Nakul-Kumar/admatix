@@ -1,0 +1,7 @@
+# Benchmark consumes the verifier (which itself pins everything).
+# Install order on the bench worktree:
+#   pip install -r services/verifier/requirements.txt
+#   pip install -e services/verifier
+#   pip install -e services/benchmark
+# The simulator is pure-stdlib; it is added via PYTHONPATH (services/simulator/src).
+pytest==8.3.*

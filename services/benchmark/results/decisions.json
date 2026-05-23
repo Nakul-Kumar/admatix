@@ -1,0 +1,694 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-23T18:43:42+00:00",
+  "runs": [
+    {
+      "run_id": "A__clean_ab__seed=17__buyer=llm__tier=basic",
+      "arm": "A",
+      "world_type": "clean_ab",
+      "seed": 17,
+      "buyer_kind": "llm",
+      "skill_tier": "basic",
+      "env_config_summary": {
+        "account_id": "clean_ab__seed17",
+        "n_campaigns": 3,
+        "n_periods": 28,
+        "decision_every_n_days": 7,
+        "campaign_specs": [
+          {
+            "campaign_id": "c_winner",
+            "world_type": "clean_ab",
+            "true_lift": 0.02,
+            "confound_strength": 0.0,
+            "revealed_world_label": "positive_lift",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_meh",
+            "world_type": "clean_ab",
+            "true_lift": 0.005,
+            "confound_strength": 0.0,
+            "revealed_world_label": "small_positive_lift",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          },
+          {
+            "campaign_id": "c_dud",
+            "world_type": "clean_ab",
+            "true_lift": 0.0,
+            "confound_strength": 0.0,
+            "revealed_world_label": "no_lift",
+            "base_daily_budget": 100.0,
+            "n_users": 4000,
+            "n_periods": 28
+          }
+        ]
+      },
+      "final_scores": {
+        "total_spend": 12992.7,
+        "reported_revenue": 46744.3469,
+        "true_incremental_revenue": 9197.9731,
+        "reported_roas": 3.597739,
+        "true_iroas": 0.707934,
+        "net_incremental_value": -3794.7269,
+        "wasted_spend": 4330.9,
+        "true_lift_captured": 9197.9731,
+        "campaigns": [
+          {
+            "campaign_id": "c_winner",
+            "true_iroas": 1.589492,
+            "reported_roas": 3.952428,
+            "cumulative_spend": 4330.9,
+            "cumulative_reported_revenue": 17117.57,
+            "cumulative_true_incremental_revenue": 6883.9325,
+            "budget_multiplier_final": 2.1970000000000005,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_meh",
+            "true_iroas": 0.534309,
+            "reported_roas": 3.859886,
+            "cumulative_spend": 4330.9,
+            "cumulative_reported_revenue": 16716.7784,
+            "cumulative_true_incremental_revenue": 2314.0407,
+            "budget_multiplier_final": 2.1970000000000005,
+            "status_final": "active"
+          },
+          {
+            "campaign_id": "c_dud",
+            "true_iroas": 0.0,
+            "reported_roas": 2.980904,
+            "cumulative_spend": 4330.9,
+            "cumulative_reported_revenue": 12909.9984,
+            "cumulative_true_incremental_revenue": 0.0,
+            "budget_multiplier_final": 2.1970000000000005,
+            "status_final": "active"
+          }
+        ]
+      },
+      "counts": {
+        "decisions": 4,
+        "proposals": 12,
+        "scale_up_proposals": 9,
+        "scale_ups_applied": 9,
+        "scale_ups_blocked_by_gate": 0,
+        "false_scale_ups_prevented": 0,
+        "true_scale_ups_prevented": 0,
+        "pause_proposals": 0,
+        "pauses_applied": 0
+      },
+      "notes": [
+        "llm_buyer_fell_back_to_policy (claude CLI failed or unavailable)"
+      ],
+      "timeline": [
+        {
+          "day": 0,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_winner",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_meh",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            },
+            {
+              "campaign_id": "c_dud",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 0.0,
+              "lifetime_reported_revenue": 0.0,
+              "lifetime_reported_conversions": 0.0,
+              "lifetime_reported_roas": 0.0,
+              "last_window_days": 0,
+              "last_window_spend": 0,
+              "last_window_reported_revenue": 0,
+              "last_window_reported_conversions": 0,
+              "last_window_reported_roas": 0.0,
+              "days_active": 0
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_winner",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "hold",
+              "delta_pct": null,
+              "rationale": "no spend yet; need a window of data"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_winner",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "hold",
+              "delta_pct": null,
+              "final_action": "hold",
+              "final_delta_pct": null,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_winner",
+              "world_type": "clean_ab",
+              "revealed_world_label": "positive_lift",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_meh",
+              "world_type": "clean_ab",
+              "revealed_world_label": "small_positive_lift",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_dud",
+              "world_type": "clean_ab",
+              "revealed_world_label": "no_lift",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 0.0,
+              "budget_multiplier": 1.0,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_winner",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 3767.9,
+              "lifetime_reported_conversions": 33.0,
+              "lifetime_reported_roas": 5.3827,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 3767.9,
+              "last_window_reported_conversions": 33.0,
+              "last_window_reported_roas": 5.3827,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_meh",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 2488.67,
+              "lifetime_reported_conversions": 19.0,
+              "lifetime_reported_roas": 3.5552,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 2488.67,
+              "last_window_reported_conversions": 19.0,
+              "last_window_reported_roas": 3.5552,
+              "days_active": 7
+            },
+            {
+              "campaign_id": "c_dud",
+              "status": "active",
+              "daily_budget": 100.0,
+              "lifetime_spend": 700.0,
+              "lifetime_reported_revenue": 1955.68,
+              "lifetime_reported_conversions": 16.0,
+              "lifetime_reported_roas": 2.7938,
+              "last_window_days": 7,
+              "last_window_spend": 700.0,
+              "last_window_reported_revenue": 1955.68,
+              "last_window_reported_conversions": 16.0,
+              "last_window_reported_roas": 2.7938,
+              "days_active": 7
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_winner",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 5.38 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 3.56 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 2.79 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_winner",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_winner",
+              "world_type": "clean_ab",
+              "revealed_world_label": "positive_lift",
+              "true_iroas": 2.160729,
+              "true_incremental_revenue_to_date": 1512.5105,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.3,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_meh",
+              "world_type": "clean_ab",
+              "revealed_world_label": "small_positive_lift",
+              "true_iroas": 0.403989,
+              "true_incremental_revenue_to_date": 282.792,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.3,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_dud",
+              "world_type": "clean_ab",
+              "revealed_world_label": "no_lift",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 700.0,
+              "budget_multiplier": 1.3,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 14,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_winner",
+              "status": "active",
+              "daily_budget": 130.0,
+              "lifetime_spend": 1610.0,
+              "lifetime_reported_revenue": 7227.34,
+              "lifetime_reported_conversions": 60.3,
+              "lifetime_reported_roas": 4.489,
+              "last_window_days": 7,
+              "last_window_spend": 910.0,
+              "last_window_reported_revenue": 3459.44,
+              "last_window_reported_conversions": 27.3,
+              "last_window_reported_roas": 3.8016,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_meh",
+              "status": "active",
+              "daily_budget": 130.0,
+              "lifetime_spend": 1610.0,
+              "lifetime_reported_revenue": 5750.82,
+              "lifetime_reported_conversions": 42.4,
+              "lifetime_reported_roas": 3.5719,
+              "last_window_days": 7,
+              "last_window_spend": 910.0,
+              "last_window_reported_revenue": 3262.15,
+              "last_window_reported_conversions": 23.4,
+              "last_window_reported_roas": 3.5848,
+              "days_active": 14
+            },
+            {
+              "campaign_id": "c_dud",
+              "status": "active",
+              "daily_budget": 130.0,
+              "lifetime_spend": 1610.0,
+              "lifetime_reported_revenue": 6138.59,
+              "lifetime_reported_conversions": 47.2,
+              "lifetime_reported_roas": 3.8128,
+              "last_window_days": 7,
+              "last_window_spend": 910.0,
+              "last_window_reported_revenue": 4182.91,
+              "last_window_reported_conversions": 31.2,
+              "last_window_reported_roas": 4.5966,
+              "days_active": 14
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_winner",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 3.80 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 3.58 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.60 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_winner",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_winner",
+              "world_type": "clean_ab",
+              "revealed_world_label": "positive_lift",
+              "true_iroas": 1.779245,
+              "true_incremental_revenue_to_date": 2864.5845,
+              "cumulative_spend": 1610.0,
+              "budget_multiplier": 1.6900000000000002,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_meh",
+              "world_type": "clean_ab",
+              "revealed_world_label": "small_positive_lift",
+              "true_iroas": 0.468096,
+              "true_incremental_revenue_to_date": 753.6349,
+              "cumulative_spend": 1610.0,
+              "budget_multiplier": 1.6900000000000002,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_dud",
+              "world_type": "clean_ab",
+              "revealed_world_label": "no_lift",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 1610.0,
+              "budget_multiplier": 1.6900000000000002,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "day": 21,
+          "reported_snapshot": [
+            {
+              "campaign_id": "c_winner",
+              "status": "active",
+              "daily_budget": 169.0,
+              "lifetime_spend": 2793.0,
+              "lifetime_reported_revenue": 12526.38,
+              "lifetime_reported_conversions": 104.24,
+              "lifetime_reported_roas": 4.4849,
+              "last_window_days": 7,
+              "last_window_spend": 1183.0,
+              "last_window_reported_revenue": 5299.04,
+              "last_window_reported_conversions": 43.94,
+              "last_window_reported_roas": 4.4793,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_meh",
+              "status": "active",
+              "daily_budget": 169.0,
+              "lifetime_spend": 2793.0,
+              "lifetime_reported_revenue": 11820.74,
+              "lifetime_reported_conversions": 98.17,
+              "lifetime_reported_roas": 4.2323,
+              "last_window_days": 7,
+              "last_window_spend": 1183.0,
+              "last_window_reported_revenue": 6069.92,
+              "last_window_reported_conversions": 55.77,
+              "last_window_reported_roas": 5.131,
+              "days_active": 21
+            },
+            {
+              "campaign_id": "c_dud",
+              "status": "active",
+              "daily_budget": 169.0,
+              "lifetime_spend": 2793.0,
+              "lifetime_reported_revenue": 9543.4,
+              "lifetime_reported_conversions": 72.55,
+              "lifetime_reported_roas": 3.4169,
+              "last_window_days": 7,
+              "last_window_spend": 1183.0,
+              "last_window_reported_revenue": 3404.81,
+              "last_window_reported_conversions": 25.35,
+              "last_window_reported_roas": 2.8781,
+              "days_active": 21
+            }
+          ],
+          "proposals": [
+            {
+              "campaign_id": "c_winner",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 4.48 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 5.13 > 2.0; scale 30%"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "rationale": "reported ROAS 2.88 > 2.0; scale 30%"
+            }
+          ],
+          "gate_decisions": [
+            {
+              "campaign_id": "c_winner",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_meh",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            },
+            {
+              "campaign_id": "c_dud",
+              "action": "scale_up",
+              "delta_pct": 30.0,
+              "final_action": "scale_up",
+              "final_delta_pct": 30.0,
+              "gate_invoked": false,
+              "verifier_verdict": null,
+              "verifier_estimate": null,
+              "verifier_ci": null,
+              "verifier_method": null,
+              "outcome": "applied",
+              "reason": "no_gate"
+            }
+          ],
+          "ground_truth_at_day": [
+            {
+              "campaign_id": "c_winner",
+              "world_type": "clean_ab",
+              "revealed_world_label": "positive_lift",
+              "true_iroas": 1.738403,
+              "true_incremental_revenue_to_date": 4855.3596,
+              "cumulative_spend": 2793.0,
+              "budget_multiplier": 2.1970000000000005,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_meh",
+              "world_type": "clean_ab",
+              "revealed_world_label": "small_positive_lift",
+              "true_iroas": 0.581018,
+              "true_incremental_revenue_to_date": 1622.7836,
+              "cumulative_spend": 2793.0,
+              "budget_multiplier": 2.1970000000000005,
+              "status": "active"
+            },
+            {
+              "campaign_id": "c_dud",
+              "world_type": "clean_ab",
+              "revealed_world_label": "no_lift",
+              "true_iroas": 0.0,
+              "true_incremental_revenue_to_date": 0.0,
+              "cumulative_spend": 2793.0,
+              "budget_multiplier": 2.1970000000000005,
+              "status": "active"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
