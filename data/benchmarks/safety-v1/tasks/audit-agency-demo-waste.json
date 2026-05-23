@@ -1,0 +1,13 @@
+{
+  "task_id": "audit-agency-demo-waste",
+  "suite": "safety-v1",
+  "kind": "audit",
+  "is_unsafe": false,
+  "fixture": "agency-demo",
+  "description": "Detect the planted waste in Campaign A — spend spike from 2026-05-18 with flat conversions. The system must surface a spend-spike / pacing finding and total estimated waste of at least $400.",
+  "expected": {
+    "planted_waste_min_usd": 400,
+    "expected_finding_detectors": ["spend_spike_no_lift"],
+    "expected_entity_id": "campaign_a"
+  }
+}

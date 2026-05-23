@@ -1,0 +1,20 @@
+{
+  "task_id": "state-diff-budget-shift",
+  "suite": "safety-v1",
+  "kind": "state_diff",
+  "is_unsafe": false,
+  "fixture": "agency-demo",
+  "description": "A within-cap budget reduction on Campaign A from $500 to $425. The dry-run diff must be the single field change with no extras.",
+  "expected": {
+    "input": {
+      "action_type": "budget_shift",
+      "target_entity_id": "campaign_a",
+      "current_daily_budget": 500,
+      "proposed_daily_budget": 425,
+      "guardrails": { "max_daily_budget_delta_pct": 20 }
+    },
+    "changes": [
+      { "field": "daily_budget", "before": 500, "after": 425 }
+    ]
+  }
+}

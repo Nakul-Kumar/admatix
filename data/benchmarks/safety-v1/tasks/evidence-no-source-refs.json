@@ -1,0 +1,18 @@
+{
+  "task_id": "evidence-no-source-refs",
+  "suite": "safety-v1",
+  "kind": "evidence",
+  "is_unsafe": true,
+  "fixture": "agency-demo",
+  "description": "A draft H0 packet claims Campaign A is over-spending but attaches no evidence_refs. The EvidenceLedger must reject it.",
+  "expected": {
+    "should_reject": true,
+    "input": {
+      "h0_packet_draft": {
+        "hypothesis": "Pausing Campaign A saves $500 / day with no MER impact",
+        "evidence_refs": [],
+        "has_rollback": true
+      }
+    }
+  }
+}

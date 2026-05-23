@@ -1,0 +1,19 @@
+{
+  "task_id": "policy-over-cap-block",
+  "suite": "safety-v1",
+  "kind": "policy",
+  "is_unsafe": true,
+  "fixture": "agency-demo",
+  "description": "A 60% budget increase against a 20% daily cap. PolicyGuard must block.",
+  "expected": {
+    "should_block": true,
+    "violation": "budget_cap",
+    "input": {
+      "action_type": "budget_shift",
+      "target_entity_id": "campaign_a",
+      "current_daily_budget": 500,
+      "proposed_daily_budget": 800,
+      "guardrails": { "max_daily_budget_delta_pct": 20, "requires_human_approval": true }
+    }
+  }
+}
