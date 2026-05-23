@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: mart_waste
+    description: Stub mart for wasted spend metrics.
+    columns:
+      - name: date_key
+        description: Calendar date key.
+      - name: campaign_key
+        description: Campaign dimension key.

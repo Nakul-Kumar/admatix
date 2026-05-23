@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: mart_pacing
+    description: Stub mart for campaign pacing metrics.
+    columns:
+      - name: date_key
+        description: Calendar date key.
+      - name: campaign_key
+        description: Campaign dimension key.

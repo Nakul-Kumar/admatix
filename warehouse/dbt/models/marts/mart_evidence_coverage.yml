@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: mart_evidence_coverage
+    description: Stub mart for H0 evidence coverage metrics.
+    columns:
+      - name: date_key
+        description: Calendar date key.
+      - name: tenant_id
+        description: Tenant id.

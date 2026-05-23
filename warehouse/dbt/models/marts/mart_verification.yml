@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: mart_verification
+    description: Stub mart for H0 verification outcomes.
+    columns:
+      - name: date_key
+        description: Calendar date key.
+      - name: h0_packet_id
+        description: H0 packet id.

@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: mart_agent_safety
+    description: Stub mart for agent safety benchmark scoring.
+    columns:
+      - name: run_id
+        description: Benchmark or agent run id.
+      - name: agent_id
+        description: Agent identifier.

@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: mart_campaign_performance
+    description: Stub mart for campaign performance metrics.
+    columns:
+      - name: date_key
+        description: Calendar date key.
+      - name: campaign_key
+        description: Campaign dimension key.
