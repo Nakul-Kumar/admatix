@@ -38,10 +38,23 @@ export type { MediaAnalystDeps, MediaAnalystInput, MediaAnalystResult } from "./
 export type { PolicyGuardInput, PolicyGuardResult } from "./agents/policy-guard-agent.js";
 export type { EvidenceLedgerInput, EvidenceLedgerResult } from "./agents/evidence-ledger-agent.js";
 export type { ApprovalCoordinatorInput, ApprovalCoordinatorResult } from "./agents/approval-coordinator-agent.js";
-export type { MeasurementScientistInput, MeasurementScientistResult } from "./agents/measurement-scientist-agent.js";
+export type {
+  MeasurementScientistDeps,
+  MeasurementScientistInput,
+  MeasurementScientistResult,
+} from "./agents/measurement-scientist-agent.js";
 export type { PlatformAdapterInput, PlatformAdapterResult } from "./agents/platform-adapter-agent.js";
 export type { DiffBuilderInput, DiffBuilderResult } from "./agents/diff-builder-agent.js";
 export type { ReflectionInput, ReflectionResult, Outcome } from "./agents/reflection-agent.js";
+
+export { createVerifierClient, VerifierError } from "./verifier-client.js";
+export type {
+  VerifierClient,
+  VerifierClientOptions,
+  VerifierErrorReason,
+  VerifyRequestPayload,
+  VerifyResponsePayload,
+} from "./verifier-client.js";
 
 /**
  * The 9 MVP agents indexed by `agent_id`, constructed against a shared
