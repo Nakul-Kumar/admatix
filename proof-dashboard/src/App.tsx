@@ -5,6 +5,7 @@ import { Worlds } from "./views/Worlds";
 import { Benchmark } from "./views/Benchmark";
 import { Validation } from "./views/Validation";
 import { Decisions } from "./views/Decisions";
+import { Artifacts } from "./views/Artifacts";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="benchmark" element={<Benchmark />} />
         <Route path="validation" element={<Validation />} />
         <Route path="decisions" element={<Decisions />} />
+        <Route path="artifacts" element={<Artifacts />} />
       </Route>
     </Routes>
   );

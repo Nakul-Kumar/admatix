@@ -673,6 +673,17 @@ button {
   border-radius: var(--radius-md);
 }
 
+.bullets {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--text-1);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 /* Decision log timeline */
 .timeline {
   display: flex;

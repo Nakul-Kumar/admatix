@@ -45,6 +45,13 @@ const ROUTES: Route[] = [
     title: "Decision Log",
     crumb: "Gated Decisions Timeline",
   },
+  {
+    to: "/artifacts",
+    label: "Proof Artifacts",
+    icon: "check",
+    title: "Proof Artifacts",
+    crumb: "Accepted Evidence Bundle",
+  },
 ];
 
 export function Layout() {
@@ -112,7 +119,7 @@ export function Layout() {
               <Icon name="lock" size={12} /> Evidence-gated
             </span>
             <span className="tag warn">
-              <Icon name="info" size={12} /> Demo samples by default
+              <Icon name="info" size={12} /> Origins visible
             </span>
           </div>
         </header>

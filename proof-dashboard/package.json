@@ -6,10 +6,12 @@
   "description": "Standalone showcase dashboard for AdMatix evidence-gated verification.",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm run sync:artifacts",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "validate:origin": "node scripts/validate-data-origin.mjs"
+    "sync:artifacts": "node scripts/sync-proof-artifacts.mjs",
+    "validate:origin": "npm run sync:artifacts && node scripts/validate-data-origin.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const allowedKinds = new Set([
@@ -39,6 +39,32 @@ for (const file of bundledFiles) {
   }
 }
 
+const artifactDir = join(root, "public", "data", "artifacts");
+const artifactFiles = (await readdir(artifactDir))
+  .filter((name) => name.endsWith(".json"))
+  .sort();
+
+if (!artifactFiles.includes("manifest.json")) {
+  failures.push("artifacts: manifest.json is required");
+}
+
+for (const file of artifactFiles) {
+  const path = join(artifactDir, file);
+  const raw = await readFile(path, "utf8");
+  const parsed = JSON.parse(raw);
+  const kind = parsed?.origin?.kind;
+
+  if (kind !== "artifact") {
+    failures.push(`artifacts/${file}: origin.kind must be artifact`);
+  }
+  if (typeof parsed?.origin?.label !== "string" || parsed.origin.label.trim() === "") {
+    failures.push(`artifacts/${file}: origin.label is required`);
+  }
+  if (parsed?.status && !["PASS", "READY", "FAIL", "INCONCLUSIVE"].includes(parsed.status)) {
+    failures.push(`artifacts/${file}: status must be PASS, READY, FAIL, or INCONCLUSIVE`);
+  }
+}
+
 const sourceChecks = [
   join(root, "src", "components", "Layout.tsx"),
   join(root, "src", "views", "Overview.tsx"),
@@ -46,6 +72,7 @@ const sourceChecks = [
   join(root, "src", "views", "Benchmark.tsx"),
   join(root, "src", "views", "Validation.tsx"),
   join(root, "src", "views", "Decisions.tsx"),
+  join(root, "src", "views", "Artifacts.tsx"),
 ];
 
 for (const path of sourceChecks) {
@@ -63,4 +90,6 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`Data-origin validation passed for ${bundledFiles.length} bundled datasets.`);
+console.log(
+  `Data-origin validation passed for ${bundledFiles.length} bundled datasets and ${artifactFiles.length} artifact files.`,
+);
