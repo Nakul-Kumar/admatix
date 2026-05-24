@@ -1,0 +1,61 @@
+{
+  "artifact_id": "cx3_headtohead_real_llm",
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-24T10:57:27Z",
+  "origin": {
+    "kind": "artifact",
+    "label": "CX-3 head-to-head benchmark output",
+    "description": "Aggregate benchmark evidence from the repaired real-LLM buyer run.",
+    "produced_by": "codex/cx3-headtohead-repair",
+    "artifact_uri": "docs/proof/artifacts/cx3-headtohead-summary.json"
+  },
+  "source_branch": "codex/cx3-headtohead-repair",
+  "source_commit": "b8028a03aca6d46a6f582733fe0deb39635a43d3",
+  "status": "READY",
+  "claim_limits": [
+    "Real Claude subscription buyer rows are present and counted.",
+    "Benchmark is simulated paid-media evidence, not live account evidence.",
+    "Fallback rows do not count toward proof readiness."
+  ],
+  "run": {
+    "run_id": "bench_2dfb070dd106",
+    "generated_at": "2026-05-24T02:15:06+00:00",
+    "world_types": [
+      "clean_ab",
+      "confounded",
+      "geo_structured",
+      "zero_lift_placebo",
+      "non_stationary",
+      "cross_campaign_interference",
+      "adversarial_misspecified"
+    ],
+    "rows": 168,
+    "decisions": 672,
+    "scale_up_proposals": 1082,
+    "scale_ups_blocked_by_gate": 359,
+    "false_scale_ups_prevented": 189
+  },
+  "llm_lane_accounting": {
+    "real_llm_rows": 28,
+    "deterministic_fallback_rows": 0,
+    "failed_llm_rows": 0,
+    "skipped_llm_rows": 0,
+    "proof_readiness_status": "READY"
+  },
+  "head_to_head": {
+    "B_vs_A": {
+      "n_paired": 42,
+      "delta_net_incremental_value_mean": 1511.978955,
+      "delta_wasted_spend_mean": -1499.15,
+      "delta_true_iroas_mean": 0.065039,
+      "win_rate_over_worlds": 0.738095
+    },
+    "D_vs_C": {
+      "n_paired": 42,
+      "delta_net_incremental_value_mean": 401.616021,
+      "delta_wasted_spend_mean": -425.333333,
+      "delta_true_iroas_mean": 0.020704,
+      "win_rate_over_worlds": 0.714286
+    }
+  }
+}

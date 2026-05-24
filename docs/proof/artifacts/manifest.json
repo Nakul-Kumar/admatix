@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-24T10:57:27Z",
+  "origin": {
+    "kind": "artifact",
+    "label": "AdMatix proof artifact manifest",
+    "description": "Aggregate-only proof evidence from CX-2 validation, CX-3 head-to-head benchmark, and CX-4 public RCT backtests. No raw Criteo or Hillstrom rows are included.",
+    "produced_by": "codex/cx9-proof-artifacts",
+    "artifact_uri": "docs/proof/artifacts/manifest.json"
+  },
+  "claim_limits": [
+    "Supports calibrated simulator plus public RCT/backtest evidence for evidence-gated verification behavior.",
+    "Does not prove live paid-media spend lift.",
+    "Does not include raw Criteo or Hillstrom data.",
+    "Criteo/Hillstrom outputs are aggregate-only and must preserve source license constraints.",
+    "Dashboard data remains demo/unavailable until artifact-specific dashboard schema is released."
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "cx2_validation_repair",
+      "path": "docs/proof/artifacts/cx2-validation-summary.json",
+      "source_branch": "codex/cx2-validation-repair",
+      "source_commit": "b925370",
+      "status": "PASS",
+      "origin_kind": "artifact",
+      "claim_limit": "Simulator/verifier calibration evidence only; robustness worlds prove no confident wrong claim, not guaranteed lift recovery."
+    },
+    {
+      "artifact_id": "cx3_headtohead_real_llm",
+      "path": "docs/proof/artifacts/cx3-headtohead-summary.json",
+      "source_branch": "codex/cx3-headtohead-repair",
+      "source_commit": "b8028a03aca6d46a6f582733fe0deb39635a43d3",
+      "status": "READY",
+      "origin_kind": "artifact",
+      "claim_limit": "Head-to-head benchmark contains real Claude subscription buyer rows, but remains simulated paid-media evidence."
+    },
+    {
+      "artifact_id": "cx4_public_rct_backtests",
+      "path": "docs/proof/artifacts/cx4-backtests-summary.json",
+      "source_branch": "codex/cx4-backtests-benchmarks",
+      "source_commit": "7f9a185e1711e39b673d3008c7b8fb5a93549502",
+      "status": "PASS",
+      "origin_kind": "artifact",
+      "claim_limit": "Public RCT/backtest recovery evidence only; Criteo license is non-commercial/share-alike and raw data is not redistributed."
+    }
+  ]
+}

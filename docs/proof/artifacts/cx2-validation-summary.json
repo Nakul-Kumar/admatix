@@ -1,0 +1,85 @@
+{
+  "artifact_id": "cx2_validation_repair",
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-24T10:57:27Z",
+  "origin": {
+    "kind": "artifact",
+    "label": "CX-2 validation repair output",
+    "description": "Aggregate Phase 4 validation metrics from the repaired simulator/verifier validation gate.",
+    "produced_by": "codex/cx2-validation-repair",
+    "artifact_uri": "docs/proof/artifacts/cx2-validation-summary.json"
+  },
+  "source_branch": "codex/cx2-validation-repair",
+  "source_commit": "b925370",
+  "status": "PASS",
+  "claim_limits": [
+    "Validates simulator/verifier calibration behavior on generated worlds.",
+    "Robustness worlds are not forced to recover lift; they must avoid confident wrong claims.",
+    "The combined all-run emitted all passing sub-gate booleans; the background launcher did not capture the process exit code."
+  ],
+  "sbc": {
+    "status": "PASS",
+    "n_simulations": 500,
+    "n_bins": 20,
+    "chi2_p_value": 0.7598939812328932,
+    "passes_uniformity": true,
+    "rank_histogram": [22, 26, 20, 29, 26, 20, 20, 24, 25, 23, 25, 26, 21, 33, 29, 28, 33, 30, 18, 22]
+  },
+  "coverage": {
+    "status": "PASS",
+    "ci_level": 0.95,
+    "empirical_coverage": 0.964815,
+    "nominal_band": [0.93, 0.97],
+    "passes_nominal": true,
+    "n_worlds": 1320,
+    "per_method": {
+      "cate_meta_learner": {
+        "coverage": 0.9625,
+        "mean_width": 0.0400506264,
+        "n": 720
+      },
+      "geo_synthetic_control": {
+        "coverage": 0.969444,
+        "mean_width": 0.0718191166,
+        "n": 360
+      }
+    }
+  },
+  "rmse_bias": {
+    "status": "PASS",
+    "passes_bias": true,
+    "passes_rmse": true,
+    "n_worlds": 1320,
+    "per_world_type": {
+      "clean_ab": {
+        "rmse": 0.0102309748,
+        "bias": -0.0005934825,
+        "true_lift_mean": 0.06,
+        "n": 360
+      },
+      "confounded": {
+        "rmse": 0.010384037,
+        "bias": 0.0003507619,
+        "true_lift_mean": 0.06,
+        "n": 360
+      },
+      "geo_structured": {
+        "rmse": 0.01443585,
+        "bias": -0.0006020891,
+        "true_lift_mean": 0.0614739399,
+        "n": 335,
+        "underpowered_estimates": 25
+      }
+    }
+  },
+  "multiseed": {
+    "status": "PASS",
+    "passes": true,
+    "n_configs": 22,
+    "seeds_per_config": 60,
+    "max_wrong_claim_rate": 0.0,
+    "placebo_false_positive_rate": 0.05,
+    "false_positive_rate_threshold": 0.05,
+    "semantic_verdict_stability_min": 1.0
+  }
+}

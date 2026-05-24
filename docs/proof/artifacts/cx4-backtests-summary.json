@@ -1,0 +1,81 @@
+{
+  "artifact_id": "cx4_public_rct_backtests",
+  "schema_version": "1.0.0",
+  "generated_at": "2026-05-24T10:57:27Z",
+  "origin": {
+    "kind": "artifact",
+    "label": "CX-4 public RCT backtest output",
+    "description": "Aggregate-only evidence from the full Criteo Uplift v2.1 and Hillstrom backtest gates.",
+    "produced_by": "codex/cx4-backtests-benchmarks",
+    "artifact_uri": "docs/proof/artifacts/cx4-backtests-summary.json"
+  },
+  "source_branch": "codex/cx4-backtests-benchmarks",
+  "source_commit": "7f9a185e1711e39b673d3008c7b8fb5a93549502",
+  "status": "PASS",
+  "claim_limits": [
+    "Aggregate public RCT/backtest metrics only.",
+    "Criteo Uplift v2.1 is CC BY-NC-SA 4.0; raw rows are not redistributed.",
+    "Hillstrom is a public challenge dataset; attribution to Kevin Hillstrom / MineThatData recommended.",
+    "AUUC/Qini references are in-harness deterministic self-references unless a published-reference tolerance gate is added later."
+  ],
+  "criteo_uplift_v2_1": {
+    "status": "PASS",
+    "rows_total": 13979592,
+    "criteo_sample_rows": null,
+    "rows_train": 6989911,
+    "rows_test": 6989681,
+    "dataset_sha256": "e4d7c710ca1f38e523309d0f8a0745d1b53e7392d51f20d1088b6cfeaef222ef",
+    "propensity_auc": 0.5,
+    "outcomes": [
+      {
+        "outcome": "visit",
+        "ate_estimate": 0.010210954645717828,
+        "ci_low": 0.009799662796724999,
+        "ci_high": 0.01059181874985,
+        "auuc_estimate": 0.007486227057151881,
+        "qini_estimate": -14252.13734089829,
+        "within_tolerance": true
+      },
+      {
+        "outcome": "conversion",
+        "ate_estimate": 0.001139932268972325,
+        "ci_low": 0.00104124808775,
+        "ci_high": 0.001237334597525,
+        "auuc_estimate": 0.0016086782884141668,
+        "qini_estimate": -683.4170877879599,
+        "within_tolerance": true
+      }
+    ]
+  },
+  "hillstrom": {
+    "status": "PASS",
+    "rows": 64000,
+    "dataset_sha256": "0e5893329d8b93cefecc571777672028290ab69865718020c78c7284f291aece",
+    "auuc_pooled": 0.06936074595323202,
+    "arms": [
+      {
+        "arm": "mens_email",
+        "outcome": "visit",
+        "ate_estimate": 0.07658956365153125,
+        "ci_low": 0.06996832282545,
+        "ci_high": 0.0830195368057,
+        "auuc_estimate": 0.08373360323310469,
+        "within_tolerance": true
+      },
+      {
+        "arm": "womens_email",
+        "outcome": "visit",
+        "ate_estimate": 0.045233106587052985,
+        "ci_low": 0.039239265590999994,
+        "ci_high": 0.05142302521895,
+        "auuc_estimate": 0.05498788867335935,
+        "within_tolerance": true
+      }
+    ]
+  },
+  "slow_pytest": {
+    "status": "PASS",
+    "exit_code": 0,
+    "completed_at": "2026-05-23T22:20:01-04:00"
+  }
+}
