@@ -1,8 +1,19 @@
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { Card } from "../components/Card";
 import { Metric } from "../components/Metric";
 import { OriginBadge, OriginSummary, UnavailablePanel } from "../components/DataOrigin";
 import { Skeleton } from "../components/Loaders";
+import { ChartTooltip } from "../components/Tooltip";
 import { useJson } from "../lib/data";
+import { SERIES_COLOR } from "../lib/chartSeries";
 import type {
   ArtifactStatus,
   Cx2ValidationSummary,
@@ -85,6 +96,11 @@ export function Artifacts() {
   const x = backtests.data;
   const criteoVisit = x.criteo_uplift_v2_1.outcomes.find((o) => o.outcome === "visit");
   const criteoConversion = x.criteo_uplift_v2_1.outcomes.find((o) => o.outcome === "conversion");
+  const headToHeadRows = Object.entries(b.head_to_head).map(([pair, result]) => ({
+    pair: pair.replace("_vs_", " vs "),
+    netValueDelta: result.delta_net_incremental_value_mean,
+    wastedSpendReduction: -result.delta_wasted_spend_mean,
+  }));
 
   return (
     <div className="page">
@@ -191,6 +207,66 @@ export function Artifacts() {
               <li key={limit}>{limit}</li>
             ))}
           </ul>
+        </Card>
+
+        <Card
+          className="col-8"
+          title="Real head-to-head benchmark deltas"
+          subtitle="CX-3 aggregate artifact. Positive bars mean the left arm improved value or reduced waste versus the right arm."
+          actions={<OriginBadge origin={b.origin} dataset="Benchmark" compact />}
+        >
+          <div className="legend">
+            <span className="lg-item">
+              <span className="swatch" style={{ background: SERIES_COLOR.c }} />
+              Net incremental value delta
+            </span>
+            <span className="lg-item">
+              <span className="swatch" style={{ background: SERIES_COLOR.b }} />
+              Wasted spend reduction
+            </span>
+          </div>
+          <div className="chart-wrap" data-chart-id="artifacts-head-to-head">
+            <ResponsiveContainer>
+              <BarChart
+                data={headToHeadRows}
+                margin={{ top: 8, right: 12, bottom: 4, left: 0 }}
+                barGap={4}
+              >
+                <CartesianGrid stroke="var(--line-1)" vertical={false} />
+                <XAxis
+                  dataKey="pair"
+                  stroke="var(--text-3)"
+                  tickLine={false}
+                  axisLine={{ stroke: "var(--line-2)" }}
+                />
+                <YAxis
+                  stroke="var(--text-3)"
+                  tickLine={false}
+                  axisLine={{ stroke: "var(--line-2)" }}
+                  tickFormatter={(v) => money(Number(v))}
+                  width={68}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(148, 163, 184, 0.05)" }}
+                  content={<ChartTooltip format={(v) => money(Number(v))} />}
+                />
+                <Bar
+                  dataKey="netValueDelta"
+                  name="Net incremental value delta"
+                  fill={SERIES_COLOR.c}
+                  radius={[6, 6, 0, 0]}
+                  isAnimationActive={false}
+                />
+                <Bar
+                  dataKey="wastedSpendReduction"
+                  name="Wasted spend reduction"
+                  fill={SERIES_COLOR.b}
+                  radius={[6, 6, 0, 0]}
+                  isAnimationActive={false}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </Card>
 
         <Card

@@ -17,6 +17,7 @@ import { OriginBadge, OriginSummary, UnavailablePanel } from "../components/Data
 import { Skeleton } from "../components/Loaders";
 import { ChartTooltip } from "../components/Tooltip";
 import { useJson } from "../lib/data";
+import { SERIES_COLOR } from "../lib/chartSeries";
 import type { ValidationData } from "../lib/types";
 
 export function Validation() {
@@ -124,15 +125,15 @@ export function Validation() {
           </p>
           <div className="legend">
             <span className="lg-item">
-              <span className="swatch" style={{ background: "var(--series-c)" }} />
+              <span className="swatch" style={{ background: SERIES_COLOR.c }} />
               AdMatix verifier
             </span>
             <span className="lg-item">
-              <span className="swatch" style={{ background: "var(--series-b)" }} />
+              <span className="swatch" style={{ background: SERIES_COLOR.b }} />
               Uncalibrated baseline
             </span>
             <span className="lg-item">
-              <span className="swatch" style={{ background: "var(--line-3)" }} />
+              <span className="swatch" style={{ background: SERIES_COLOR.line }} />
               Expected (uniform)
             </span>
           </div>
@@ -162,21 +163,23 @@ export function Validation() {
                 />
                 <ReferenceLine
                   y={v.sbc.expected_per_bin}
-                  stroke="var(--line-3)"
+                  stroke={SERIES_COLOR.line}
                   strokeDasharray="3 3"
                 />
                 <Bar
                   dataKey="baseline"
                   name="Baseline"
-                  fill="var(--series-b)"
+                  fill={SERIES_COLOR.b}
                   fillOpacity={0.55}
                   radius={[2, 2, 0, 0]}
+                  isAnimationActive={false}
                 />
                 <Bar
                   dataKey="admatix"
                   name="AdMatix"
-                  fill="var(--series-c)"
+                  fill={SERIES_COLOR.c}
                   radius={[2, 2, 0, 0]}
+                  isAnimationActive={false}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -194,15 +197,15 @@ export function Validation() {
           </p>
           <div className="legend">
             <span className="lg-item">
-              <span className="swatch" style={{ background: "var(--series-c)" }} />
+              <span className="swatch" style={{ background: SERIES_COLOR.c }} />
               AdMatix verifier
             </span>
             <span className="lg-item">
-              <span className="swatch" style={{ background: "var(--series-b)" }} />
+              <span className="swatch" style={{ background: SERIES_COLOR.b }} />
               Baseline
             </span>
             <span className="lg-item">
-              <span className="swatch" style={{ background: "var(--line-3)" }} />
+              <span className="swatch" style={{ background: SERIES_COLOR.line }} />
               Ideal (y = x)
             </span>
           </div>
@@ -244,24 +247,26 @@ export function Validation() {
                     { x: 40, y: 40 },
                     { x: 100, y: 100 },
                   ]}
-                  stroke="var(--line-3)"
+                  stroke={SERIES_COLOR.line}
                   strokeDasharray="3 3"
                 />
                 <Line
                   type="monotone"
                   dataKey="admatix"
                   name="AdMatix"
-                  stroke="var(--series-c)"
+                  stroke={SERIES_COLOR.c}
                   strokeWidth={2.4}
                   dot={{ r: 3 }}
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="baseline"
                   name="Baseline"
-                  stroke="var(--series-b)"
+                  stroke={SERIES_COLOR.b}
                   strokeWidth={2}
                   dot={{ r: 3 }}
+                  isAnimationActive={false}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -288,6 +293,20 @@ export function Validation() {
               value={v.qini.auuc_baseline.toFixed(3)}
               small
             />
+          </div>
+          <div className="legend">
+            <span className="lg-item">
+              <span className="swatch" style={{ background: SERIES_COLOR.c }} />
+              AdMatix verifier
+            </span>
+            <span className="lg-item">
+              <span className="swatch" style={{ background: SERIES_COLOR.b }} />
+              Baseline
+            </span>
+            <span className="lg-item">
+              <span className="swatch" style={{ background: SERIES_COLOR.muted }} />
+              Random
+            </span>
           </div>
           <div className="chart-wrap">
             <ResponsiveContainer>
@@ -322,26 +341,29 @@ export function Validation() {
                   type="monotone"
                   dataKey="admatix"
                   name="AdMatix"
-                  stroke="var(--series-c)"
+                  stroke={SERIES_COLOR.c}
                   strokeWidth={2.4}
                   dot={false}
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="baseline"
                   name="Baseline"
-                  stroke="var(--series-b)"
+                  stroke={SERIES_COLOR.b}
                   strokeWidth={2}
                   dot={false}
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="random"
                   name="Random"
-                  stroke="var(--text-3)"
+                  stroke={SERIES_COLOR.muted}
                   strokeWidth={1.5}
                   dot={false}
                   strokeDasharray="3 3"
+                  isAnimationActive={false}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -377,6 +399,16 @@ export function Validation() {
               }}
             />
           </div>
+          <div className="legend">
+            <span className="lg-item">
+              <span className="swatch" style={{ background: SERIES_COLOR.c }} />
+              AdMatix verifier
+            </span>
+            <span className="lg-item">
+              <span className="swatch" style={{ background: SERIES_COLOR.b }} />
+              Baseline
+            </span>
+          </div>
           <div className="chart-wrap">
             <ResponsiveContainer>
               <BarChart
@@ -402,13 +434,14 @@ export function Validation() {
                   cursor={{ fill: "rgba(148, 163, 184, 0.05)" }}
                   content={<ChartTooltip title={(l) => `${l}% lift bucket`} />}
                 />
-                <ReferenceLine x={0} stroke="var(--line-3)" strokeDasharray="2 2" />
+                <ReferenceLine x={0} stroke={SERIES_COLOR.line} strokeDasharray="2 2" />
                 <Bar
                   dataKey="baseline"
                   name="Baseline"
-                  fill="var(--series-b)"
+                  fill={SERIES_COLOR.b}
                   fillOpacity={0.6}
                   radius={[2, 2, 0, 0]}
+                  isAnimationActive={false}
                 >
                   {v.placebo.distribution.map((_, i) => (
                     <Cell key={i} />
@@ -417,8 +450,9 @@ export function Validation() {
                 <Bar
                   dataKey="admatix"
                   name="AdMatix"
-                  fill="var(--series-c)"
+                  fill={SERIES_COLOR.c}
                   radius={[2, 2, 0, 0]}
+                  isAnimationActive={false}
                 />
               </BarChart>
             </ResponsiveContainer>

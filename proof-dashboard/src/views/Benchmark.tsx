@@ -3,21 +3,20 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import { Card } from "../components/Card";
+import { CumulativeReturnChart } from "../components/CumulativeReturnChart";
 import { Metric } from "../components/Metric";
 import { OriginBadge, OriginSummary, UnavailablePanel } from "../components/DataOrigin";
 import { Skeleton } from "../components/Loaders";
 import { ChartTooltip } from "../components/Tooltip";
 import { Icon } from "../icons/Icon";
 import { useJson } from "../lib/data";
+import { ARM_COLOR } from "../lib/chartSeries";
 import {
   fmtPct,
   fmtPctRaw,
@@ -26,13 +25,6 @@ import {
   fmtNumber,
 } from "../lib/format";
 import type { Benchmark as BenchmarkData, BenchmarkArm, DataOrigin } from "../lib/types";
-
-const ARM_COLOR: Record<string, string> = {
-  A: "var(--series-a)",
-  B: "var(--series-b)",
-  C: "var(--series-c)",
-  D: "var(--series-d)",
-};
 
 function ArmCard({ arm, origin }: { arm: BenchmarkArm; origin: DataOrigin }) {
   const wasted_pct = (arm.metrics.wasted_spend_usd / arm.metrics.spend_usd) * 100;
@@ -290,82 +282,11 @@ export function Benchmark() {
           subtitle="USD thousands. Identical $1M spend per arm."
           actions={<OriginBadge origin={data.data.origin} dataset="Benchmark" compact />}
         >
-          <div className="legend">
-            {arms.map((a) => (
-              <span key={a.id} className="lg-item">
-                <span
-                  className="swatch"
-                  style={{ background: ARM_COLOR[a.id] }}
-                />
-                Arm {a.id} · {a.short}
-              </span>
-            ))}
-          </div>
-          <div className="chart-wrap lg">
-            <ResponsiveContainer>
-              <LineChart
-                data={weekly_curve}
-                margin={{ top: 10, right: 12, bottom: 0, left: 0 }}
-              >
-                <CartesianGrid stroke="var(--line-1)" vertical={false} />
-                <XAxis
-                  dataKey="week"
-                  stroke="var(--text-3)"
-                  tickLine={false}
-                  axisLine={{ stroke: "var(--line-2)" }}
-                  tickFormatter={(v) => `W${v}`}
-                />
-                <YAxis
-                  stroke="var(--text-3)"
-                  tickLine={false}
-                  axisLine={{ stroke: "var(--line-2)" }}
-                  tickFormatter={(v) => `$${v}k`}
-                  width={56}
-                />
-                <Tooltip
-                  content={
-                    <ChartTooltip
-                      title={(l) => `Week ${l}`}
-                      format={(v) => `$${Number(v).toLocaleString()}k`}
-                    />
-                  }
-                />
-                <Line
-                  type="monotone"
-                  dataKey="arm_d"
-                  name="Arm D"
-                  stroke={ARM_COLOR.D}
-                  strokeWidth={2.4}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="arm_c"
-                  name="Arm C"
-                  stroke={ARM_COLOR.C}
-                  strokeWidth={2.2}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="arm_b"
-                  name="Arm B"
-                  stroke={ARM_COLOR.B}
-                  strokeWidth={1.8}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="arm_a"
-                  name="Arm A"
-                  stroke={ARM_COLOR.A}
-                  strokeWidth={1.6}
-                  dot={false}
-                  strokeDasharray="4 4"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <CumulativeReturnChart
+            data={weekly_curve}
+            chartId="benchmark-cumulative-return"
+            legendLabel={(series) => `${series.label} · ${series.short}`}
+          />
         </Card>
 
         <Card
@@ -469,7 +390,6 @@ export function Benchmark() {
               </tbody>
             </table>
           </div>
-          <Legend wrapperStyle={{ display: "none" }} />
         </Card>
       </section>
 

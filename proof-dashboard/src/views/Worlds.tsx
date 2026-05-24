@@ -14,6 +14,7 @@ import { Skeleton } from "../components/Loaders";
 import { ChartTooltip } from "../components/Tooltip";
 import { Icon } from "../icons/Icon";
 import { useJson } from "../lib/data";
+import { SERIES_COLOR } from "../lib/chartSeries";
 import { fmtPct, fmtPctRaw } from "../lib/format";
 import type { DataOrigin, World, Worlds as WorldsData } from "../lib/types";
 
@@ -123,7 +124,7 @@ function WorldCard({ w, origin }: { w: World; origin: DataOrigin }) {
                 width={48}
                 domain={["auto", "auto"]}
               />
-              <ReferenceLine y={0} stroke="var(--line-3)" strokeDasharray="2 2" />
+              <ReferenceLine y={0} stroke={SERIES_COLOR.line} strokeDasharray="2 2" />
               <Tooltip
                 content={
                   <ChartTooltip
@@ -136,34 +137,38 @@ function WorldCard({ w, origin }: { w: World; origin: DataOrigin }) {
                 type="monotone"
                 dataKey="truth"
                 name="True lift"
-                stroke="var(--series-d)"
+                stroke={SERIES_COLOR.d}
                 strokeWidth={2.5}
                 strokeDasharray="6 4"
                 dot={false}
+                isAnimationActive={false}
               />
               <Line
                 type="monotone"
                 dataKey="platform_reported"
                 name="Platform reported"
-                stroke="var(--series-a)"
+                stroke={SERIES_COLOR.a}
                 strokeWidth={1.8}
                 dot={false}
+                isAnimationActive={false}
               />
               <Line
                 type="monotone"
                 dataKey="agent_alone"
                 name="Agent alone"
-                stroke="var(--series-b)"
+                stroke={SERIES_COLOR.b}
                 strokeWidth={1.8}
                 dot={false}
+                isAnimationActive={false}
               />
               <Line
                 type="monotone"
                 dataKey="agent_admatix"
                 name="Agent + AdMatix"
-                stroke="var(--series-c)"
+                stroke={SERIES_COLOR.c}
                 strokeWidth={2.4}
                 dot={false}
+                isAnimationActive={false}
               />
             </LineChart>
           </ResponsiveContainer>

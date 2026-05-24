@@ -1,18 +1,8 @@
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Line,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { Card } from "../components/Card";
+import { CumulativeReturnChart } from "../components/CumulativeReturnChart";
 import { Metric } from "../components/Metric";
 import { OriginBadge, OriginSummary, UnavailablePanel } from "../components/DataOrigin";
 import { Skeleton } from "../components/Loaders";
-import { ChartTooltip } from "../components/Tooltip";
 import { Icon, type IconName } from "../icons/Icon";
 import { useJson } from "../lib/data";
 import {
@@ -237,101 +227,10 @@ export function Overview() {
             />
           ) : null}
           {bench.status === "ready" ? (
-            <>
-              <div className="legend">
-                <span className="lg-item">
-                  <span className="swatch" style={{ background: "var(--series-d)" }} />
-                  Agent + skills + AdMatix
-                </span>
-                <span className="lg-item">
-                  <span className="swatch" style={{ background: "var(--series-c)" }} />
-                  Agent + AdMatix
-                </span>
-                <span className="lg-item">
-                  <span className="swatch" style={{ background: "var(--series-b)" }} />
-                  Agent + modern skills
-                </span>
-                <span className="lg-item">
-                  <span className="swatch" style={{ background: "var(--series-a)" }} />
-                  Naive agent
-                </span>
-              </div>
-              <div className="chart-wrap lg">
-                <ResponsiveContainer>
-                  <AreaChart
-                    data={bench.data.weekly_curve}
-                    margin={{ top: 10, right: 16, bottom: 0, left: 0 }}
-                  >
-                    <defs>
-                      <linearGradient id="gradD" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="var(--series-d)" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="var(--series-d)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="gradC" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="var(--series-c)" stopOpacity={0.25} />
-                        <stop offset="100%" stopColor="var(--series-c)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="var(--line-1)" vertical={false} />
-                    <XAxis
-                      dataKey="week"
-                      stroke="var(--text-3)"
-                      tickLine={false}
-                      axisLine={{ stroke: "var(--line-2)" }}
-                      tickFormatter={(v) => `W${v}`}
-                    />
-                    <YAxis
-                      stroke="var(--text-3)"
-                      tickLine={false}
-                      axisLine={{ stroke: "var(--line-2)" }}
-                      tickFormatter={(v) => `$${v}k`}
-                      width={56}
-                    />
-                    <Tooltip
-                      content={
-                        <ChartTooltip
-                          title={(l) => `Week ${l}`}
-                          format={(v) => `$${Number(v).toLocaleString()}k`}
-                        />
-                      }
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="arm_d"
-                      name="Agent + skills + AdMatix"
-                      stroke="var(--series-d)"
-                      strokeWidth={2.2}
-                      fill="url(#gradD)"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="arm_c"
-                      name="Agent + AdMatix"
-                      stroke="var(--series-c)"
-                      strokeWidth={2}
-                      fill="url(#gradC)"
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="arm_b"
-                      name="Agent + modern skills"
-                      stroke="var(--series-b)"
-                      strokeWidth={1.8}
-                      dot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="arm_a"
-                      name="Naive agent"
-                      stroke="var(--series-a)"
-                      strokeWidth={1.5}
-                      strokeDasharray="4 4"
-                      dot={false}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </>
+            <CumulativeReturnChart
+              data={bench.data.weekly_curve}
+              chartId="overview-cumulative-return"
+            />
           ) : null}
         </Card>
 

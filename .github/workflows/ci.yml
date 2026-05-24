@@ -107,6 +107,10 @@ jobs:
         working-directory: proof-dashboard
         run: npm run validate:origin
 
+      - name: Check dashboard chart data contracts
+        working-directory: proof-dashboard
+        run: npm run check:data
+
       - name: Typecheck dashboard
         working-directory: proof-dashboard
         run: npm run typecheck
