@@ -10,6 +10,9 @@ Apply these files in lexical order with `scripts/db/apply-migrations.ts`.
 4. `0003_warehouse_bronze_silver.sql` creates the `warehouse` schema namespace
    used by WP-N/WP-O dbt work.
 5. `0004_sim_bench_schemas.sql` creates the `sim` and `bench` schemas.
+6. `0005_live_data_readiness.sql` adds the shadow-mode live ingestion spine,
+   experiment pre-registration tables, and immutable proof bundle metadata used
+   to promote validated artifacts without treating raw latest data as proof.
 
 Each SQL file wraps its statements in `BEGIN`/`COMMIT` and uses replay-safe
 guards where PostgreSQL supports them. The runner records completed files in

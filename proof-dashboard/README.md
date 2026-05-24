@@ -32,18 +32,26 @@ Output is in `proof-dashboard/dist/`. Serve it with any static host
 
 ## What the dashboard shows
 
-Five views, each driven by a JSON file in `public/data/`:
+The primary proof view is `/` / `/artifacts`. It renders accepted aggregate
+artifacts from `public/data/artifacts/` and must keep `origin.kind:
+"artifact"`. It is an artifact-backed proof snapshot, not a continuous live
+ad-account feed.
+
+The other routes are the Demo Lab. They are driven by illustrative JSON files
+in `public/data/` and must stay labelled `demo`, `fixture`, or `unavailable`
+until a validated proof bundle replaces them.
 
 | View | Purpose | JSON |
 |------|---------|------|
+| **Proof Artifacts** | Accepted CX-2/CX-3/CX-4 proof artifacts, claim limits, and evidence freshness. | `artifacts/*.json` |
 | **Overview** | The AdMatix loop (gate → log → verify → decide) and headline scorecard. | `scorecard.json` (+ `benchmark.json` for the cumulative-return chart) |
 | **Simulator Worlds** | Six synthetic environments with known true lift — clean, confounded, geo, placebo, non-stationary, adversarial. | `worlds.json` |
 | **Head-to-Head Benchmark** | Four arms across the agent × verifier matrix. Same agent, same spend, very different incremental ROAS and wasted spend. | `benchmark.json` |
 | **Verifier Validation** | SBC rank histograms, CI coverage curves, Qini / AUUC, placebo distribution. | `validation.json` |
 | **Decision Log** | Timeline of agent proposals → verifier verdict → gate outcome → realized result. | `decisions.json` |
 
-Bundled data is synthetic demo data sized to be plausible. It is labelled
-`demo` in the UI and in every JSON file. The schemas are real and are
+Bundled Demo Lab data is synthetic demo data sized to be plausible. It is
+labelled `demo` in the UI and in every JSON file. The schemas are real and are
 described in [DATA-SCHEMA.md](./DATA-SCHEMA.md).
 
 ## Data-origin contract
@@ -73,18 +81,18 @@ npm run validate:origin
 
 ## CX-2/CX-3/CX-4 artifact wiring runbook
 
-The SPA does **not** import data at build time. It fetches JSON
-lazily on view load, relative to `index.html`. To wire production
-data:
+The SPA fetches JSON lazily on view load, relative to `index.html`. The current
+accepted proof artifacts are synchronized from `docs/proof/artifacts/` into
+`public/data/artifacts/` by `npm run sync:artifacts`.
 
-1. CX-2 produces verifier/validation artifacts. Export `validation.json` and
-   any contributing scorecard fields with `origin.kind: "artifact"` and
-   `artifact_uri` pointing at the immutable artifact bundle.
-2. CX-3 produces simulator/world and benchmark artifacts. Export
-   `worlds.json` and `benchmark.json` with `origin.kind: "artifact"` until a
-   live endpoint exists.
-3. CX-4 produces decision/proof packet artifacts. Export `decisions.json` and
-   the scorecard rollup with `origin.kind: "artifact"` and stable packet IDs.
+To wire future production proof data:
+
+1. Create or select a validated `app.proof_bundles` row with source tables,
+   source artifacts, checksums, `evidence_as_of`, and claim limits.
+2. Export aggregate-only dashboard JSON with `origin.kind: "artifact"` unless
+   the data comes from a real validated live endpoint.
+3. Keep Demo Lab JSON labelled as demo. Do not relabel illustrative pages as
+   proof.
 4. When a real production endpoint replaces artifact files, keep the same
    shapes and change `origin.kind` to `live`, with `endpoint` set to the source
    URL or API route.

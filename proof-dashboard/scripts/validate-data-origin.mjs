@@ -82,6 +82,19 @@ for (const path of sourceChecks) {
   }
 }
 
+const artifactsView = await readFile(join(root, "src", "views", "Artifacts.tsx"), "utf8");
+if (!/not a continuous live ad-account feed/i.test(artifactsView)) {
+  failures.push("Artifacts.tsx: must state the proof view is not a continuous live ad-account feed");
+}
+if (!/No live spend-lift claim/i.test(artifactsView)) {
+  failures.push("Artifacts.tsx: must display the no-live-spend-lift claim boundary");
+}
+
+const layoutSource = await readFile(join(root, "src", "components", "Layout.tsx"), "utf8");
+if (!/Demo Lab/i.test(layoutSource)) {
+  failures.push("Layout.tsx: illustrative routes must be grouped under Demo Lab");
+}
+
 if (failures.length > 0) {
   console.error("Data-origin validation failed:");
   for (const failure of failures) {

@@ -42,6 +42,14 @@ function money(value: number) {
   }).format(value);
 }
 
+function formatTimestamp(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(new Date(value));
+}
+
 function statusTone(status: ArtifactStatus) {
   if (status === "PASS" || status === "READY") return "good";
   if (status === "FAIL") return "bad";
@@ -106,14 +114,44 @@ export function Artifacts() {
     <div className="page">
       <header className="page-header">
         <span className="eyebrow">Accepted evidence</span>
-        <h1>Proof artifacts, not demo samples.</h1>
+        <h1>Artifact-backed proof snapshot.</h1>
         <p>
-          This view renders the accepted aggregate outputs from validation,
-          head-to-head benchmarking, and public RCT backtests. It keeps the
-          claim narrow: calibrated simulator plus public RCT evidence, not live
-          paid-media lift.
+          This is not a continuous live ad-account feed. It renders accepted,
+          aggregate proof artifacts from validation, head-to-head benchmarking,
+          and public RCT backtests, with a narrow claim boundary.
         </p>
+        <div className="proof-stamp">
+          <span className="tag brand">Evidence as of {formatTimestamp(m.generated_at)} UTC</span>
+          <span className="tag warn">No live spend-lift claim</span>
+        </div>
       </header>
+
+      <section className="proof-boundary grid cols-2">
+        <Card
+          compact
+          title="What this proves"
+          subtitle="Accepted artifact-backed evidence."
+        >
+          <ul className="bullets compact-list">
+            <li>Evidence-gated proposal, policy, approval, and dry-run mechanics.</li>
+            <li>Verifier calibration on seeded simulator worlds with known truth.</li>
+            <li>Public Criteo/Hillstrom aggregate recovery, not live spend lift.</li>
+            <li>Real LLM lane accounting in simulation, not buyer superiority.</li>
+          </ul>
+        </Card>
+        <Card
+          compact
+          title="What this does not prove"
+          subtitle="The live pilot is the next evidence tier."
+        >
+          <ul className="bullets compact-list">
+            <li>No proven live paid-media lift yet.</li>
+            <li>No guaranteed ROAS improvement.</li>
+            <li>No autonomous customer-account mutation safety claim.</li>
+            <li>Demo Lab pages are illustrative and separate from this proof view.</li>
+          </ul>
+        </Card>
+      </section>
 
       <OriginSummary
         items={[
@@ -211,8 +249,8 @@ export function Artifacts() {
 
         <Card
           className="col-8"
-          title="Real head-to-head benchmark deltas"
-          subtitle="CX-3 aggregate artifact. Positive bars mean the left arm improved value or reduced waste versus the right arm."
+          title="Simulated head-to-head benchmark deltas"
+          subtitle="CX-3 simulated benchmark artifact. Positive bars mean the left arm had higher simulated value or lower simulated waste versus the right arm."
           actions={<OriginBadge origin={b.origin} dataset="Benchmark" compact />}
         >
           <div className="legend">

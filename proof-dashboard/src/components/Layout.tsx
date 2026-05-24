@@ -9,6 +9,7 @@ type Route = {
   title: string;
   crumb: string;
   kind: "artifact" | "illustrative";
+  group: "evidence" | "demo";
 };
 
 const ROUTES: Route[] = [
@@ -20,6 +21,7 @@ const ROUTES: Route[] = [
     title: "Proof Artifacts",
     crumb: "Accepted Evidence Bundle",
     kind: "artifact",
+    group: "evidence",
   },
   {
     to: "/overview",
@@ -28,6 +30,7 @@ const ROUTES: Route[] = [
     title: "Illustrative Overview",
     crumb: "Demo Sample",
     kind: "illustrative",
+    group: "demo",
   },
   {
     to: "/worlds",
@@ -36,6 +39,7 @@ const ROUTES: Route[] = [
     title: "Illustrative Worlds",
     crumb: "Demo Sample",
     kind: "illustrative",
+    group: "demo",
   },
   {
     to: "/benchmark",
@@ -44,6 +48,7 @@ const ROUTES: Route[] = [
     title: "Illustrative Benchmark",
     crumb: "Demo Sample",
     kind: "illustrative",
+    group: "demo",
   },
   {
     to: "/validation",
@@ -52,6 +57,7 @@ const ROUTES: Route[] = [
     title: "Illustrative Validation",
     crumb: "Demo Sample",
     kind: "illustrative",
+    group: "demo",
   },
   {
     to: "/decisions",
@@ -60,8 +66,36 @@ const ROUTES: Route[] = [
     title: "Illustrative Decisions",
     crumb: "Demo Sample",
     kind: "illustrative",
+    group: "demo",
   },
 ];
+
+const EVIDENCE_ROUTES = ROUTES.filter((route) => route.group === "evidence");
+const DEMO_ROUTES = ROUTES.filter((route) => route.group === "demo");
+
+function NavSection({ label, routes }: { label: string; routes: Route[] }) {
+  const location = useLocation();
+
+  return (
+    <>
+      <div className="nav-label">{label}</div>
+      {routes.map((r) => (
+        <NavLink
+          key={r.to}
+          to={r.to}
+          end={r.to === "/"}
+          className={({ isActive }) =>
+            "nav-link" +
+            (isActive || r.match?.includes(location.pathname) ? " active" : "")
+          }
+        >
+          <Icon name={r.icon} />
+          <span>{r.label}</span>
+        </NavLink>
+      ))}
+    </>
+  );
+}
 
 export function Layout() {
   const location = useLocation();
@@ -94,21 +128,8 @@ export function Layout() {
         </div>
 
         <nav className="nav" aria-label="Sections">
-          <div className="nav-label">Proof</div>
-          {ROUTES.map((r) => (
-            <NavLink
-              key={r.to}
-              to={r.to}
-              end={r.to === "/"}
-              className={({ isActive }) =>
-                "nav-link" +
-                (isActive || r.match?.includes(location.pathname) ? " active" : "")
-              }
-            >
-              <Icon name={r.icon} />
-              <span>{r.label}</span>
-            </NavLink>
-          ))}
+          <NavSection label="Accepted Evidence" routes={EVIDENCE_ROUTES} />
+          <NavSection label="Demo Lab" routes={DEMO_ROUTES} />
         </nav>
 
         <div className="sidebar-footer">
@@ -116,7 +137,7 @@ export function Layout() {
             <span className="dot" aria-hidden="true" />
             <span>Static dashboard v0.1.0</span>
           </div>
-          <div>Artifacts are primary; samples stay visibly illustrative.</div>
+          <div>Artifact proof is primary. Demo Lab pages are illustrative only.</div>
         </div>
       </aside>
 
@@ -136,7 +157,7 @@ export function Layout() {
               </span>
             ) : (
               <span className="tag warn">
-                <Icon name="info" size={12} /> Illustrative demo data
+                <Icon name="info" size={12} /> Demo Lab
               </span>
             )}
           </div>

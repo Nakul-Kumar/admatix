@@ -12,6 +12,9 @@ sources:
       - name: bronze_sim_events
       - name: bronze_platform_metrics
       - name: bronze_first_party_orders
+      - name: raw_platform_reports
+      - name: raw_entity_snapshots
+      - name: raw_conversion_events
   - name: app
     schema: app
     tables:
@@ -25,6 +28,9 @@ sources:
       - name: ad_accounts
       - name: tenants
       - name: policies
+      - name: connector_syncs
+      - name: experiment_designs
+      - name: proof_bundles
   - name: ledger
     schema: ledger
     description: Read-only governance ledger sources. dbt models may SELECT only.

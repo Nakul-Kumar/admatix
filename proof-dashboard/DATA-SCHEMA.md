@@ -7,6 +7,15 @@ To wire real production data, regenerate the JSON files with the same shapes
 on whatever cadence is appropriate (nightly batch, post-run hook, etc.) and
 drop them in `public/data/` of the deployed bundle.
 
+The proof view is deliberately **not** a continuous live ad-account dashboard.
+The root route `/` and `/artifacts` render immutable proof bundles with
+`origin.kind = "artifact"`. Demo Lab routes (`/overview`, `/worlds`,
+`/benchmark`, `/validation`, `/decisions`) are illustrative samples and must
+remain labeled `demo` unless they are replaced by a validated proof bundle.
+Future production freshness should promote a generated bundle from the live
+pipeline to `artifact` or `live`; raw latest platform data must not be rendered
+as proof before H0, policy, measurement, and claim-limit checks pass.
+
 Every top-level file must include `origin`. The app refuses to render a dataset
 without it, and unavailable fetches are shown as `unavailable` instead of falling
 back to bundled samples.
