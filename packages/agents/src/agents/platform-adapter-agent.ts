@@ -1,10 +1,11 @@
 import {
   AgentOutput,
   ProposedAction,
+  actionIdForPacket,
   type H0Packet,
   type RiskLevel,
 } from "@admatix/schemas";
-import { newId, sha256 } from "@admatix/core";
+import { sha256 } from "@admatix/core";
 import type { Agent } from "../agent.js";
 
 export interface PlatformAdapterInput {
@@ -33,7 +34,7 @@ export function makePlatformAdapterAgent(opts: { traceId: string }): {
   const translate = async (input: PlatformAdapterInput): Promise<PlatformAdapterResult> => {
     const { packet } = input;
     const action: ProposedAction = ProposedAction.parse({
-      action_id: newId("act"),
+      action_id: actionIdForPacket(packet.packet_id),
       packet_id: packet.packet_id,
       type: packet.proposal.action,
       target_entity_id:

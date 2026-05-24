@@ -27,11 +27,13 @@
  */
 import {
   execFile as execFileCb,
+  spawn,
+  type ChildProcess,
   spawnSync,
 } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, dirname, resolve } from "node:path";
+import { delimiter, join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -66,6 +68,7 @@ const skipReason = (() => {
 
 let storeRoot: string | null = null;
 let verifierClient: VerifierClient | null = null;
+let verifierProcess: ChildProcess | null = null;
 
 beforeAll(async () => {
   if (skipReason !== null) return;
@@ -76,11 +79,7 @@ beforeAll(async () => {
     ADMATIX_VERIFIER_PID_FILE: VERIFIER_PID_FILE,
     ADMATIX_VERIFIER_LOG: `/tmp/admatix-verifier-phase3-${process.pid}.log`,
   };
-  await execFile("bash", [join(REPO_ROOT, "scripts", "start-verifier.sh")], {
-    cwd: REPO_ROOT,
-    env,
-    timeout: 90_000,
-  });
+  await startVerifier(env);
   verifierClient = createVerifierClient({
     baseUrl: VERIFIER_BASE_URL,
     timeoutMs: 60_000,
@@ -90,12 +89,17 @@ beforeAll(async () => {
 
 afterAll(() => {
   if (skipReason !== null) return;
-  spawnSync("bash", [join(REPO_ROOT, "scripts", "stop-verifier.sh")], {
-    env: {
-      ...process.env,
-      ADMATIX_VERIFIER_PID_FILE: VERIFIER_PID_FILE,
-    },
-  });
+  if (verifierProcess) {
+    verifierProcess.kill();
+    verifierProcess = null;
+  } else {
+    spawnSync("bash", [bashPath(join(REPO_ROOT, "scripts", "stop-verifier.sh"))], {
+      env: {
+        ...process.env,
+        ADMATIX_VERIFIER_PID_FILE: VERIFIER_PID_FILE,
+      },
+    });
+  }
   if (storeRoot !== null) {
     rmSync(storeRoot, { recursive: true, force: true });
   }
@@ -262,12 +266,89 @@ async function postJson(url: string, body: unknown): Promise<Record<string, unkn
   return (await res.json()) as Record<string, unknown>;
 }
 
+async function startVerifier(env: NodeJS.ProcessEnv): Promise<void> {
+  if (process.platform !== "win32") {
+    await execFile("bash", [bashPath(join(REPO_ROOT, "scripts", "start-verifier.sh"))], {
+      cwd: REPO_ROOT,
+      env,
+      timeout: 90_000,
+    });
+    return;
+  }
+
+  const python = join(VERIFIER_VENV, "Scripts", "python.exe");
+  const verifierDir = join(REPO_ROOT, "services", "verifier");
+  const pythonPath = [
+    join(REPO_ROOT, "services", "verifier", "src"),
+    join(REPO_ROOT, "services", "simulator", "src"),
+    env.PYTHONPATH,
+  ].filter((part): part is string => typeof part === "string" && part.length > 0)
+    .join(delimiter);
+  let stderr = "";
+  verifierProcess = spawn(
+    python,
+    [
+      "-m",
+      "uvicorn",
+      "admatix_verifier.app:app",
+      "--host",
+      env.ADMATIX_VERIFIER_HOST ?? "127.0.0.1",
+      "--port",
+      env.ADMATIX_VERIFIER_PORT ?? "8088",
+    ],
+    {
+      cwd: verifierDir,
+      env: { ...env, PYTHONPATH: pythonPath },
+      stdio: ["ignore", "ignore", "pipe"],
+    },
+  );
+  verifierProcess.stderr?.on("data", (chunk) => {
+    stderr += String(chunk);
+  });
+
+  const started = Date.now();
+  while (Date.now() - started < 90_000) {
+    if (verifierProcess.exitCode !== null) {
+      throw new Error(`verifier exited early with ${verifierProcess.exitCode}: ${stderr}`);
+    }
+    try {
+      const health = await fetch(`${VERIFIER_BASE_URL}/healthz`);
+      if (health.ok) return;
+    } catch {
+      // Keep polling until boot timeout.
+    }
+    await new Promise((resolveWait) => setTimeout(resolveWait, 1000));
+  }
+  verifierProcess.kill();
+  verifierProcess = null;
+  throw new Error(`verifier failed to answer /healthz within 90s: ${stderr}`);
+}
+
 function readJsonl<T>(path: string): T[] {
   if (!existsSync(path)) return [];
   return readFileSync(path, "utf8")
     .split("\n")
     .filter((line) => line.trim().length > 0)
     .map((line) => JSON.parse(line) as T);
+}
+
+function bashPath(path: string): string {
+  if (process.platform !== "win32") return path;
+  const slash = path.replace(/\\/g, "/");
+  const drive = /^([A-Za-z]):\/(.*)$/.exec(slash);
+  if (!drive) return slash;
+  const letter = drive[1]!.toLowerCase();
+  const rest = drive[2]!;
+  const candidates = [`/mnt/${letter}/${rest}`, `/${letter}/${rest}`, slash];
+  for (const candidate of candidates) {
+    const exists = spawnSync("bash", ["-lc", `test -e ${shellQuote(candidate)}`]);
+    if (exists.status === 0) return candidate;
+  }
+  return candidates[0]!;
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
 /**

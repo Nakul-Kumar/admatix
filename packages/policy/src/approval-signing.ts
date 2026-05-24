@@ -43,14 +43,24 @@ export function approvalSecret(): string {
 export function approvalPayload(
   receipt: Pick<
     ApprovalReceipt,
-    "packet_id" | "action_id" | "decided_by" | "decided_at" | "decision"
+    | "receipt_id"
+    | "packet_id"
+    | "action_id"
+    | "decided_by"
+    | "role"
+    | "decided_at"
+    | "decision"
+    | "expires_at"
   >,
 ): string {
   return [
+    receipt.receipt_id,
     receipt.packet_id,
     receipt.action_id,
     receipt.decided_by,
+    receipt.role,
     receipt.decided_at,
+    receipt.expires_at ?? "",
     receipt.decision,
   ].join("|");
 }
@@ -58,7 +68,14 @@ export function approvalPayload(
 export function signApprovalReceipt(
   receipt: Pick<
     ApprovalReceipt,
-    "packet_id" | "action_id" | "decided_by" | "decided_at" | "decision"
+    | "receipt_id"
+    | "packet_id"
+    | "action_id"
+    | "decided_by"
+    | "role"
+    | "decided_at"
+    | "decision"
+    | "expires_at"
   >,
   secret: string = approvalSecret(),
 ): string {
@@ -72,11 +89,23 @@ export function verifyApprovalReceipt(
   if (typeof receipt.signature !== "string" || receipt.signature.length === 0) {
     return { ok: false, reason: "missing_signature" };
   }
+  if (!/^[0-9a-f]{64}$/i.test(receipt.signature)) {
+    return { ok: false, reason: "invalid_signature_format" };
+  }
+  if (!Number.isFinite(Date.parse(receipt.decided_at))) {
+    return { ok: false, reason: "invalid_decided_at" };
+  }
+  if (receipt.expires_at !== undefined) {
+    const expiresAt = Date.parse(receipt.expires_at);
+    if (!Number.isFinite(expiresAt)) {
+      return { ok: false, reason: "invalid_expires_at" };
+    }
+    if (expiresAt <= Date.now()) {
+      return { ok: false, reason: "expired" };
+    }
+  }
   const expected = signApprovalReceipt(receipt, secret);
   const got = receipt.signature;
-  if (expected.length !== got.length) {
-    return { ok: false, reason: "signature_mismatch" };
-  }
   const ok = timingSafeEqual(Buffer.from(expected, "utf8"), Buffer.from(got, "utf8"));
   return ok ? { ok: true } : { ok: false, reason: "signature_mismatch" };
 }

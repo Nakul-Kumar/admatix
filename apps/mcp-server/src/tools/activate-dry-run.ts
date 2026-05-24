@@ -1,5 +1,9 @@
 import { ApprovalReceipt, ExecutionDiff, z } from "@admatix/schemas";
-import { makeDiffBuilderAgent, makePlatformAdapterAgent } from "@admatix/agents";
+import {
+  DiffBuilderExactnessError,
+  makeDiffBuilderAgent,
+  makePlatformAdapterAgent,
+} from "@admatix/agents";
 import { evaluateAction, verifyApprovalReceipt } from "@admatix/policy";
 import {
   blockedEnvelope,
@@ -78,6 +82,44 @@ export async function activateDryRunTool(
   const packet = await getPacketOrThrow(ctx.store, parsed.packet_id);
   const adapter = makePlatformAdapterAgent({ traceId: trace_id });
   const { action } = await adapter.translate({ packet });
+  if (parsed.approval_receipt.action_id !== action.action_id) {
+    return blockedEnvelope({
+      trace_id,
+      risk_level: "high",
+      data: {
+        blocked: true,
+        reason: "approval_receipt_action_mismatch",
+      },
+    });
+  }
+  const storedReceipt = await ctx.store.get<z.infer<typeof ApprovalReceipt>>(
+    "approval_receipts",
+    parsed.approval_receipt.receipt_id,
+  );
+  if (!storedReceipt || storedReceipt.signature !== parsed.approval_receipt.signature) {
+    return blockedEnvelope({
+      trace_id,
+      risk_level: "high",
+      data: {
+        blocked: true,
+        reason: "approval_receipt_not_stored",
+      },
+    });
+  }
+  const existingDiffs = await ctx.store.list<z.infer<typeof ExecutionDiff>>(
+    "execution_diffs",
+    { action_id: action.action_id },
+  );
+  if (existingDiffs.length > 0) {
+    return blockedEnvelope({
+      trace_id,
+      risk_level: "high",
+      data: {
+        blocked: true,
+        reason: "approval_receipt_already_used",
+      },
+    });
+  }
   const accounts = await ctx.connector.listAccounts();
   const campaigns = (
     await Promise.all(accounts.map((account) => ctx.connector.getCampaigns(account.account_id)))
@@ -108,7 +150,23 @@ export async function activateDryRunTool(
     // above. We record the decision id so audit trail covers this path.
   }
   const builder = makeDiffBuilderAgent({ traceId: trace_id });
-  const { diff } = await builder.build({ action, packet, campaign });
+  let diff: z.infer<typeof ExecutionDiff>;
+  try {
+    const built = await builder.build({ action, packet, campaign });
+    diff = built.diff;
+  } catch (error) {
+    if (error instanceof DiffBuilderExactnessError) {
+      return blockedEnvelope({
+        trace_id,
+        risk_level: "high",
+        data: {
+          blocked: true,
+          reason: `diff_not_exact:${error.code}`,
+        },
+      });
+    }
+    throw error;
+  }
   const parsedDiff = ExecutionDiff.parse(diff);
   await ctx.store.put("execution_diffs", parsedDiff.diff_id, parsedDiff);
   await ctx.store.put("policy_decisions", decision.decision_id, decision);

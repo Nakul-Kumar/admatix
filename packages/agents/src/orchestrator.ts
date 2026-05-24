@@ -9,6 +9,7 @@ import {
   type ExecutionDiff,
   type FirstPartyRevenueDaily,
   type H0Packet,
+  type ApprovalReceipt,
   type NormalizedMetrics,
   type PlatformAccount,
   type PolicyDecision,
@@ -44,7 +45,10 @@ import {
 import { makeMeasurementScientistAgent } from "./agents/measurement-scientist-agent.js";
 import type { VerifierClient, VerifyResponsePayload } from "./verifier-client.js";
 import { makePlatformAdapterAgent } from "./agents/platform-adapter-agent.js";
-import { makeDiffBuilderAgent } from "./agents/diff-builder-agent.js";
+import {
+  DiffBuilderExactnessError,
+  makeDiffBuilderAgent,
+} from "./agents/diff-builder-agent.js";
 import { makeReflectionAgent } from "./agents/reflection-agent.js";
 import type { WorkflowIntent, WorkflowResult } from "./types.js";
 
@@ -784,6 +788,22 @@ export async function runActivation(
   const traceId = packet.trace_id;
   const adapter = makePlatformAdapterAgent({ traceId });
   const { action } = await adapter.translate({ packet });
+  if (args.receipt.action_id !== action.action_id) {
+    return { ok: false, reason: "approval_receipt_action_mismatch" };
+  }
+  const storedReceipt = await store.get<ApprovalReceipt>(
+    "approval_receipts",
+    args.receipt.receipt_id,
+  );
+  if (!storedReceipt || storedReceipt.signature !== args.receipt.signature) {
+    return { ok: false, reason: "approval_receipt_not_stored" };
+  }
+  const existingDiffs = await store.list<ExecutionDiff>("execution_diffs", {
+    action_id: action.action_id,
+  });
+  if (existingDiffs.length > 0) {
+    return { ok: false, reason: "approval_receipt_already_used" };
+  }
   const accounts = await connector.listAccounts();
   const campaigns = (
     await Promise.all(accounts.map((a) => connector.getCampaigns(a.account_id)))
@@ -800,7 +820,16 @@ export async function runActivation(
   }
   // `needs_approval` is OK here — we hold a verified receipt.
   const builder = makeDiffBuilderAgent({ traceId });
-  const { diff } = await builder.build({ action, packet, campaign });
+  let diff: ExecutionDiff;
+  try {
+    const built = await builder.build({ action, packet, campaign });
+    diff = built.diff;
+  } catch (error) {
+    if (error instanceof DiffBuilderExactnessError) {
+      return { ok: false, reason: `diff_not_exact:${error.code}` };
+    }
+    throw error;
+  }
   await store.put("execution_diffs", diff.diff_id, diff);
   await store.put("policy_decisions", decision.decision_id, decision);
   return { ok: true, diff, decision };

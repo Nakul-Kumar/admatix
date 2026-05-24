@@ -27,6 +27,11 @@ export const ProposedAction = z.object({
 });
 export type ProposedAction = z.infer<typeof ProposedAction>;
 
+/** Deterministic single-action id for the MVP one-H0-packet/one-action flow. */
+export function actionIdForPacket(packetId: string): string {
+  return `action_${packetId}`;
+}
+
 export const FieldDiff = z.object({
   field: z.string(),
   before: z.unknown(),
@@ -54,13 +59,12 @@ export const ApprovalReceipt = z.object({
   decided_by: z.string(),
   role: z.string(),
   decided_at: z.string(),
+  expires_at: z.string().optional(),
   note: z.string().optional(),
   /**
-   * HMAC-SHA256 (hex) of `{packet_id, action_id, decided_by, decided_at,
-   * decision}` keyed by the tenant secret. Required when produced by the
-   * API; activate_dry_run rejects receipts whose signature does not verify.
-   * Optional only because the CLI demo path can mint local receipts before
-   * the secret is set.
+   * HMAC-SHA256 (hex) over the canonical approval payload keyed by the
+   * tenant secret. New API receipts bind receipt id, packet/action id,
+   * caller identity, role, timestamp, expiry, and decision.
    */
   signature: z.string().optional(),
 });

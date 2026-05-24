@@ -9,3 +9,4 @@ export type { Connector } from "./connector.js";
 export { fixtureConnector } from "./fixture-connector.js";
 export { resolveAccountRef } from "./resolve-ref.js";
 export type { AccountRef } from "./resolve-ref.js";
+export { redactConnectorSecrets } from "./redact.js";

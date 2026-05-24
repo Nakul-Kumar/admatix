@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   ApprovalReceipt,
   H0Packet,
+  actionIdForPacket,
   type ApprovalReceipt as ApprovalReceiptT,
   type H0Packet as H0PacketT,
 } from "@admatix/schemas";
@@ -58,6 +59,13 @@ export function registerApprovalsRoutes(app: FastifyInstance, deps: ApprovalsDep
       reply.code(403);
       return { error: "forbidden_tenant" };
     }
+    if (packet.approval.status !== "pending") {
+      reply.code(409);
+      return {
+        error: "packet_already_decided",
+        status: packet.approval.status,
+      };
+    }
     const validity = verifyEvidence(packet);
     if (!validity.ok) {
       reply.code(409);
@@ -70,22 +78,28 @@ export function registerApprovalsRoutes(app: FastifyInstance, deps: ApprovalsDep
     }
 
     const decided_at = nowIso();
-    const action_id = `action_${packet.packet_id}`;
+    const expires_at = new Date(Date.parse(decided_at) + 15 * 60 * 1000).toISOString();
+    const action_id = actionIdForPacket(packet.packet_id);
+    const receipt_id = newId("rec");
     const signature = signApprovalReceipt({
+      receipt_id,
       packet_id: packet.packet_id,
       action_id,
       decided_by: identity!.token_prefix,
+      role: identity!.role,
       decided_at,
+      expires_at,
       decision: parsed.data.decision,
     });
     const receipt: ApprovalReceiptT = ApprovalReceipt.parse({
-      receipt_id: newId("rec"),
+      receipt_id,
       packet_id: packet.packet_id,
       action_id,
       decision: parsed.data.decision,
       decided_by: identity!.token_prefix,
       role: identity!.role,
       decided_at,
+      expires_at,
       signature,
       ...(parsed.data.note !== undefined ? { note: parsed.data.note } : {}),
     });

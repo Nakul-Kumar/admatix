@@ -31,7 +31,7 @@ export { makeApprovalCoordinatorAgent } from "./agents/approval-coordinator-agen
 export { makeMediaAnalystAgent } from "./agents/media-analyst-agent.js";
 export { makeMeasurementScientistAgent } from "./agents/measurement-scientist-agent.js";
 export { makePlatformAdapterAgent } from "./agents/platform-adapter-agent.js";
-export { makeDiffBuilderAgent } from "./agents/diff-builder-agent.js";
+export { DiffBuilderExactnessError, makeDiffBuilderAgent } from "./agents/diff-builder-agent.js";
 export { makeReflectionAgent } from "./agents/reflection-agent.js";
 
 export type { MediaAnalystDeps, MediaAnalystInput, MediaAnalystResult } from "./agents/media-analyst-agent.js";

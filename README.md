@@ -113,10 +113,24 @@ pnpm demo
 For Python service tests, install the relevant service requirements first, then run:
 
 ```bash
+pnpm run setup:python
 pnpm run test:python
 ```
 
+The Python scripts create service-local virtual environments under `services/*/.venv`
+and run tests with explicit `PYTHONPATH`, so local results do not depend on a
+global Python install or accidentally shared packages.
+
 Some full public-dataset backtests require local Criteo/Hillstrom datasets and are intentionally not committed to Git.
+
+## Diligence Hardening
+
+The approval and dry-run path is intentionally fail-closed:
+
+- Approval receipts are HMAC-signed over receipt id, packet id, action id, caller identity, role, decision time, expiry, and decision.
+- Activation requires the signed receipt to be persisted, unexpired, matched to the action re-derived from the H0 packet, and unused.
+- Dry-run diffs are emitted only when the before-state is exact enough to preview. Unsupported action semantics are blocked until connector snapshots can model them faithfully.
+- Future live connectors must log redacted credential-shaped payloads only and store credential references rather than raw OAuth tokens or API keys.
 
 ## Repo Layout
 

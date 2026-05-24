@@ -31,6 +31,7 @@ describe("platform-adapter-agent + diff-builder-agent", () => {
   it("adapter never invents actions — type and params come from the packet", async () => {
     const { translate } = makePlatformAdapterAgent({ traceId: "trace_x" });
     const { action } = await translate({ packet });
+    expect(action.action_id).toBe(`action_${packet.packet_id}`);
     expect(action.type).toBe("budget_shift");
     expect(action.params).toEqual({ delta_pct: -10 });
     expect(action.target_entity_id).toBe("campaign_a");
@@ -57,5 +58,44 @@ describe("platform-adapter-agent + diff-builder-agent", () => {
     expect(diff.changes[0]?.field).toBe("daily_budget");
     expect(diff.changes[0]?.before).toBe(500);
     expect(diff.changes[0]?.after).toBe(450); // 500 * 0.9
+  });
+
+  it("diff builder fails closed when budget_shift lacks campaign before-state", async () => {
+    const { translate } = makePlatformAdapterAgent({ traceId: "trace_x" });
+    const { build } = makeDiffBuilderAgent({ traceId: "trace_x" });
+    const { action } = await translate({ packet });
+    await expect(build({ action, packet })).rejects.toThrow(
+      /diff_requires_campaign_budget/,
+    );
+  });
+
+  it("diff builder fails closed for action types without exact connector semantics", async () => {
+    const bidPacket: H0Packet = {
+      ...packet,
+      packet_id: "h0_bid_adjust",
+      proposal: {
+        action: "bid_adjust",
+        target_entity_id: "campaign_a",
+        params: { delta_pct: -5 },
+        dry_run_only: true,
+      },
+    };
+    const { translate } = makePlatformAdapterAgent({ traceId: "trace_x" });
+    const { build } = makeDiffBuilderAgent({ traceId: "trace_x" });
+    const { action } = await translate({ packet: bidPacket });
+    await expect(
+      build({
+        action,
+        packet: bidPacket,
+        campaign: {
+          campaign_id: "campaign_a",
+          account_id: "acc_demo",
+          platform: "google_ads",
+          name: "Brand - Search",
+          status: "active",
+          daily_budget: 500,
+        },
+      }),
+    ).rejects.toThrow(/diff_semantics_not_supported:bid_adjust/);
   });
 });

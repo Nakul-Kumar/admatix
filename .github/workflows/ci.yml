@@ -67,20 +67,23 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install lightweight Python test dependencies
-        run: python -m pip install --upgrade pip pytest==8.3.4
+      - name: Install Node helper dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Run ingest and simulator tests
+      - name: Set up ingest and simulator venvs
+        run: pnpm run setup:python:core
+
+      - name: Run ingest, simulator, and evidence smoke tests
         run: pnpm run test:python:core
 
-      - name: Install verifier dependencies
-        run: python -m pip install --prefer-binary -r services/verifier/requirements.txt
+      - name: Set up verifier venv
+        run: pnpm run setup:python:verifier
 
       - name: Run verifier tests
         run: pnpm run test:python:verifier
 
-      - name: Install validation dependencies
-        run: python -m pip install --prefer-binary -r services/validation/requirements.lock
+      - name: Set up validation venv
+        run: pnpm run setup:python:validation
 
       - name: Run validation fast tests
         run: pnpm run test:python:validation

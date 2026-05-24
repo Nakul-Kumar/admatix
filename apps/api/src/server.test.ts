@@ -204,20 +204,14 @@ describe("WP-J API acceptance", () => {
   });
 
   it("approves a valid packet end-to-end", async () => {
-    const listed = await app.inject({
-      method: "GET",
-      url: "/api/v1/packets",
-      headers: MANAGER_AUTH,
-    });
-    const { packets } = listed.json() as { packets: { packet_id: string }[] };
-    const target = packets.find((p) => p.packet_id !== "h0_invalid_test");
-    expect(target).toBeDefined();
+    const target = validPacket("h0_approve_end_to_end");
+    await store.put("h0_packets", target.packet_id, target);
     const res = await app.inject({
       method: "POST",
       url: "/api/v1/approvals",
       headers: MANAGER_AUTH,
       payload: {
-        packetId: target!.packet_id,
+        packetId: target.packet_id,
         decision: "approved",
       },
     });
@@ -226,6 +220,57 @@ describe("WP-J API acceptance", () => {
     expect(body.receipt.decision).toBe("approved");
     expect(typeof body.receipt.signature).toBe("string");
     expect(body.receipt.signature!.length).toBeGreaterThan(16);
+  });
+
+  it("rejects duplicate approval attempts for an already decided packet", async () => {
+    const packet = validPacket("h0_duplicate_approval");
+    await store.put("h0_packets", packet.packet_id, packet);
+
+    const first = await app.inject({
+      method: "POST",
+      url: "/api/v1/approvals",
+      headers: MANAGER_AUTH,
+      payload: {
+        packetId: packet.packet_id,
+        decision: "approved",
+      },
+    });
+    expect(first.statusCode).toBe(200);
+
+    const second = await app.inject({
+      method: "POST",
+      url: "/api/v1/approvals",
+      headers: MANAGER_AUTH,
+      payload: {
+        packetId: packet.packet_id,
+        decision: "approved",
+      },
+    });
+    expect(second.statusCode).toBe(409);
+    expect((second.json() as { error: string }).error).toBe("packet_already_decided");
+  });
+
+  it("mints approval receipts with a bounded expiry", async () => {
+    const packet = validPacket("h0_expiring_receipt");
+    await store.put("h0_packets", packet.packet_id, packet);
+
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/v1/approvals",
+      headers: MANAGER_AUTH,
+      payload: {
+        packetId: packet.packet_id,
+        decision: "approved",
+      },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as {
+      receipt: { decided_at: string; expires_at?: string };
+    };
+    expect(typeof body.receipt.expires_at).toBe("string");
+    expect(Date.parse(body.receipt.expires_at!)).toBeGreaterThan(
+      Date.parse(body.receipt.decided_at),
+    );
   });
 
   describe("F5: approvals cannot forge identity (QA finding)", () => {
@@ -239,20 +284,14 @@ describe("WP-J API acceptance", () => {
     });
 
     it("ignores a body-supplied decidedBy/role and uses the token identity", async () => {
-      const listed = await app.inject({
-        method: "GET",
-        url: "/api/v1/packets",
-        headers: MANAGER_AUTH,
-      });
-      const { packets } = listed.json() as { packets: { packet_id: string }[] };
-      const target = packets[0];
-      expect(target).toBeDefined();
+      const target = validPacket("h0_identity_forge");
+      await store.put("h0_packets", target.packet_id, target);
       const res = await app.inject({
         method: "POST",
         url: "/api/v1/approvals",
         headers: MANAGER_AUTH,
         payload: {
-          packetId: target!.packet_id,
+          packetId: target.packet_id,
           decision: "approved",
           // QA finding #5 attack: caller tries to manufacture an
           // approval as "finance_director" without holding that role.
@@ -309,21 +348,53 @@ describe("WP-J API acceptance", () => {
     });
 
     it("forbids a viewer-role token from approving (403)", async () => {
-      const listed = await app.inject({
-        method: "GET",
-        url: "/api/v1/packets",
-        headers: MANAGER_AUTH,
-      });
-      const { packets } = listed.json() as { packets: { packet_id: string }[] };
-      const target = packets[0];
-      expect(target).toBeDefined();
+      const target = validPacket("h0_viewer_forbidden");
+      await store.put("h0_packets", target.packet_id, target);
       const res = await app.inject({
         method: "POST",
         url: "/api/v1/approvals",
         headers: { authorization: "Bearer tok_demo_viewer" },
-        payload: { packetId: target!.packet_id, decision: "approved" },
+        payload: { packetId: target.packet_id, decision: "approved" },
       });
       expect(res.statusCode).toBe(403);
     });
   });
 });
+
+function validPacket(packet_id: string): ReturnType<typeof H0Packet.parse> {
+  return H0Packet.parse({
+    packet_id,
+    tenant_id: "tenant_demo",
+    goal: "reduce_cac",
+    hypothesis: "Reducing inefficient spend on cmp_brand will lower waste.",
+    null_hypothesis: "No change will improve the account.",
+    baseline_window: "2026-05-12..2026-05-21",
+    success_metric: "estimated_waste_reduction",
+    guardrails: { max_daily_budget_delta_pct: 20, requires_human_approval: true },
+    evidence: [
+      {
+        source: "google_ads_fixture",
+        ref: "metric:campaign_daily:acc_demo:cmp_brand:2026-05-21",
+        entity_id: "cmp_brand",
+      },
+    ],
+    causal_status: "directional_until_lift_test",
+    proposal: {
+      action: "budget_shift",
+      target_entity_id: "cmp_brand",
+      params: { delta_pct: -10 },
+      dry_run_only: true,
+    },
+    rollback: {
+      method: "restore_previous_budget",
+      checkpoint_id: `checkpoint_${packet_id}`,
+    },
+    approval: {
+      status: "pending",
+      required_role: "media_manager",
+    },
+    created_by_agent: "test",
+    created_at: "2026-05-21T00:00:00.000Z",
+    trace_id: `trace_${packet_id}`,
+  });
+}

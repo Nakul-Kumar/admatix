@@ -29,7 +29,7 @@ import {
   RollbackCheckpoint,
 } from "@admatix/schemas";
 import { makeDiffBuilderAgent, makePlatformAdapterAgent } from "@admatix/agents";
-import { evaluateAction } from "@admatix/policy";
+import { evaluateAction, signApprovalReceipt } from "@admatix/policy";
 
 export const DEFAULT_WINDOW = "2026-05-12..2026-05-21";
 export const DEFAULT_GOAL = "reduce CAC 10% without MER below 3.0";
@@ -240,6 +240,8 @@ export async function approvePacket(
   note?: string,
 ): Promise<ApprovalReceipt> {
   const activation = await activatePacketDryRun(packet);
+  const decided_at = nowIso();
+  const expires_at = new Date(Date.parse(decided_at) + 15 * 60 * 1000).toISOString();
   const receipt = ApprovalReceipt.parse({
     receipt_id: `approval_${packet.packet_id}`,
     packet_id: packet.packet_id,
@@ -247,9 +249,11 @@ export async function approvePacket(
     decision: "approved",
     decided_by: decidedBy,
     role: "media_manager",
-    decided_at: nowIso(),
+    decided_at,
+    expires_at,
     note,
   });
+  receipt.signature = signApprovalReceipt(receipt);
   await store.put("approval_receipts", receipt.receipt_id, receipt);
   return receipt;
 }

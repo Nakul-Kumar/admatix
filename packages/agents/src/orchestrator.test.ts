@@ -286,23 +286,27 @@ describe("F6: runWorkflow stops at needs_approval (no diff until approved)", () 
     );
     expect(packet).toBeDefined();
     const decided_at = new Date().toISOString();
+    const expires_at = new Date(Date.parse(decided_at) + 15 * 60 * 1000).toISOString();
     const baseReceipt = {
+      receipt_id: "rec_test",
       packet_id: packet!.packet_id,
-      action_id: `act_${packet!.packet_id}`,
+      action_id: `action_${packet!.packet_id}`,
       decided_by: "user_test",
+      role: "media_manager",
       decided_at,
+      expires_at,
       decision: "approved" as const,
     };
+    const receipt = {
+      ...baseReceipt,
+      signature: signApprovalReceipt(baseReceipt),
+    };
+    await store.put("approval_receipts", receipt.receipt_id, receipt);
     const activation = await runActivation(
       {
         packet_id: packet!.packet_id,
         tenant_id: "tenant_demo",
-        receipt: {
-          receipt_id: "rec_test",
-          ...baseReceipt,
-          role: "media_manager",
-          signature: signApprovalReceipt(baseReceipt),
-        },
+        receipt,
       },
       { store },
     );
@@ -335,9 +339,10 @@ describe("F6: runWorkflow stops at needs_approval (no diff until approved)", () 
         receipt: {
           receipt_id: "rec_test_unsigned",
           packet_id: packet!.packet_id,
-          action_id: `act_${packet!.packet_id}`,
+          action_id: `action_${packet!.packet_id}`,
           decided_by: "user_test",
           decided_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
           decision: "approved",
           role: "media_manager",
           // signature deliberately omitted

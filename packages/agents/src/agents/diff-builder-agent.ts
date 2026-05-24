@@ -20,6 +20,16 @@ export interface DiffBuilderResult {
   diff: ExecutionDiff;
 }
 
+export class DiffBuilderExactnessError extends Error {
+  readonly code: string;
+
+  constructor(code: string) {
+    super(code);
+    this.name = "DiffBuilderExactnessError";
+    this.code = code;
+  }
+}
+
 /**
  * Builds a deterministic before/after preview from an approved proposal.
  * The result carries `dry_run: true` — schemas reject anything else, so
@@ -79,42 +89,44 @@ function buildChanges(input: DiffBuilderInput): FieldDiff[] {
   const changes: FieldDiff[] = [];
   switch (input.action.type) {
     case "budget_shift": {
-      const before = input.campaign?.daily_budget ?? null;
-      const deltaPct = numericParam(params, "delta_pct");
-      let after: number | null = null;
-      if (before !== null && deltaPct !== null) {
-        after = round2(before * (1 + deltaPct / 100));
+      const before = input.campaign?.daily_budget;
+      if (typeof before !== "number" || !Number.isFinite(before)) {
+        throw new DiffBuilderExactnessError("diff_requires_campaign_budget");
       }
+      const deltaPct = numericParam(params, "delta_pct");
+      if (deltaPct === null) {
+        throw new DiffBuilderExactnessError("diff_requires_numeric_delta_pct");
+      }
+      const after = round2(before * (1 + deltaPct / 100));
       changes.push({ field: "daily_budget", before, after });
       break;
     }
     case "pause_entity": {
-      const before = input.campaign?.status ?? null;
+      const before = input.campaign?.status;
+      if (typeof before !== "string" || before.length === 0) {
+        throw new DiffBuilderExactnessError("diff_requires_campaign_status");
+      }
       changes.push({ field: "status", before, after: "paused" });
       break;
     }
     case "resume_entity": {
-      const before = input.campaign?.status ?? null;
+      const before = input.campaign?.status;
+      if (typeof before !== "string" || before.length === 0) {
+        throw new DiffBuilderExactnessError("diff_requires_campaign_status");
+      }
       changes.push({ field: "status", before, after: "active" });
       break;
     }
     case "bid_adjust": {
-      const deltaPct = numericParam(params, "delta_pct");
-      changes.push({ field: "bid_delta_pct", before: 0, after: deltaPct });
-      break;
+      throw new DiffBuilderExactnessError("diff_semantics_not_supported:bid_adjust");
     }
     case "add_negative_keyword": {
-      const term = (params["term"] as string | undefined) ?? null;
-      changes.push({ field: "negative_keywords", before: [], after: term ? [term] : [] });
-      break;
+      throw new DiffBuilderExactnessError(
+        "diff_semantics_not_supported:add_negative_keyword",
+      );
     }
     case "creative_rotate": {
-      changes.push({
-        field: "creative_rotation",
-        before: params["from"] ?? null,
-        after: params["to"] ?? null,
-      });
-      break;
+      throw new DiffBuilderExactnessError("diff_semantics_not_supported:creative_rotate");
     }
     case "no_op": {
       changes.push({ field: "noop", before: null, after: null });

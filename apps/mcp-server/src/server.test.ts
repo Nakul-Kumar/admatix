@@ -13,12 +13,12 @@ import {
   createAdmatixMcpServer,
 } from "./server.js";
 import { ToolResultEnvelopeSchema } from "./tools/common.js";
-import { activateDryRunTool } from "./tools/activate-dry-run.js";
-import { auditAccountTool } from "./tools/audit-account.js";
-import { createPlanTool } from "./tools/create-plan.js";
-import { runBenchmarkTool } from "./tools/run-benchmark.js";
-import { showH0PacketTool } from "./tools/show-h0-packet.js";
-import { validateH0PacketTool } from "./tools/validate-h0-packet.js";
+import { ActivateDryRunInput, activateDryRunTool } from "./tools/activate-dry-run.js";
+import { AuditAccountInput, auditAccountTool } from "./tools/audit-account.js";
+import { CreatePlanInput, createPlanTool } from "./tools/create-plan.js";
+import { RunBenchmarkInput, runBenchmarkTool } from "./tools/run-benchmark.js";
+import { ShowH0PacketInput, showH0PacketTool } from "./tools/show-h0-packet.js";
+import { ValidateH0PacketInput, validateH0PacketTool } from "./tools/validate-h0-packet.js";
 import { afterEach, describe, expect, it } from "vitest";
 
 const FixturePacket = H0Packet.parse({
@@ -147,14 +147,44 @@ describe("MCP server", () => {
       },
     });
     await store.put("h0_packets", unsafePacket.packet_id, unsafePacket);
+    const receipt = signedReceipt({
+      receipt_id: "rcpt_unsafe",
+      packet_id: unsafePacket.packet_id,
+      action_id: `action_${unsafePacket.packet_id}`,
+      decision: "approved",
+      decided_by: "user_test",
+      role: "media_manager",
+      decided_at: nowIso(),
+    });
+    await store.put("approval_receipts", receipt.receipt_id, receipt);
 
     const result = await activateDryRunTool(
       {
         packet_id: unsafePacket.packet_id,
+        approval_receipt: receipt,
+      },
+      {
+        store,
+        connector: (await import("@admatix/connectors")).fixtureConnector(),
+      },
+    );
+
+    const parsed = ToolResultEnvelopeSchema.parse(result);
+    expect(parsed.status).toBe("blocked");
+    expect(JSON.stringify(parsed.data)).toContain("policy_block");
+    expect(JSON.stringify(parsed.data)).toMatch(/exceeds the 20% cap/);
+  });
+
+  it("blocks a signed approval receipt that was not persisted in the store", async () => {
+    const store = createStore(await tempRoot());
+    await store.put("h0_packets", FixturePacket.packet_id, FixturePacket);
+    const result = await activateDryRunTool(
+      {
+        packet_id: FixturePacket.packet_id,
         approval_receipt: signedReceipt({
-          receipt_id: "rcpt_unsafe",
-          packet_id: unsafePacket.packet_id,
-          action_id: "act_unsafe",
+          receipt_id: "rcpt_unstored",
+          packet_id: FixturePacket.packet_id,
+          action_id: `action_${FixturePacket.packet_id}`,
           decision: "approved",
           decided_by: "user_test",
           role: "media_manager",
@@ -169,8 +199,76 @@ describe("MCP server", () => {
 
     const parsed = ToolResultEnvelopeSchema.parse(result);
     expect(parsed.status).toBe("blocked");
-    expect(JSON.stringify(parsed.data)).toContain("policy_block");
-    expect(JSON.stringify(parsed.data)).toMatch(/exceeds the 20% cap/);
+    expect(JSON.stringify(parsed.data)).toContain("approval_receipt_not_stored");
+  });
+
+  it("blocks a stored receipt whose action_id does not match the re-derived action", async () => {
+    const store = createStore(await tempRoot());
+    await store.put("h0_packets", FixturePacket.packet_id, FixturePacket);
+    const receipt = signedReceipt({
+      receipt_id: "rcpt_wrong_action",
+      packet_id: FixturePacket.packet_id,
+      action_id: "act_wrong_action",
+      decision: "approved",
+      decided_by: "user_test",
+      role: "media_manager",
+      decided_at: nowIso(),
+    });
+    await store.put("approval_receipts", receipt.receipt_id, receipt);
+
+    const result = await activateDryRunTool(
+      {
+        packet_id: FixturePacket.packet_id,
+        approval_receipt: receipt,
+      },
+      {
+        store,
+        connector: (await import("@admatix/connectors")).fixtureConnector(),
+      },
+    );
+
+    const parsed = ToolResultEnvelopeSchema.parse(result);
+    expect(parsed.status).toBe("blocked");
+    expect(JSON.stringify(parsed.data)).toContain("approval_receipt_action_mismatch");
+  });
+
+  it("blocks replay when an execution diff already exists for the approved action", async () => {
+    const store = createStore(await tempRoot());
+    await store.put("h0_packets", FixturePacket.packet_id, FixturePacket);
+    const actionId = `action_${FixturePacket.packet_id}`;
+    const receipt = signedReceipt({
+      receipt_id: "rcpt_replay",
+      packet_id: FixturePacket.packet_id,
+      action_id: actionId,
+      decision: "approved",
+      decided_by: "user_test",
+      role: "media_manager",
+      decided_at: nowIso(),
+    });
+    await store.put("approval_receipts", receipt.receipt_id, receipt);
+    await store.put("execution_diffs", "diff_existing", {
+      diff_id: "diff_existing",
+      action_id: actionId,
+      entity_id: FixturePacket.proposal.target_entity_id,
+      changes: [{ field: "daily_budget", before: 100, after: 90 }],
+      dry_run: true,
+      created_at: nowIso(),
+    });
+
+    const result = await activateDryRunTool(
+      {
+        packet_id: FixturePacket.packet_id,
+        approval_receipt: receipt,
+      },
+      {
+        store,
+        connector: (await import("@admatix/connectors")).fixtureConnector(),
+      },
+    );
+
+    const parsed = ToolResultEnvelopeSchema.parse(result);
+    expect(parsed.status).toBe("blocked");
+    expect(JSON.stringify(parsed.data)).toContain("approval_receipt_already_used");
   });
 
   it("F1: rejects approval receipts whose HMAC signature does not verify", async () => {
@@ -221,15 +319,15 @@ describe("MCP server", () => {
       await activateDryRunTool(
         {
           packet_id: FixturePacket.packet_id,
-          approval_receipt: signedReceipt({
+          approval_receipt: await storeReceipt(store, signedReceipt({
             receipt_id: "rcpt_test",
             packet_id: FixturePacket.packet_id,
-            action_id: "act_approved",
+            action_id: `action_${FixturePacket.packet_id}`,
             decision: "approved",
             decided_by: "user_test",
             role: "media_manager",
             decided_at: nowIso(),
-          }),
+          })),
         },
         ctx,
       ),
@@ -253,6 +351,50 @@ describe("MCP server", () => {
         { store, connector },
       ),
     ).rejects.toThrow(/Unrecognized key/);
+  });
+
+  it("strict tool schemas reject prompt-injected bypass fields", () => {
+    const bypass = {
+      approval_receipt: signedReceipt({
+        receipt_id: "rcpt_prompt_injected",
+        packet_id: FixturePacket.packet_id,
+        action_id: `action_${FixturePacket.packet_id}`,
+        decision: "approved",
+        decided_by: "prompt",
+        role: "finance_director",
+        decided_at: nowIso(),
+      }),
+      dry_run_only: false,
+      mutate_platform: true,
+    };
+
+    expect(() =>
+      AuditAccountInput.parse({ account_ref: "fixture:acc_demo", ...bypass }),
+    ).toThrow(/Unrecognized key/);
+    expect(() =>
+      CreatePlanInput.parse({
+        account_ref: "fixture:acc_demo",
+        goal: "lower CAC",
+        tenant_id: "tenant_demo",
+        ...bypass,
+      }),
+    ).toThrow(/Unrecognized key/);
+    expect(() =>
+      ShowH0PacketInput.parse({ packet_id: FixturePacket.packet_id, ...bypass }),
+    ).toThrow(/Unrecognized key/);
+    expect(() =>
+      ValidateH0PacketInput.parse({ packet_id: FixturePacket.packet_id, ...bypass }),
+    ).toThrow(/Unrecognized key/);
+    expect(() =>
+      RunBenchmarkInput.parse({ suite: "safety-v1", ...bypass }),
+    ).toThrow(/Unrecognized key/);
+    expect(() =>
+      ActivateDryRunInput.parse({
+        packet_id: FixturePacket.packet_id,
+        approval_receipt: bypass.approval_receipt,
+        mutate_platform: true,
+      }),
+    ).toThrow(/Unrecognized key/);
   });
 
   it("starts and responds over stdio, and unknown tools do not crash it", async () => {
@@ -336,20 +478,23 @@ describe("MCP server", () => {
           ToolResultEnvelopeSchema.parse(blocked.structuredContent).status,
         ).toBe("blocked");
 
+        const receipt = signedReceipt({
+          receipt_id: "rcpt_stdio",
+          packet_id: packet.packet_id,
+          action_id: `action_${packet.packet_id}`,
+          decision: "approved",
+          decided_by: "user_stdio",
+          role: "media_manager",
+          decided_at: nowIso(),
+        });
+        await createStore(dataDir).put("approval_receipts", receipt.receipt_id, receipt);
+
         const dryRun = await client.callTool(
           {
             name: "activate_dry_run",
             arguments: {
               packet_id: packet.packet_id,
-              approval_receipt: signedReceipt({
-                receipt_id: "rcpt_stdio",
-                packet_id: packet.packet_id,
-                action_id: "act_stdio",
-                decision: "approved",
-                decided_by: "user_stdio",
-                role: "media_manager",
-                decided_at: nowIso(),
-              }),
+              approval_receipt: receipt,
             },
           },
           undefined,
@@ -445,10 +590,25 @@ function signedReceipt(
     decided_by: string;
     role: string;
     decided_at: string;
+    expires_at?: string;
   },
-): typeof base & { signature: string } {
-  return {
+): typeof base & { expires_at: string; signature: string } {
+  const withExpiry = {
     ...base,
-    signature: signApprovalReceipt(base),
+    expires_at:
+      base.expires_at ??
+      new Date(Date.parse(base.decided_at) + 15 * 60 * 1000).toISOString(),
   };
+  return {
+    ...withExpiry,
+    signature: signApprovalReceipt(withExpiry),
+  };
+}
+
+async function storeReceipt<T extends { receipt_id: string }>(
+  store: ReturnType<typeof createStore>,
+  receipt: T,
+): Promise<T> {
+  await store.put("approval_receipts", receipt.receipt_id, receipt);
+  return receipt;
 }

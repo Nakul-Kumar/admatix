@@ -8,10 +8,13 @@ import {
 
 const SECRET = "test-secret-xyz";
 const base = {
+  receipt_id: "rec_1",
   packet_id: "h0_01",
   action_id: "act_01",
   decided_by: "media_manager_demo",
+  role: "media_manager",
   decided_at: "2026-05-22T12:00:00.000Z",
+  expires_at: "2099-05-22T12:15:00.000Z",
   decision: "approved" as const,
 };
 
@@ -64,9 +67,7 @@ describe("approval-signing — HMAC fail-closed", () => {
     const signature = signApprovalReceipt(base, SECRET);
     const r = verifyApprovalReceipt(
       {
-        receipt_id: "rec_1",
         ...base,
-        role: "media_manager",
         signature,
       },
       SECRET,
@@ -77,9 +78,7 @@ describe("approval-signing — HMAC fail-closed", () => {
   it("rejects a receipt with no signature (would have caught QA finding #5)", () => {
     const r = verifyApprovalReceipt(
       {
-        receipt_id: "rec_1",
         ...base,
-        role: "finance_director", // forged role
       },
       SECRET,
     );
@@ -91,9 +90,7 @@ describe("approval-signing — HMAC fail-closed", () => {
     const signature = signApprovalReceipt(base, "different-secret");
     const r = verifyApprovalReceipt(
       {
-        receipt_id: "rec_1",
         ...base,
-        role: "media_manager",
         signature,
       },
       SECRET,
@@ -105,23 +102,62 @@ describe("approval-signing — HMAC fail-closed", () => {
   it("rejects a receipt whose payload was tampered after signing", () => {
     const signature = signApprovalReceipt(base, SECRET);
     const tampered = {
-      receipt_id: "rec_1",
       ...base,
       decided_by: "evil_user", // mutate after sign
-      role: "media_manager",
       signature,
     };
     const r = verifyApprovalReceipt(tampered, SECRET);
     expect(r.ok).toBe(false);
   });
 
+  it("rejects a receipt whose receipt_id was tampered after signing", () => {
+    const signature = signApprovalReceipt(base, SECRET);
+    const r = verifyApprovalReceipt({ ...base, receipt_id: "rec_2", signature }, SECRET);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("signature_mismatch");
+  });
+
+  it("rejects a receipt whose role was tampered after signing", () => {
+    const signature = signApprovalReceipt(base, SECRET);
+    const r = verifyApprovalReceipt({ ...base, role: "finance_director", signature }, SECRET);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("signature_mismatch");
+  });
+
+  it("rejects a receipt whose expires_at was tampered after signing", () => {
+    const signature = signApprovalReceipt(base, SECRET);
+    const r = verifyApprovalReceipt(
+      { ...base, expires_at: "2099-05-22T12:45:00.000Z", signature },
+      SECRET,
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("signature_mismatch");
+  });
+
+  it("rejects expired receipts", () => {
+    const expired = { ...base, expires_at: "2020-01-01T00:00:00.000Z" };
+    const signature = signApprovalReceipt(expired, SECRET);
+    const r = verifyApprovalReceipt({ ...expired, signature }, SECRET);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("expired");
+  });
+
+  it("rejects malformed signature hex before timing-safe compare", () => {
+    const r = verifyApprovalReceipt({ ...base, signature: "not-hex" }, SECRET);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("invalid_signature_format");
+  });
+
   it("payload is deterministic in field order", () => {
     expect(approvalPayload(base)).toBe(
       [
+        base.receipt_id,
         base.packet_id,
         base.action_id,
         base.decided_by,
+        base.role,
         base.decided_at,
+        base.expires_at,
         base.decision,
       ].join("|"),
     );
