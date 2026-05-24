@@ -12,7 +12,12 @@ import { readFile } from "node:fs/promises";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { devNull, runDemo, type DemoResult } from "../../scripts/demo.ts";
+import {
+  devNull,
+  isDemoCliEntrypoint,
+  runDemo,
+  type DemoResult,
+} from "../../scripts/demo.ts";
 
 const RUNBOOK = resolve(__dirname, "..", "..", "docs", "runbooks", "demo-script.md");
 
@@ -133,5 +138,11 @@ describe("AdMatix demo flow (WP-K)", () => {
     const a = await runOnFreshStore();
     const b = await runOnFreshStore();
     expect(a.transcript).toBe(b.transcript);
+  });
+
+  it("recognizes the CLI entrypoint on Windows and POSIX paths", () => {
+    expect(isDemoCliEntrypoint("C:\\repo\\scripts\\demo.ts")).toBe(true);
+    expect(isDemoCliEntrypoint("/repo/scripts/demo.ts")).toBe(true);
+    expect(isDemoCliEntrypoint("/repo/scripts/not-demo.ts")).toBe(false);
   });
 });

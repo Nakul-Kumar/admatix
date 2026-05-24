@@ -13,7 +13,7 @@
     "Does not prove live paid-media spend lift.",
     "Does not include raw Criteo or Hillstrom data.",
     "Criteo/Hillstrom outputs are aggregate-only and must preserve source license constraints.",
-    "Dashboard data remains demo/unavailable until artifact-specific dashboard schema is released."
+    "The dashboard artifact view reads aggregate artifact files; older sample pages remain explicitly illustrative/demo."
   ],
   "artifacts": [
     {

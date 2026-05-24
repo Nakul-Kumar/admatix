@@ -36,11 +36,16 @@ Windows PowerShell from the repo root:
 py -3.12 -m venv services\validation\.venv
 services\validation\.venv\Scripts\python -m pip install --upgrade pip
 services\validation\.venv\Scripts\python -m pip install `
-  -r services\validation\requirements.txt `
+  -r services\validation\requirements.lock `
   -r services\verifier\requirements.txt
 $env:PYTHONPATH = "services/validation/src;services/simulator/src;services/verifier/src"
 services\validation\.venv\Scripts\python -m pytest services/validation/tests -q -m "not slow"
 ```
+
+Do not install the verifier top-level requirements together with an older
+validation lock in a single resolver transaction. The committed lock is
+Windows-safe and uses plain `uvicorn` so the proof gate does not attempt to
+build Linux-only `uvloop` on Windows.
 
 If dependency resolution changes, record the exact resolved versions in the
 phase report. Do not change the WP-T thresholds to make a local run pass.

@@ -549,7 +549,11 @@ const isMain =
   typeof process !== "undefined" &&
   Array.isArray(process.argv) &&
   process.argv[1] !== undefined &&
-  /scripts\/demo\.(t|j|m)s$/.test(process.argv[1]);
+  isDemoCliEntrypoint(process.argv[1]);
+
+export function isDemoCliEntrypoint(argvPath: string): boolean {
+  return /(?:^|[\\/])scripts[\\/]demo\.(?:t|j|m)s$/.test(argvPath);
+}
 
 if (isMain) {
   runDemo()

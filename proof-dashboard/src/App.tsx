@@ -11,12 +11,13 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<Overview />} />
+        <Route index element={<Artifacts />} />
+        <Route path="artifacts" element={<Artifacts />} />
+        <Route path="overview" element={<Overview />} />
         <Route path="worlds" element={<Worlds />} />
         <Route path="benchmark" element={<Benchmark />} />
         <Route path="validation" element={<Validation />} />
         <Route path="decisions" element={<Decisions />} />
-        <Route path="artifacts" element={<Artifacts />} />
       </Route>
     </Routes>
   );
