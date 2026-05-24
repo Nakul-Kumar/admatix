@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
+
 from admatix_benchmark.buyer import BasicPolicyBuyer, ModernPolicyBuyer
 from admatix_benchmark.buyer.base import BuyerContext
 from admatix_benchmark.env import CampaignReportedView
@@ -136,3 +139,85 @@ def test_llm_buyer_extract_decisions_returns_none_on_garbage():
     from admatix_benchmark.buyer.llm import _extract_decisions
 
     assert _extract_decisions("not even json") is None
+
+
+def test_llm_buyer_omits_hanging_cli_json_schema_by_default(monkeypatch):
+    from admatix_benchmark.buyer import llm
+    from admatix_benchmark.buyer.llm import ClaudeBuyerConfig, ClaudeHeadlessBuyer
+
+    captured: dict[str, list[str]] = {}
+
+    def fake_run(cmd, **kwargs):
+        captured["cmd"] = list(cmd)
+        return subprocess.CompletedProcess(
+            cmd,
+            0,
+            stdout=json.dumps(
+                {
+                    "is_error": False,
+                    "result": json.dumps(
+                        {
+                            "decisions": [
+                                {
+                                    "campaign_id": "c1",
+                                    "action": "hold",
+                                    "delta_pct": None,
+                                    "rationale": "healthy enough to keep observing",
+                                }
+                            ]
+                        }
+                    ),
+                }
+            ),
+        )
+
+    monkeypatch.setattr(llm.shutil, "which", lambda binary: binary)
+    monkeypatch.setattr(llm.subprocess, "run", fake_run)
+
+    buyer = ClaudeHeadlessBuyer(ClaudeBuyerConfig(skill_tier="basic"))
+    actions = buyer.decide([_view("c1", roas_window=2.0)], _ctx(7))
+
+    assert actions[0].action_type == "hold"
+    assert "--json-schema" not in captured["cmd"]
+
+
+def test_llm_buyer_can_opt_into_cli_json_schema(monkeypatch):
+    from admatix_benchmark.buyer import llm
+    from admatix_benchmark.buyer.llm import ClaudeBuyerConfig, ClaudeHeadlessBuyer
+
+    captured: dict[str, list[str]] = {}
+
+    def fake_run(cmd, **kwargs):
+        captured["cmd"] = list(cmd)
+        return subprocess.CompletedProcess(
+            cmd,
+            0,
+            stdout=json.dumps(
+                {
+                    "is_error": False,
+                    "result": json.dumps(
+                        {
+                            "decisions": [
+                                {
+                                    "campaign_id": "c1",
+                                    "action": "hold",
+                                    "delta_pct": None,
+                                    "rationale": "schema flag enabled by operator",
+                                }
+                            ]
+                        }
+                    ),
+                }
+            ),
+        )
+
+    monkeypatch.setattr(llm.shutil, "which", lambda binary: binary)
+    monkeypatch.setattr(llm.subprocess, "run", fake_run)
+
+    buyer = ClaudeHeadlessBuyer(
+        ClaudeBuyerConfig(skill_tier="basic", use_cli_json_schema=True)
+    )
+    actions = buyer.decide([_view("c1", roas_window=2.0)], _ctx(7))
+
+    assert actions[0].action_type == "hold"
+    assert "--json-schema" in captured["cmd"]

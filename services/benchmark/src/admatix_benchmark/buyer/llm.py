@@ -4,9 +4,11 @@ Each decision day this spawns `claude --print --output-format json` with the
 skill pack as the system prompt and the campaign report as the user message.
 Claude returns a JSON array of actions, which we parse into `BuyerAction`.
 
-The output schema is locked via `--json-schema` so the model can't drift.
-Cost discipline: we use `claude-haiku-4-5` by default, the prompt is short,
-and we cap calls to one per (arm, world, seed, decision-day).
+The output schema is included in the prompt and enforced by the parser. The
+Claude CLI's `--json-schema` flag is opt-in because it can hang in the
+subscription-authenticated desktop CLI path. Cost discipline: we use the chosen
+CLI model, the prompt is short, and we cap calls to one per (arm, world, seed,
+decision-day).
 
 Identical-across-arms-within-tier discipline: the skill pack, model,
 temperature/seed, prompt format, and JSON schema are all functions of the
@@ -62,6 +64,7 @@ class ClaudeBuyerConfig:
     skill_tier: str = "basic"  # "basic" or "modern"
     timeout_s: int = 120
     binary: str = "claude"
+    use_cli_json_schema: bool = False
     # Whether to add --bare. We default OFF because the headless host has
     # OAuth available but typically not ANTHROPIC_API_KEY, and --bare requires
     # an API key. The system prompt may therefore include some boilerplate;
@@ -128,9 +131,9 @@ class ClaudeHeadlessBuyer:
             "*",
             "--append-system-prompt",
             system_prompt,
-            "--json-schema",
-            json.dumps(_DECISIONS_JSON_SCHEMA),
         ]
+        if self.config.use_cli_json_schema:
+            cmd.extend(["--json-schema", json.dumps(_DECISIONS_JSON_SCHEMA)])
         if self.config.bare:
             cmd.append("--bare")
 
