@@ -1,0 +1,289 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "bench_1ddaeaab39d8",
+  "generated_at": "2026-05-23T18:52:17+00:00",
+  "config": {
+    "seeds_llm": [
+      17
+    ],
+    "seeds_policy": [
+      17
+    ],
+    "n_periods": 28,
+    "decision_every_n_days": 7,
+    "world_types": [
+      "clean_ab"
+    ],
+    "campaigns_per_account_by_world": {
+      "clean_ab": 3
+    },
+    "arms": [
+      "A"
+    ],
+    "models": {
+      "llm": "claude-haiku-4-5-20251001"
+    },
+    "code_version": "4868549f2c45c38c98bd21a3ba43742a72a16be9",
+    "env_config_fingerprints": {
+      "clean_ab__seed17": "92b4ffa9029b1a999189f3602ae3505fa292edeb79ee1ab61f321e3fd2fe77d4"
+    }
+  },
+  "by_run": [
+    {
+      "run_id": "A__clean_ab__seed=17__buyer=policy__tier=basic",
+      "arm": "A",
+      "world_type": "clean_ab",
+      "seed": 17,
+      "buyer_kind": "policy",
+      "row_kind": "policy",
+      "row_status": "completed",
+      "skill_tier": "basic",
+      "total_spend": 12992.7,
+      "reported_revenue": 47584.4893,
+      "reported_roas": 3.662402,
+      "true_incremental_revenue": 9528.107,
+      "true_iroas": 0.733343,
+      "net_incremental_value": -3464.593,
+      "wasted_spend": 4330.9,
+      "true_lift_captured": 9528.107,
+      "scale_up_proposals": 9,
+      "scale_ups_applied": 9,
+      "scale_ups_blocked_by_gate": 0,
+      "false_scale_ups_prevented": 0,
+      "true_scale_ups_prevented": 0,
+      "pause_proposals": 0,
+      "pauses_applied": 0,
+      "decisions_count": 4
+    },
+    {
+      "run_id": "A__clean_ab__seed=17__buyer=llm__tier=basic",
+      "arm": "A",
+      "world_type": "clean_ab",
+      "seed": 17,
+      "buyer_kind": "llm",
+      "row_kind": "llm_fallback",
+      "row_status": "fallback",
+      "skill_tier": "basic",
+      "total_spend": 12992.7,
+      "reported_revenue": 47584.4893,
+      "reported_roas": 3.662402,
+      "true_incremental_revenue": 9528.107,
+      "true_iroas": 0.733343,
+      "net_incremental_value": -3464.593,
+      "wasted_spend": 4330.9,
+      "true_lift_captured": 9528.107,
+      "scale_up_proposals": 9,
+      "scale_ups_applied": 9,
+      "scale_ups_blocked_by_gate": 0,
+      "false_scale_ups_prevented": 0,
+      "true_scale_ups_prevented": 0,
+      "pause_proposals": 0,
+      "pauses_applied": 0,
+      "decisions_count": 4
+    }
+  ],
+  "by_arm": {
+    "A": {
+      "total_spend": {
+        "mean": 12992.7,
+        "sd": 0.0,
+        "n": 2
+      },
+      "true_iroas": {
+        "mean": 0.733343,
+        "sd": 0.0,
+        "n": 2
+      },
+      "reported_roas": {
+        "mean": 3.662402,
+        "sd": 0.0,
+        "n": 2
+      },
+      "net_incremental_value": {
+        "mean": -3464.593,
+        "sd": 0.0,
+        "n": 2
+      },
+      "wasted_spend": {
+        "mean": 4330.9,
+        "sd": 0.0,
+        "n": 2
+      },
+      "true_lift_captured": {
+        "mean": 9528.107,
+        "sd": 0.0,
+        "n": 2
+      },
+      "false_scale_ups_prevented": {
+        "mean": 0.0,
+        "sd": 0.0,
+        "n": 2
+      },
+      "n_runs": 2
+    },
+    "B": {
+      "total_spend": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "true_iroas": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "reported_roas": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "net_incremental_value": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "wasted_spend": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "true_lift_captured": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "false_scale_ups_prevented": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "n_runs": 0
+    },
+    "C": {
+      "total_spend": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "true_iroas": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "reported_roas": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "net_incremental_value": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "wasted_spend": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "true_lift_captured": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "false_scale_ups_prevented": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "n_runs": 0
+    },
+    "D": {
+      "total_spend": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "true_iroas": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "reported_roas": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "net_incremental_value": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "wasted_spend": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "true_lift_captured": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "false_scale_ups_prevented": {
+        "mean": null,
+        "sd": null,
+        "n": 0
+      },
+      "n_runs": 0
+    }
+  },
+  "per_world": {
+    "clean_ab": {
+      "A": {
+        "n_runs": 2,
+        "mean_total_spend": 12992.7,
+        "mean_true_iroas": 0.733343,
+        "mean_net_incremental_value": -3464.593,
+        "mean_wasted_spend": 4330.9,
+        "mean_false_scale_ups_prevented": 0.0
+      }
+    }
+  },
+  "llm_lane_accounting": {
+    "policy_rows": 1,
+    "real_llm_rows": 0,
+    "deterministic_fallback_rows": 1,
+    "failed_llm_rows": 0,
+    "skipped_llm_rows": 0
+  },
+  "proof_readiness": {
+    "status": "BLOCKED",
+    "blocking_reasons": [
+      "requires_nonzero_real_llm_rows"
+    ],
+    "required_for_phase_5_proof_claims": [
+      "nonzero_real_llm_rows"
+    ],
+    "claim_limit": "calibrated simulator/public RCT proof only; no live spend lift claim"
+  },
+  "claim_limits": [
+    "This benchmark is calibrated simulator/public RCT proof only.",
+    "It does not claim live spend lift.",
+    "Fallback rows are deterministic-policy rows, not real LLM rows."
+  ],
+  "head_to_head": {
+    "B_vs_A": {
+      "delta_net_incremental_value_mean": null,
+      "delta_wasted_spend_mean": null,
+      "delta_true_iroas_mean": null,
+      "win_rate_over_worlds": null,
+      "n_paired": 0
+    },
+    "D_vs_C": {
+      "delta_net_incremental_value_mean": null,
+      "delta_wasted_spend_mean": null,
+      "delta_true_iroas_mean": null,
+      "win_rate_over_worlds": null,
+      "n_paired": 0
+    }
+  }
+}
