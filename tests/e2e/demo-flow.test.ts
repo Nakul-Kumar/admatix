@@ -28,15 +28,19 @@ async function runOnFreshStore(): Promise<DemoResult> {
 function extractTranscriptBlock(markdown: string): string {
   // The runbook embeds the transcript in the first fenced code block tagged
   // ```text or just ``` immediately following the "Live transcript" header.
-  const fenceRegex = /^```text\n([\s\S]*?)\n```/m;
-  const match = markdown.match(fenceRegex);
+  const [, transcriptSection] = markdown.split(/^## Live transcript\s*$/m);
+  if (transcriptSection === undefined) {
+    throw new Error("runbook: could not find the Live transcript section");
+  }
+  const fenceRegex = /^```(?:text)?\r?\n([\s\S]*?)\r?\n```/m;
+  const match = transcriptSection.match(fenceRegex);
   if (!match || match[1] === undefined) {
     throw new Error(
       "runbook: could not find a ```text fenced block (the live transcript)",
     );
   }
   // Ensure the block ends in a newline like the captured transcript.
-  return `${match[1]}\n`;
+  return `${match[1].replace(/\r\n/g, "\n")}\n`;
 }
 
 describe("AdMatix demo flow (WP-K)", () => {
