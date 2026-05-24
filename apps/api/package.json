@@ -21,7 +21,7 @@
     "@admatix/evidence": "workspace:*",
     "@admatix/policy": "workspace:*",
     "@admatix/schemas": "workspace:*",
-    "fastify": "^4.28.1",
+    "fastify": "^5.8.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {

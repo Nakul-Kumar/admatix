@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -18,6 +19,17 @@ for candidate in [
     value = str(candidate)
     if value not in sys.path:
         sys.path.insert(0, value)
+
+pythonpath_entries = [
+    str(UPLIFT_ROOT / "src"),
+    str(ROOT / "services" / "simulator" / "src"),
+    str(ROOT / "services" / "verifier" / "src"),
+    str(ROOT / "services" / "ingest" / "src"),
+]
+existing_pythonpath = os.environ.get("PYTHONPATH")
+os.environ["PYTHONPATH"] = os.pathsep.join(
+    pythonpath_entries + ([existing_pythonpath] if existing_pythonpath else [])
+)
 
 
 def dataset_path(name: str) -> Path:

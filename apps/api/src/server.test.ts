@@ -17,6 +17,32 @@ let tmpRoot: string;
 
 const MANAGER_AUTH = { authorization: "Bearer tok_demo_media_manager" };
 
+async function buildAndClose(): Promise<void> {
+  const candidate = await buildServer({ logger: false });
+  await candidate.close();
+}
+
+async function withEnv<T>(
+  updates: Record<string, string | undefined>,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const prev: Record<string, string | undefined> = {};
+  for (const key of Object.keys(updates)) {
+    prev[key] = process.env[key];
+    const next = updates[key];
+    if (next === undefined) delete process.env[key];
+    else process.env[key] = next;
+  }
+  try {
+    return await fn();
+  } finally {
+    for (const [key, value] of Object.entries(prev)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
 beforeAll(async () => {
   tmpRoot = mkdtempSync(join(tmpdir(), "admatix-api-"));
   store = createStore(tmpRoot);
@@ -39,6 +65,43 @@ describe("F8: API entry point enforces ADMATIX_MODE=fixtures", () => {
       if (prev === undefined) delete process.env["ADMATIX_MODE"];
       else process.env["ADMATIX_MODE"] = prev;
     }
+  });
+});
+
+describe("CX-7 production secret hygiene", () => {
+  it("hard-fails production API boot when ADMATIX_API_TOKENS is missing", async () => {
+    await withEnv(
+      {
+        ADMATIX_ENV: "production",
+        NODE_ENV: undefined,
+        ADMATIX_API_TOKENS: undefined,
+      },
+      async () => {
+        await expect(buildAndClose()).rejects.toThrow(
+          /ADMATIX_API_TOKENS/,
+        );
+      },
+    );
+  });
+
+  it("hard-fails production API boot when ADMATIX_API_TOKENS uses demo defaults", async () => {
+    await withEnv(
+      {
+        ADMATIX_ENV: "production",
+        NODE_ENV: undefined,
+        ADMATIX_API_TOKENS: JSON.stringify({
+          tok_demo_media_manager: {
+            tenant_id: "tenant_demo",
+            role: "media_manager",
+          },
+        }),
+      },
+      async () => {
+        await expect(buildAndClose()).rejects.toThrow(
+          /demo default token/,
+        );
+      },
+    );
   });
 });
 

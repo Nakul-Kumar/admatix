@@ -14,9 +14,28 @@ import type { ApprovalReceipt } from "@admatix/schemas";
  */
 const DEFAULT_DEMO_SECRET = "admatix-dev-only-do-not-use-in-prod";
 
+function isProductionEnv(): boolean {
+  return (
+    process.env["ADMATIX_ENV"] === "production" ||
+    process.env["NODE_ENV"] === "production"
+  );
+}
+
 export function approvalSecret(): string {
   const fromEnv = process.env["ADMATIX_APPROVAL_SECRET"];
-  if (typeof fromEnv === "string" && fromEnv.length > 0) return fromEnv;
+  if (typeof fromEnv === "string" && fromEnv.length > 0) {
+    if (isProductionEnv() && fromEnv === DEFAULT_DEMO_SECRET) {
+      throw new Error(
+        "ADMATIX_APPROVAL_SECRET is the demo default secret; set a production secret.",
+      );
+    }
+    return fromEnv;
+  }
+  if (isProductionEnv()) {
+    throw new Error(
+      "ADMATIX_APPROVAL_SECRET is required in production; demo default is local-only.",
+    );
+  }
   return DEFAULT_DEMO_SECRET;
 }
 

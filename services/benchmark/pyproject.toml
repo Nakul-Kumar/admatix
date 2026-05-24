@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "admatix-benchmark"
+version = "0.1.0"
+description = "AdMatix head-to-head benchmark: AI buyer with vs without AdMatix gate"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "AdMatix" }]
+dependencies = [
+  "admatix-verifier",
+  "pydantic>=2.9,<2.10",
+  "numpy>=2.1,<2.2",
+  "pandas>=2.2,<2.3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<9"]
+
+[project.scripts]
+admatix-benchmark = "admatix_benchmark.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src", "../simulator/src"]

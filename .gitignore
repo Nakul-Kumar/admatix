@@ -17,6 +17,7 @@ data/raw/
 data/.cache/
 data/sim/
 services/uplift/output/
+services/backtests/output/
 coverage/
 *.log
 .DS_Store
