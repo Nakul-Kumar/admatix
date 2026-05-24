@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "admatix-backtests"
+version = "0.1.0"
+description = "AdMatix public RCT backtest readiness harness"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "AdMatix" }]
+dependencies = [
+  "numpy>=2.1,<2.2",
+  "pandas>=2.2,<2.3",
+  "scipy>=1.14,<1.17",
+  "scikit-learn>=1.6,<1.8",
+  "matplotlib>=3.9,<3.10",
+  "pytest>=8.3,<9",
+]
+
+[project.scripts]
+admatix-backtests = "admatix_backtests.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = [
+  "src",
+  "../uplift/src",
+  "../ingest/src",
+]
+markers = [
+  "slow: production-sized public-dataset backtest gate",
+]

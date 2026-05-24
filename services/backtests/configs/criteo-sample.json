@@ -1,0 +1,7 @@
+{
+  "output_dir": "output",
+  "seed": 17,
+  "bootstrap_iters": 120,
+  "criteo_outcomes": ["visit"],
+  "criteo_sample_rows": 200000
+}
