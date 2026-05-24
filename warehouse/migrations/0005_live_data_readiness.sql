@@ -169,6 +169,8 @@ CREATE TABLE IF NOT EXISTS app.experiment_designs (
   ad_account_id        uuid,
   h0_packet_id         uuid,
   design_key           text                       NOT NULL,
+  design_version       integer                    NOT NULL DEFAULT 1,
+  supersedes_experiment_design_id uuid,
   design_type          app.experiment_design_type NOT NULL,
   primary_metric       text                       NOT NULL,
   treatment_unit       text                       NOT NULL,
@@ -201,7 +203,10 @@ CREATE TABLE IF NOT EXISTS app.experiment_designs (
     REFERENCES app.ad_accounts (ad_account_id) ON DELETE SET NULL,
   CONSTRAINT fk_experiment_designs_packet FOREIGN KEY (h0_packet_id)
     REFERENCES app.h0_packets (h0_packet_id) ON DELETE SET NULL,
-  CONSTRAINT uq_experiment_designs_key UNIQUE (tenant_id, design_key),
+  CONSTRAINT fk_experiment_designs_supersedes FOREIGN KEY (supersedes_experiment_design_id)
+    REFERENCES app.experiment_designs (experiment_design_id) ON DELETE RESTRICT,
+  CONSTRAINT uq_experiment_designs_key_version UNIQUE (tenant_id, design_key, design_version),
+  CONSTRAINT ck_experiment_designs_version CHECK (design_version > 0),
   CONSTRAINT ck_experiment_designs_windows CHECK (
     (baseline_start IS NULL OR baseline_end IS NULL OR baseline_end >= baseline_start)
     AND (measurement_start IS NULL OR measurement_end IS NULL OR measurement_end >= measurement_start)
@@ -210,10 +215,10 @@ CREATE TABLE IF NOT EXISTS app.experiment_designs (
   CONSTRAINT ck_experiment_designs_power CHECK (power IS NULL OR (power >= 0 AND power <= 1)),
   CONSTRAINT ck_experiment_designs_alpha CHECK (alpha > 0 AND alpha < 1),
   CONSTRAINT ck_experiment_designs_mde CHECK (mde IS NULL OR mde >= 0),
-  CONSTRAINT ck_experiment_designs_status CHECK (status IN ('draft', 'pre_registered', 'running', 'completed', 'cancelled')),
+  CONSTRAINT ck_experiment_designs_status CHECK (status IN ('draft', 'pre_registered', 'cancelled')),
   CONSTRAINT ck_experiment_designs_preregistered_at CHECK (
-    (status = 'draft' AND pre_registered_at IS NULL)
-    OR (status <> 'draft' AND pre_registered_at IS NOT NULL)
+    (status = 'pre_registered' AND pre_registered_at IS NOT NULL)
+    OR (status <> 'pre_registered' AND pre_registered_at IS NULL)
   )
 );
 
@@ -223,7 +228,9 @@ COMMENT ON COLUMN app.experiment_designs.experiment_design_id IS 'Surrogate prim
 COMMENT ON COLUMN app.experiment_designs.tenant_id IS 'Owning tenant (FK app.tenants).';
 COMMENT ON COLUMN app.experiment_designs.ad_account_id IS 'Optional ad account covered by the design (FK app.ad_accounts).';
 COMMENT ON COLUMN app.experiment_designs.h0_packet_id IS 'Optional H0 packet the design measures (FK app.h0_packets).';
-COMMENT ON COLUMN app.experiment_designs.design_key IS 'Stable human-readable experiment key, unique per tenant.';
+COMMENT ON COLUMN app.experiment_designs.design_key IS 'Stable human-readable experiment key, versioned per tenant.';
+COMMENT ON COLUMN app.experiment_designs.design_version IS 'Monotonic version for a design_key. Superseding designs insert a new version instead of editing old rows.';
+COMMENT ON COLUMN app.experiment_designs.supersedes_experiment_design_id IS 'Prior experiment design this row supersedes, if any.';
 COMMENT ON COLUMN app.experiment_designs.design_type IS 'Measurement design: user holdout, geo holdout, switchback, platform lift, synthetic control, or none.';
 COMMENT ON COLUMN app.experiment_designs.primary_metric IS 'Primary decision metric, e.g. first_party_gross_margin or incremental_revenue.';
 COMMENT ON COLUMN app.experiment_designs.treatment_unit IS 'Unit of assignment: user, geo, campaign, ad_set, keyword, audience, or time block.';
@@ -242,7 +249,7 @@ COMMENT ON COLUMN app.experiment_designs.decision_rule IS 'Pre-declared rule for
 COMMENT ON COLUMN app.experiment_designs.pre_period_fit IS 'Pre-period fit diagnostics for geo/synthetic-control designs.';
 COMMENT ON COLUMN app.experiment_designs.placebo_plan IS 'Planned placebo or negative-control checks.';
 COMMENT ON COLUMN app.experiment_designs.assumptions IS 'Named assumptions and known limitations for the design.';
-COMMENT ON COLUMN app.experiment_designs.status IS 'Lifecycle state: draft | pre_registered | running | completed | cancelled.';
+COMMENT ON COLUMN app.experiment_designs.status IS 'Design state: draft | pre_registered | cancelled. Running/completed outcomes live in outcome/proof tables, not by mutating the pre-registered design.';
 COMMENT ON COLUMN app.experiment_designs.body IS 'Full design payload as jsonb.';
 COMMENT ON COLUMN app.experiment_designs.body_hash IS 'SHA-256 of the canonical design body, generated from body.';
 COMMENT ON COLUMN app.experiment_designs.pre_registered_at IS 'UTC timestamp when the design became immutable for interpretation.';
@@ -252,6 +259,7 @@ COMMENT ON COLUMN app.experiment_designs.updated_at IS 'UTC timestamp of the las
 CREATE INDEX IF NOT EXISTS idx_experiment_designs_tenant_id ON app.experiment_designs (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_experiment_designs_account_id ON app.experiment_designs (ad_account_id);
 CREATE INDEX IF NOT EXISTS idx_experiment_designs_packet_id ON app.experiment_designs (h0_packet_id);
+CREATE INDEX IF NOT EXISTS idx_experiment_designs_supersedes_id ON app.experiment_designs (supersedes_experiment_design_id);
 CREATE INDEX IF NOT EXISTS idx_experiment_designs_type ON app.experiment_designs (design_type);
 CREATE INDEX IF NOT EXISTS idx_experiment_designs_status ON app.experiment_designs (status);
 CREATE INDEX IF NOT EXISTS idx_experiment_designs_metric ON app.experiment_designs (primary_metric);
@@ -266,7 +274,7 @@ BEGIN
       RAISE EXCEPTION
         'app.experiment_designs % is pre-registered and cannot be deleted', OLD.experiment_design_id
         USING ERRCODE = 'restrict_violation',
-              HINT = 'Append a superseding experiment design instead of mutating or deleting a pre-registered design.';
+              HINT = 'Insert a new experiment_designs row with the same design_key, incremented design_version, and supersedes_experiment_design_id.';
     END IF;
     RETURN OLD;
   END IF;
@@ -275,10 +283,10 @@ BEGIN
     RAISE EXCEPTION
       'app.experiment_designs % is pre-registered and cannot be updated', OLD.experiment_design_id
       USING ERRCODE = 'restrict_violation',
-            HINT = 'Append a superseding experiment design instead of mutating a pre-registered design.';
+            HINT = 'Insert a new experiment_designs row with the same design_key, incremented design_version, and supersedes_experiment_design_id.';
   END IF;
 
-  IF NEW.status <> 'draft' AND NEW.pre_registered_at IS NULL THEN
+  IF NEW.status = 'pre_registered' AND NEW.pre_registered_at IS NULL THEN
     RAISE EXCEPTION
       'app.experiment_designs % cannot leave draft without pre_registered_at', OLD.experiment_design_id
       USING ERRCODE = 'check_violation',
@@ -290,7 +298,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION app.enforce_experiment_design_preregistration() IS
-  'Blocks mutation/deletion of experiment designs once they leave draft or have pre_registered_at. Draft rows may be edited; pre-registered designs require a superseding row.';
+  'Blocks mutation/deletion of experiment designs once they leave draft or have pre_registered_at. Draft rows may be edited; pre-registered designs require a new version row.';
 
 DROP TRIGGER IF EXISTS trg_experiment_designs_touch ON app.experiment_designs;
 CREATE TRIGGER trg_experiment_designs_touch BEFORE UPDATE ON app.experiment_designs
@@ -327,7 +335,7 @@ CREATE TABLE IF NOT EXISTS app.proof_bundles (
   source_tables         text[]                NOT NULL DEFAULT '{}',
   source_artifacts      text[]                NOT NULL DEFAULT '{}',
   claim_limits          text[]                NOT NULL DEFAULT '{}',
-  status                text                  NOT NULL DEFAULT 'DRAFT',
+  status                text                  NOT NULL,
   public_uri            text,
   evidence_as_of        timestamptz           NOT NULL,
   generated_at          timestamptz           NOT NULL DEFAULT now(),
@@ -343,7 +351,7 @@ CREATE TABLE IF NOT EXISTS app.proof_bundles (
   CONSTRAINT fk_proof_bundles_outcome FOREIGN KEY (outcome_measurement_id)
     REFERENCES app.outcome_measurements (outcome_measurement_id) ON DELETE SET NULL,
   CONSTRAINT uq_proof_bundles_key UNIQUE (tenant_id, bundle_key),
-  CONSTRAINT ck_proof_bundles_status CHECK (status IN ('DRAFT', 'PASS', 'READY', 'FAIL', 'INCONCLUSIVE'))
+  CONSTRAINT ck_proof_bundles_status CHECK (status IN ('PASS', 'READY', 'FAIL', 'INCONCLUSIVE'))
 );
 
 COMMENT ON TABLE app.proof_bundles IS
@@ -360,7 +368,7 @@ COMMENT ON COLUMN app.proof_bundles.source_commit IS 'Git commit that generated 
 COMMENT ON COLUMN app.proof_bundles.source_tables IS 'Warehouse/app/ledger table names used to build the bundle.';
 COMMENT ON COLUMN app.proof_bundles.source_artifacts IS 'Artifact paths or object URIs included in the bundle.';
 COMMENT ON COLUMN app.proof_bundles.claim_limits IS 'Explicit claim limits that must render with the proof.';
-COMMENT ON COLUMN app.proof_bundles.status IS 'Bundle status: DRAFT | PASS | READY | FAIL | INCONCLUSIVE.';
+COMMENT ON COLUMN app.proof_bundles.status IS 'Final bundle status at insertion: PASS | READY | FAIL | INCONCLUSIVE. Draft bundles must not be inserted into this immutable table.';
 COMMENT ON COLUMN app.proof_bundles.public_uri IS 'Optional public dashboard or object-storage URI for the bundle.';
 COMMENT ON COLUMN app.proof_bundles.evidence_as_of IS 'Latest source-data timestamp represented by the proof.';
 COMMENT ON COLUMN app.proof_bundles.generated_at IS 'UTC timestamp when the bundle was generated.';

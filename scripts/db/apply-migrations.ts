@@ -7,7 +7,7 @@ import { spawn } from "node:child_process";
 import { parse } from "dotenv";
 import pg from "pg";
 
-const SECRETS_PATH = "/opt/admatix/.build/secrets.env";
+const SECRETS_PATH = process.env.ADMATIX_SECRETS_PATH ?? "/opt/admatix/.build/secrets.env";
 const MIGRATIONS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../warehouse/migrations");
 const MIGRATION_FILES = [
   "0000_extensions_roles_helpers.sql",
@@ -28,12 +28,22 @@ function sha256Text(value: string): string {
 }
 
 async function readSupabaseDbUrl(): Promise<string> {
+  if (process.env.SUPABASE_DB_URL) {
+    return process.env.SUPABASE_DB_URL;
+  }
   const env = parse(await readFile(SECRETS_PATH));
   const value = env.SUPABASE_DB_URL;
   if (!value) {
     throw new Error(`SUPABASE_DB_URL is missing from ${SECRETS_PATH}. Add the direct Supabase Postgres URL and retry.`);
   }
   return value;
+}
+
+function pgSslConfig(): pg.ClientConfig["ssl"] {
+  if (["0", "false", "off", "no"].includes((process.env.ADMATIX_DB_SSL ?? "").toLowerCase())) {
+    return undefined;
+  }
+  return { rejectUnauthorized: false };
 }
 
 function pgClientUrl(databaseUrl: string): string {
@@ -94,7 +104,7 @@ function runPsql(databaseUrl: string, filePath: string): Promise<void> {
 
 export async function applyMigrations(): Promise<MigrationResult[]> {
   const databaseUrl = await readSupabaseDbUrl();
-  const client = new pg.Client({ connectionString: pgClientUrl(databaseUrl), ssl: { rejectUnauthorized: false } });
+  const client = new pg.Client({ connectionString: pgClientUrl(databaseUrl), ssl: pgSslConfig() });
   await client.connect();
   try {
     await ensureMigrationTable(client);

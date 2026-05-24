@@ -20,6 +20,18 @@ dbt deps
 
 Never paste `SUPABASE_DB_URL` into a tracked file or shell transcript.
 
+For disposable validation databases, the generator can read the connection
+string directly from the environment instead of `/opt/admatix/.build/secrets.env`:
+
+```bash
+SUPABASE_DB_URL=postgresql://postgres:postgres@127.0.0.1:5432/postgres \
+ADMATIX_DB_SSL=0 \
+pnpm tsx scripts/db/generate-dictionary.ts
+```
+
+Use `ADMATIX_SECRETS_PATH=/path/to/secrets.env` only when validating against a
+different untracked secrets file.
+
 ## Refresh
 
 Build the marts and generate the dbt manifest first:
@@ -53,7 +65,8 @@ text in the owning migration or DDL source, then rerun the generator.
 - Dictionary diffs should reflect real schema, description, lineage, or test
   changes.
 - `generated.sql` is schema-only output from `pg_dump` for `warehouse`, `sim`,
-  and `bench`.
+  and `bench`. App/ledger DDL remains in the versioned migrations and the
+  architecture DDL document.
 - `erd.md` is generated from PostgreSQL foreign keys and column metadata.
 
 The dictionary is a due-diligence artifact. Do not hand-edit generated outputs;

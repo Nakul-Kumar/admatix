@@ -14,7 +14,8 @@ part assumes the previous parts have already run.
 - **Part 4** — `warehouse` schema, gold dimensions
 - **Part 5** — `warehouse` schema, gold facts
 - **Part 6** — `sim` and `bench` schemas
-- **Part 7** — Running it + dbt notes
+- **Part 7** — Live-data readiness bridge
+- **Part 8** — Running it + dbt notes
 
 ---
 
@@ -27,7 +28,12 @@ part assumes the previous parts have already run.
 -- ============================================================================
 
 -- pgcrypto gives us digest() for SHA-256 hashing inside the ledger triggers.
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Supabase commonly installs extensions into the `extensions` schema, while a
+-- vanilla PostgreSQL container defaults to `public`. Create the schema
+-- explicitly and set helper-function search_path below so fresh-clone validation
+-- and Supabase both resolve digest().
+CREATE SCHEMA IF NOT EXISTS extensions;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 -- citext is used for case-insensitive natural keys (emails, account handles).
 CREATE EXTENSION IF NOT EXISTS citext;
@@ -62,6 +68,7 @@ CREATE OR REPLACE FUNCTION public.admatix_sha256_jsonb(p_payload jsonb)
 RETURNS char(64)
 LANGUAGE sql
 IMMUTABLE
+SET search_path = public, extensions
 AS $$
   SELECT encode(digest(convert_to((p_payload || '{}'::jsonb)::text, 'UTF8'), 'sha256'), 'hex')::char(64);
 $$;
@@ -76,6 +83,7 @@ CREATE OR REPLACE FUNCTION public.admatix_sha256_text(p_text text)
 RETURNS char(64)
 LANGUAGE sql
 IMMUTABLE
+SET search_path = public, extensions
 AS $$
   SELECT encode(digest(convert_to(coalesce(p_text, ''), 'UTF8'), 'sha256'), 'hex')::char(64);
 $$;
@@ -2895,7 +2903,61 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA bench TO admatix_app;
 
 ---
 
-## Part 7 — Running It + dbt Notes
+## Part 7 — Live-Data Readiness Bridge
+
+The executable migration for this part is
+`warehouse/migrations/0005_live_data_readiness.sql`. It extends the Phase 2 data
+layer for the first real/customer pilot without pretending that a live account is
+already connected.
+
+This bridge adds six production-facing tables:
+
+- `app.connector_syncs`: one row per read-only platform or first-party sync,
+  including platform, API version, cursor, freshness window, landed/rejected row
+  counts, checksum, and failure metadata.
+- `warehouse.raw_platform_reports`: lossless daily platform metric rows at
+  account/campaign/ad set/ad/creative/keyword/placement/geo/device/audience/search
+  term grain, with raw payload hash and idempotent batch/semantic uniqueness.
+- `warehouse.raw_entity_snapshots`: lossless SCD source snapshots for campaigns,
+  ad sets, ads, creatives, keywords, placements, audiences, budgets, and
+  account-level entities.
+- `warehouse.raw_conversion_events`: privacy-safe first-party conversion/revenue
+  events from GA4, Shopify, Stripe, server pixels, or later customer pipelines.
+- `app.experiment_designs`: versioned pre-registration records for holdout, geo,
+  switchback, platform-lift, synthetic-control, or no-experiment designs. Draft
+  rows may be edited, but pre-registered rows cannot be updated or deleted; a
+  later design must insert a new `design_version` and link
+  `supersedes_experiment_design_id`.
+- `app.proof_bundles`: immutable dashboard/export proof bundles. Bundles must be
+  inserted with a final status (`PASS`, `READY`, `FAIL`, or `INCONCLUSIVE`);
+  there is no mutable draft state inside this append-only table.
+
+The migration also adds the `app.ad_platform`, `app.connector_sync_type`,
+`app.connector_sync_status`, `app.entity_kind`, and
+`app.experiment_design_type` enums; all table/column comments; indexes for
+freshness, provenance, and joins; generated SHA-256 hash columns where payloads
+need stable provenance; and grants that keep `app.proof_bundles` insert/select
+only for `admatix_app`.
+
+Operational rules:
+
+- Apply this migration only after the base ledger/app/warehouse/sim/bench
+  migrations are in place.
+- Use `app.experiment_designs` before live measurement begins. The H0 packet,
+  treatment unit, primary metric, power/MDE, baseline window, measurement
+  window, placebo plan, assumptions, and decision rule belong there before any
+  result is interpreted.
+- Treat `app.proof_bundles` as the promotion boundary for dashboards and exports.
+  Raw connector tables may refresh continuously, but public proof is published
+  only when a validated bundle is generated with source commits, source tables,
+  checksums, evidence timestamp, and claim limits.
+- The current repository validates this migration in disposable PostgreSQL 17.
+  It is not evidence that `0005` has already been applied to production
+  Supabase.
+
+---
+
+## Part 8 — Running It + dbt Notes
 
 ### Applying the DDL
 
@@ -2911,7 +2973,7 @@ psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f db/migrations/0001_admatix_data_la
 
 Notes for the automated build agent:
 
-- Apply parts strictly in order (0 to 6). Part 0 must run first because the
+- Apply parts strictly in order (0 to 7). Part 0 must run first because the
   `ledger` and `app` triggers depend on `public.admatix_sha256_*` and
   `pgcrypto`.
 - `-v ON_ERROR_STOP=1` makes `psql` abort on the first error so a partial

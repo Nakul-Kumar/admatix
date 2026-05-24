@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { parse } from "dotenv";
 import pg from "pg";
 
-const SECRETS_PATH = "/opt/admatix/.build/secrets.env";
+const SECRETS_PATH = process.env.ADMATIX_SECRETS_PATH ?? "/opt/admatix/.build/secrets.env";
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const MANIFEST_PATH = resolve(REPO_ROOT, "warehouse/dbt/target/manifest.json");
 const DICTIONARY_PATH = resolve(REPO_ROOT, "docs/data-dictionary.md");
@@ -70,12 +70,22 @@ function asStringArray(value: unknown): string[] {
 }
 
 async function readSupabaseDbUrl(): Promise<string> {
+  if (process.env.SUPABASE_DB_URL) {
+    return process.env.SUPABASE_DB_URL;
+  }
   const env = parse(await readFile(SECRETS_PATH));
   const value = env.SUPABASE_DB_URL;
   if (!value) {
     throw new Error(`SUPABASE_DB_URL is missing from ${SECRETS_PATH}. Add the direct Supabase Postgres URL and retry.`);
   }
   return value;
+}
+
+function pgSslConfig(): pg.ClientConfig["ssl"] {
+  if (["0", "false", "off", "no"].includes((process.env.ADMATIX_DB_SSL ?? "").toLowerCase())) {
+    return undefined;
+  }
+  return { rejectUnauthorized: false };
 }
 
 function pgClientUrl(databaseUrl: string): string {
@@ -491,7 +501,7 @@ async function writeDictionary(columns: readonly ColumnRow[], docs: ReadonlyMap<
 
 export async function generateDictionary(): Promise<DictionaryGenerationResult> {
   const databaseUrl = await readSupabaseDbUrl();
-  const client = new pg.Client({ connectionString: pgClientUrl(databaseUrl), ssl: { rejectUnauthorized: false } });
+  const client = new pg.Client({ connectionString: pgClientUrl(databaseUrl), ssl: pgSslConfig() });
   await client.connect();
   try {
     const [columns, foreignKeys, docs] = await Promise.all([fetchColumns(client), fetchForeignKeys(client), readManifestDocs()]);

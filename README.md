@@ -1,96 +1,155 @@
 # AdMatix
 
-**The evidence-gated operating layer for humans and AI agents running paid media.**
+**Evidence-gated control plane for AI-run paid media.**
 
-AdMatix audits paid-media accounts, produces hypothesis-backed **H0 packets**, proposes
-changes, gates them against policy, dry-runs platform diffs, and records provenance so
-every spend-touching decision is accountable. It ships as a CLI, an MCP server, and an
-API ("software for agents"), plus a web cockpit for agencies.
+AdMatix lets humans, LLM agents, and ad-ops tools propose campaign changes, but it does not trust proposals by default. Every spend-touching action must pass through evidence, policy, approval, dry-run diffing, tamper-evident logging, and independent measurement before it can become a claim.
 
-> Agents propose. AdMatix gates. Humans approve. Adapters execute. Evidence decides what happens next.
+> Agents propose. AdMatix gates. Humans approve. Evidence decides what can be claimed.
 
-## The operating loop
+Public proof dashboard: [https://admatix.tech/artifacts](https://admatix.tech/artifacts)
 
+Important boundary: the dashboard is an artifact-backed proof snapshot, not a continuous live ad-account feed. AdMatix has not proven live paid-media lift yet. The next milestone is a pre-registered live geo or holdout pilot.
+
+## What Exists Today
+
+AdMatix currently includes:
+
+- A deterministic dry-run product loop over fixture ad-account data.
+- H0 packets with hypotheses, evidence references, guardrails, rollback plans, and claim limits.
+- Evidence and policy gates that block unsafe or unsupported actions before mutation.
+- CLI, API, web cockpit, and read-only/propose-only MCP server surfaces.
+- A Python simulator that creates seeded ad-campaign worlds with known ground truth.
+- An independent verifier service that returns estimates, confidence intervals, methods, verdicts, confounders, guardrail audit results, and claim limits.
+- Accepted aggregate proof artifacts from validation, real-LLM simulated benchmarking, and public RCT/backtest datasets.
+- A Supabase/Postgres data-layer shape for ledger, app state, warehouse, simulator, benchmark, shadow connector syncs, pre-registered experiment designs, and immutable proof bundles.
+
+## What The Proof Shows
+
+| Evidence area | Artifact or command | Result | Honest claim | Not claimed |
+| --- | --- | --- | --- | --- |
+| Product loop | `pnpm demo`, `tests/e2e/demo-flow.test.ts` | Dry-run demo and e2e tests pass | AdMatix can audit fixture account data, build H0 packets, block unsafe budget changes, and produce dry-run diffs. | Live ad-account operation or autonomous spend mutation. |
+| Safety gate | `packages/policy`, `packages/evidence` | PolicyGuard blocks a +60% budget shift against a 20% cap | Spend-touching proposals can be blocked by deterministic policy/evidence gates. | That every possible unsafe action has been proven impossible. |
+| CX-2 validation | `docs/proof/artifacts/cx2-validation-summary.json` | PASS: empirical 95% CI coverage `0.964815`, SBC p-value `0.7598939812328932`, max wrong-claim rate `0.0`, placebo false-positive rate `0.05` | The verifier is calibrated on seeded simulator worlds within stated limits. | Simulation proves real-world lift. |
+| CX-3 head-to-head | `docs/proof/artifacts/cx3-headtohead-summary.json` | READY: `28` real Claude subscription buyer rows, `0` fallback rows, `0` failed rows, simulated benchmark | The benchmark has real LLM lane accounting without fallback inflation. | Live-market superiority or causal lift. |
+| CX-4 public backtests | `docs/proof/artifacts/cx4-backtests-summary.json` | PASS: full Criteo Uplift v2.1 `13,979,592` rows and Hillstrom `64,000` rows, aggregate-only, with checksums | Public randomized/backtest datasets recover aggregate measured effects. | Public RCT data equals production account proof. |
+| Dashboard | `proof-dashboard/`, [admatix.tech/artifacts](https://admatix.tech/artifacts) | LIVE: artifact view uses `origin.kind = "artifact"`; Demo Lab pages stay illustrative | Investors can inspect accepted aggregate proof artifacts and claim limits. | Continuous live ad-account telemetry. |
+| Live-data readiness | `warehouse/migrations/0005_live_data_readiness.sql` | Disposable Postgres 17 migration apply/replay validated on the VPS | The schema is ready for shadow connector syncs, raw platform landings, experiment preregistration, and immutable proof bundles. | Connected live ad accounts or applied production migrations. |
+
+## Claim Boundary
+
+Safe external wording:
+
+> AdMatix is an evidence-gated control plane for AI-run paid media. Agents can propose campaign changes, but deterministic evidence, policy, approval, and independent verifier gates decide whether an action can proceed. Today the system runs end-to-end in dry-run mode, blocks unsafe budget actions, exposes aggregate proof artifacts in the dashboard, and passes calibrated simulator plus public RCT/backtest gates. We are not claiming live spend lift yet; the next milestone is a pre-registered live geo or holdout pilot.
+
+Do not claim:
+
+- AdMatix has proven live spend lift.
+- AdMatix guarantees ROAS or iROAS improvement.
+- AdMatix autonomously changes customer spend today.
+- The dashboard shows live paid-media proof.
+- The simulator proves real-world lift.
+- Every campaign decision has a rigorous causal estimate.
+- Public RCT/backtest evidence is the same as production account proof.
+
+## How The H0 Gate Works
+
+Every proposed action needs an H0 packet:
+
+1. **Hypothesis**: null, alternative, treatment, unit, target population, and metric.
+2. **Evidence**: source references, baseline window, measurement window, data freshness, and known confounders.
+3. **Guardrails**: budget caps, policy constraints, approval requirements, rollback checkpoints, and allowed action scope.
+4. **Power and decision rule**: MDE, power, alpha, confidence interval rule, and claim limit.
+5. **Verification**: independent verifier estimates effect only when the design supports it; weak evidence returns `inconclusive`.
+6. **Ledger**: H0 packet, proposed action, policy result, diff, approval, and outcome are recorded for auditability.
+
+This is the core product idea: an LLM can suggest a spend change, but AdMatix decides whether the evidence and policy envelope allow it.
+
+## Data And Evidence Architecture
+
+AdMatix separates raw data from proof:
+
+- **Raw platform reports** land in warehouse bronze tables.
+- **Entity snapshots** preserve campaign, ad set, ad, creative, keyword, audience, budget, and conversion-action history.
+- **First-party conversion events** are the preferred source for live incrementality and iROAS claims.
+- **Experiment designs** preregister control arms, measurement windows, MDE/power, placebo checks, and decision rules.
+- **Proof bundles** promote only validated aggregate outputs to the dashboard/export layer.
+- **Ledger events** preserve tamper-evident governance history.
+
+See [docs/architecture/LIVE-DATA-EVIDENCE-ARCHITECTURE.md](docs/architecture/LIVE-DATA-EVIDENCE-ARCHITECTURE.md) for the full ER map, KPI taxonomy, dataset roadmap, and live pilot plan.
+
+## Dashboard
+
+The dashboard is a static React/Vite proof surface served at [https://admatix.tech](https://admatix.tech).
+
+- `/` and `/artifacts`: accepted aggregate proof artifacts only.
+- `/overview`, `/worlds`, `/benchmark`, `/validation`, `/decisions`: Demo Lab routes with illustrative sample data.
+- Every dataset carries an origin badge: `artifact`, `demo`, `fixture`, `live`, or `unavailable`.
+- The dashboard data contract is enforced by `npm run validate:origin` and `npm run check:data`.
+
+Dashboard verification:
+
+```bash
+cd proof-dashboard
+npm ci
+npm run validate:origin
+npm run check:data
+npm run typecheck
+npm run build
 ```
-Plan  ->  Activate  ->  Measure  ->  Reflect
-```
 
-1. **Plan** — turn a business goal + account state into hypothesis-backed H0 packets.
-2. **Activate** — dry-run or execute bounded platform actions through scoped tools.
-3. **Measure** — reconcile platform metrics with first-party and experimental evidence.
-4. **Reflect** — update trust, detect false positives, decide the next plan.
+## Reproduce Locally
 
-## Repo layout
-
-```
-apps/        api  web  mcp-server  cli
-packages/    schemas  core  connectors  evidence  evals  ui
-data/        fixtures  benchmarks
-docs/        build  architecture  research  runbooks
-scripts/     doctor  seed-fixtures  scan-secrets
-```
-
-`packages/schemas` is the **shared contract**. Every other package imports its types
-and Zod validators and must never redefine them.
-
-## Quick start
+Requires Node 20+ and pnpm 9.12+.
 
 ```bash
 pnpm install
-pnpm doctor          # environment + workspace health check
-pnpm seed-fixtures   # load demo ad-account data
+pnpm -r typecheck
 pnpm test
+pnpm scan-secrets
+pnpm audit:prod
+pnpm demo
 ```
 
-## Building AdMatix
-
-This repo is being built by parallel coding agents. Start at
-[`docs/build/00-BUILD-ORCHESTRATION.md`](docs/build/00-BUILD-ORCHESTRATION.md) — it
-defines the work packages, the dependency waves, and how to dispatch agents.
-Read [`AGENTS.md`](AGENTS.md) before writing any code.
-
-## Status
-
-The 72-hour MVP — Phase 1 of the Proof Wave — is **complete and demonstrable
-end-to-end**: fixtures-only, dry-run-only, read-only MCP, no live platform
-writes anywhere in the codebase.
-
-| Work package | Owns | State |
-| --- | --- | --- |
-| WP-A bootstrap | root config, scripts, vitest | shipped |
-| WP-B core | `packages/core` — Store, normalize, impact, hashing | shipped |
-| WP-C connectors | `packages/connectors` — fixture adapters, `Connector` interface | shipped |
-| WP-D evidence | `packages/evidence` — 5 detectors, audit report, H0 builder | shipped |
-| WP-E policy | `packages/policy` — PolicyGuard, EvidenceLedger, events | shipped |
-| WP-F agents | `packages/agents` — 9 MVP agents + orchestrator | shipped |
-| WP-G cli | `apps/cli` — the `admatix` CLI | shipped |
-| WP-H mcp | `apps/mcp-server` — 6 read-only MCP tools | shipped |
-| WP-I evals | `packages/evals` — `safety-v1` benchmark harness | shipped |
-| WP-J api+web | `apps/api`, `apps/web` — Fastify + React cockpit | shipped |
-| **WP-K integration** | `scripts/demo.ts`, `tests/e2e/**`, this runbook | **shipped** |
-
-Run the demo end-to-end:
+For Python service tests, install the relevant service requirements first, then run:
 
 ```bash
-pnpm install
-pnpm tsx scripts/demo.ts   # or:  pnpm demo
+pnpm run test:python
 ```
 
-The output is byte-deterministic against the fixtures. The walkthrough lives
-at [`docs/runbooks/demo-script.md`](docs/runbooks/demo-script.md); the same
-transcript is asserted line-for-line by `tests/e2e/demo-flow.test.ts`.
+Some full public-dataset backtests require local Criteo/Hillstrom datasets and are intentionally not committed to Git.
 
-What the demo proves in one command, on fixtures, with no LLM in the loop:
+## Repo Layout
 
-1. **Audit** — three evidence-backed findings, every claim carrying source refs.
-2. **Plan** — H0 packets with hypothesis, evidence, guardrails, rollback.
-3. **Packet** — EvidenceLedger validates; missing refs would block.
-4. **Activate** — a dry-run `ExecutionDiff` (never a mutation; enforced by Zod literal).
-5. **Policy block** — a +60% budget shift against a 20% cap is **blocked** with a clear reason.
-6. **Benchmark** — `safety-v1` scorecard (12/12 passed, 0 unsafe write attempts).
-7. **MCP** — six read-only/propose-only tools; write-shaped tools fail closed without an `ApprovalReceipt`.
-8. **ROI + cockpit** — recovered-waste math + the Fastify API surface the web cockpit consumes.
+```text
+apps/                 api, web cockpit, MCP server, CLI
+packages/             schemas, core, connectors, evidence, policy, agents, evals
+services/             ingest, simulator, verifier, validation, benchmark, backtests
+warehouse/            Supabase/Postgres migrations and dbt project
+docs/proof/           proof report, claims matrix, demo package, aggregate artifacts
+docs/architecture/    system architecture, simulator/verifier, live-data roadmap
+proof-dashboard/      static investor/proof dashboard
+scripts/              doctor, demo, fixtures, DB migration runner, secret scan
+tests/e2e/            deterministic demo flow tests
+```
 
-Phases 2-5 (Supabase data layer, Python simulator + verifier, validation
-harness, proof package) are next on the Proof Wave plan — see
-[`docs/build/AUTONOMOUS-WAVE-PLAN.md`](docs/build/AUTONOMOUS-WAVE-PLAN.md).
+`packages/schemas` is the shared TypeScript contract. Runtime packages should import its types and Zod validators instead of redefining product schemas.
+
+## Build And Deployment Notes
+
+- GitHub branch prefix for Codex work: `codex/*`.
+- Main branch is the source of truth after green checks and explicit merge.
+- VPS mirror path: `/opt/admatix`.
+- Public dashboard web root: `/var/www/admatix`, served by Caddy.
+- Raw Criteo/Hillstrom data must remain untracked. Commit only checksums, aggregate metrics, manifests, and docs.
+
+## Next Milestone
+
+The next proof step is a self-owned or design-partner live pilot with human-approved changes only:
+
+1. Run shadow replay first: compare recommendations from baseline agents and AdMatix without changing spend.
+2. Pre-register a control arm: status-quo policy, matched control geos, platform lift-test control, or switchback control.
+3. Use first-party incremental gross margin or revenue as the primary metric, not platform ROAS alone.
+4. Apply strict safety gates: budget cap, max daily delta, no unapproved creative launch, no policy-sensitive targeting, and rollback checkpoints.
+5. Claim success only if the confidence interval excludes zero and lower-bound iROAS clears break-even; otherwise report `inconclusive`.
+
+That is the line between the current proof package and a real live spend-lift claim.

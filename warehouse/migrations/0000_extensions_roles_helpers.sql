@@ -6,7 +6,12 @@ BEGIN;
 -- ============================================================================
 
 -- pgcrypto gives us digest() for SHA-256 hashing inside the ledger triggers.
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Supabase commonly installs extensions into the `extensions` schema, while a
+-- vanilla PostgreSQL container defaults to `public`. Create the schema
+-- explicitly and set helper-function search_path below so fresh-clone validation
+-- and Supabase both resolve digest().
+CREATE SCHEMA IF NOT EXISTS extensions;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 -- citext is used for case-insensitive natural keys (emails, account handles).
 CREATE EXTENSION IF NOT EXISTS citext;
@@ -48,8 +53,9 @@ CREATE OR REPLACE FUNCTION public.admatix_sha256_jsonb(p_payload jsonb)
 RETURNS char(64)
 LANGUAGE sql
 IMMUTABLE
+SET search_path = public, extensions
 AS $$
-  SELECT encode(extensions.digest(convert_to((p_payload || '{}'::jsonb)::text, 'UTF8'), 'sha256'), 'hex')::char(64);
+  SELECT encode(digest(convert_to((p_payload || '{}'::jsonb)::text, 'UTF8'), 'sha256'), 'hex')::char(64);
 $$;
 
 COMMENT ON FUNCTION public.admatix_sha256_jsonb(jsonb) IS
@@ -62,8 +68,9 @@ CREATE OR REPLACE FUNCTION public.admatix_sha256_text(p_text text)
 RETURNS char(64)
 LANGUAGE sql
 IMMUTABLE
+SET search_path = public, extensions
 AS $$
-  SELECT encode(extensions.digest(convert_to(coalesce(p_text, ''), 'UTF8'), 'sha256'), 'hex')::char(64);
+  SELECT encode(digest(convert_to(coalesce(p_text, ''), 'UTF8'), 'sha256'), 'hex')::char(64);
 $$;
 
 COMMENT ON FUNCTION public.admatix_sha256_text(text) IS
