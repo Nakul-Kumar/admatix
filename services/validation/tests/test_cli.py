@@ -90,6 +90,24 @@ def verifier_uvicorn() -> Generator[str, None, None]:
             proc.kill()
 
 
+def _expected_exit(body: dict) -> int:
+    if {"sbc", "coverage", "rmse_bias", "multiseed"} <= set(body):
+        ok = (
+            bool(body["sbc"]["passes_uniformity"])
+            and bool(body["coverage"]["passes_nominal"])
+            and bool(body["rmse_bias"]["passes_bias"])
+            and bool(body["rmse_bias"]["passes_rmse"])
+            and bool(body["multiseed"]["passes"])
+        )
+        return 0 if ok else 1
+    for key in ("passes_uniformity", "passes_nominal", "passes"):
+        if key in body:
+            return 0 if bool(body[key]) else 1
+    if "passes_bias" in body and "passes_rmse" in body:
+        return 0 if (bool(body["passes_bias"]) and bool(body["passes_rmse"])) else 1
+    raise AssertionError(f"no pass flag in CLI body keys={sorted(body)}")
+
+
 def _run_cli(cmd: str, fixture: str, tmp_path: Path) -> dict:
     """Invoke `python -m admatix_validation <cmd> --config <fixture>` with output_dir overridden to tmp_path."""
     fixture_path = _HERE.parent / "fixtures" / fixture
@@ -111,6 +129,14 @@ def _run_cli(cmd: str, fixture: str, tmp_path: Path) -> dict:
     # too small to gate).
     assert result.stdout.strip(), f"empty stdout from {cmd}: stderr={result.stderr}"
     body = json.loads(result.stdout)
+    expected = _expected_exit(body)
+    assert result.returncode == expected, (
+        f"{cmd} exit code must reflect pass/fail flags: expected {expected}, "
+        f"got {result.returncode}; stderr={result.stderr}"
+    )
+    metrics_path = body.get("metrics_path")
+    if metrics_path is not None:
+        assert Path(metrics_path).exists()
     return body
 
 

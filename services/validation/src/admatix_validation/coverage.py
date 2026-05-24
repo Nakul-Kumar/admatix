@@ -28,8 +28,11 @@ from .grids import (
     materialise,
     round_float,
     run_production_verifier,
+    target_ground_truth_ate,
+    validation_role_for,
     write_json,
     write_jsonl,
+    write_progress,
 )
 from .types import ValidationConfig, WorldRun
 
@@ -135,8 +138,12 @@ def run_coverage(config: ValidationConfig) -> CoverageResult:
     upper_band = round(0.97, 4)          # 0.97 — locked from §3.2
 
     runs: list[WorldRun] = []
+    cells = list(enumerate_cells(config.world_grid, config.seeds))
+    total_cells = len(cells)
+    progress_path = cov_dir / "progress.json"
+    write_progress(progress_path, stage="coverage", completed=0, total=total_cells)
 
-    for cell in enumerate_cells(config.world_grid, config.seeds):
+    for idx, cell in enumerate(cells, start=1):
         world_type = cell.cell_kwargs.get("world_type", "clean_ab")
         world = materialise(cell, sim_root)
 
@@ -148,12 +155,13 @@ def run_coverage(config: ValidationConfig) -> CoverageResult:
 
         result = run_production_verifier(req, config.verifier_method)
 
-        truth = float(world.ground_truth.get("ate", 0.0))
+        truth = target_ground_truth_ate(world)
         diagnostics = dict(result.diagnostics)
         diagnostics.update(
             {
                 "ci_width": round_float(_ci_width(result.ci_low, result.ci_high)),
                 "guardrail_all_pass": bool(result.guardrail_proof.all_pass),
+                "validation_role": validation_role_for(cell.cell_kwargs),
                 "verifier_entrypoint": "admatix_verifier.app.verify",
             }
         )
@@ -172,17 +180,31 @@ def run_coverage(config: ValidationConfig) -> CoverageResult:
                 diagnostics=diagnostics,
             )
         )
+        if idx % 25 == 0 or idx == total_cells:
+            write_progress(
+                progress_path,
+                stage="coverage",
+                completed=idx,
+                total=total_cells,
+                latest={
+                    "config_hash": cell.config_hash,
+                    "seed": int(cell.seed),
+                    "world_type": str(world_type),
+                    "world_id": world.world_id,
+                },
+            )
 
     n_worlds = len(runs)
+    gate_runs = [r for r in runs if r.diagnostics.get("validation_role", "core") != "robustness"]
     contained = [
         (r.ci_low is not None and r.ci_high is not None and r.ci_low <= r.ground_truth_ate <= r.ci_high)
-        for r in runs
+        for r in gate_runs
     ]
     empirical = float(np.mean(contained)) if contained else 0.0
 
     per_method: dict[str, dict[str, float]] = {}
-    for method in sorted({r.method for r in runs}):
-        subset = [r for r in runs if r.method == method]
+    for method in sorted({r.method for r in gate_runs}):
+        subset = [r for r in gate_runs if r.method == method]
         n = len(subset)
         cov = float(np.mean([
             r.ci_low is not None and r.ci_high is not None and r.ci_low <= r.ground_truth_ate <= r.ci_high
@@ -218,6 +240,8 @@ def run_coverage(config: ValidationConfig) -> CoverageResult:
     metrics_path = cov_dir / "metrics.json"
     metrics: dict[str, Any] = {
         "n_worlds": int(n_worlds),
+        "n_gate_worlds": int(len(gate_runs)),
+        "n_robustness_worlds": int(n_worlds - len(gate_runs)),
         "ci_level": float(ci_level),
         "empirical_coverage": round(empirical, 6),
         "lower_band": lower_band,
@@ -228,9 +252,18 @@ def run_coverage(config: ValidationConfig) -> CoverageResult:
         "runs_path": str(runs_path),
         "metrics_path": str(metrics_path),
         "coverage_curve_path": str(coverage_curve_path),
+        "progress_path": str(progress_path),
         "config_hash": config.hash(),
     }
     write_json(metrics_path, metrics)
+    write_progress(
+        progress_path,
+        stage="coverage",
+        completed=total_cells,
+        total=total_cells,
+        status="completed",
+        latest={"metrics_path": str(metrics_path), "passes_nominal": bool(passes_nominal)},
+    )
 
     return CoverageResult(
         n_worlds=int(n_worlds),

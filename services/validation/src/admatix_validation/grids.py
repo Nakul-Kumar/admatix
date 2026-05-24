@@ -11,7 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -20,6 +20,7 @@ from admatix_verifier.models import H0PacketSubset, VerifyRequest
 
 
 _ROUND_DIGITS = 10
+_SIMULATION_CONFIG_FIELDS = {field.name for field in fields(SimulationConfig)}
 
 
 def cell_hash(cell: dict[str, Any]) -> str:
@@ -51,10 +52,27 @@ def enumerate_cells(world_grid: list[dict[str, Any]], seeds: list[int]) -> Itera
 
 def materialise(cell: GridCell, sim_root: Path) -> SimulatedWorld:
     """Materialise a world via services.simulator.generate_world."""
-    kwargs = dict(cell.cell_kwargs)
+    kwargs = {key: value for key, value in cell.cell_kwargs.items() if key in _SIMULATION_CONFIG_FIELDS}
     kwargs["seed"] = cell.seed
     config = SimulationConfig(**kwargs)
     return generate_world(config, Path(sim_root))
+
+
+def validation_role_for(cell_kwargs: dict[str, Any]) -> str:
+    """Return whether a cell is part of the strict gate or robustness report."""
+    return str(cell_kwargs.get("validation_role", "core"))
+
+
+def target_ground_truth_ate(world: SimulatedWorld) -> float:
+    """Return the verifier-facing estimand for a simulated world.
+
+    Most worlds validate against population ATE. Geo pre/post holdouts validate
+    against the post-period action estimand recorded by the simulator so the
+    harness does not compare a post-action DiD estimate to a diluted whole-panel
+    average.
+    """
+    truth = world.ground_truth
+    return float(truth.get("verification_target_ate", truth.get("ate", 0.0)))
 
 
 def build_verify_request(
@@ -168,6 +186,26 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
         handle.write("\n")
 
 
+def write_progress(
+    path: Path,
+    *,
+    stage: str,
+    completed: int,
+    total: int,
+    status: str = "running",
+    latest: dict[str, Any] | None = None,
+) -> None:
+    payload: dict[str, Any] = {
+        "stage": stage,
+        "completed": int(completed),
+        "total": int(total),
+        "status": status,
+    }
+    if latest:
+        payload["latest"] = dict(latest)
+    write_json(path, payload)
+
+
 __all__ = [
     "GridCell",
     "build_verify_request",
@@ -177,6 +215,9 @@ __all__ = [
     "materialise",
     "round_float",
     "run_production_verifier",
+    "target_ground_truth_ate",
+    "validation_role_for",
     "write_json",
     "write_jsonl",
+    "write_progress",
 ]

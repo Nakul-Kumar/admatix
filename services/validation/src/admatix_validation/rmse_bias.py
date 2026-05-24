@@ -25,8 +25,11 @@ from .grids import (
     materialise,
     round_float,
     run_production_verifier,
+    target_ground_truth_ate,
+    validation_role_for,
     write_json,
     write_jsonl,
+    write_progress,
 )
 from .types import ValidationConfig, WorldRun
 
@@ -34,6 +37,17 @@ from .types import ValidationConfig, WorldRun
 _BIAS_CONFOUNDED_REL = 0.10
 _BIAS_CLEAN_REL = 0.05
 _RMSE_REL = 0.25
+
+
+def _missing_estimate_rate(n_missing: int, n_expected: int) -> float:
+    if n_expected <= 0:
+        return 0.0
+    return float(n_missing / n_expected)
+
+
+def _is_underpowered_estimate(diagnostics: dict[str, Any]) -> bool:
+    reason = str(diagnostics.get("reason", "")).strip().lower()
+    return reason == "underpowered"
 
 
 @dataclass(frozen=True)
@@ -95,8 +109,15 @@ def run_rmse_bias(config: ValidationConfig) -> RmseBiasResult:
     runs: list[WorldRun] = []
     # Track (estimate, truth, n_users) per (world_type) for the consistency check.
     by_type: dict[str, list[tuple[float, float, int]]] = defaultdict(list)
+    expected_by_type: dict[str, int] = defaultdict(int)
+    missing_by_type: dict[str, int] = defaultdict(int)
+    underpowered_by_type: dict[str, int] = defaultdict(int)
+    cells = list(enumerate_cells(config.world_grid, config.seeds))
+    total_cells = len(cells)
+    progress_path = rmse_dir / "progress.json"
+    write_progress(progress_path, stage="rmse_bias", completed=0, total=total_cells)
 
-    for cell in enumerate_cells(config.world_grid, config.seeds):
+    for idx, cell in enumerate(cells, start=1):
         world_type = cell.cell_kwargs.get("world_type", "clean_ab")
         world = materialise(cell, sim_root)
         req = build_verify_request(
@@ -106,11 +127,19 @@ def run_rmse_bias(config: ValidationConfig) -> RmseBiasResult:
         )
         result = run_production_verifier(req, config.verifier_method)
 
-        truth = float(world.ground_truth.get("ate", 0.0))
+        truth = target_ground_truth_ate(world)
         est = result.estimate
         n_users = _per_cell_n_users(cell.cell_kwargs)
-        if est is not None and np.isfinite(est):
-            by_type[str(world_type)].append((float(est), truth, n_users))
+        role = validation_role_for(cell.cell_kwargs)
+        diagnostics = dict(result.diagnostics)
+        if role != "robustness":
+            expected_by_type[str(world_type)] += 1
+            if _is_underpowered_estimate(diagnostics):
+                underpowered_by_type[str(world_type)] += 1
+            elif est is not None and np.isfinite(est):
+                by_type[str(world_type)].append((float(est), truth, n_users))
+            else:
+                missing_by_type[str(world_type)] += 1
         runs.append(
             WorldRun(
                 config_hash=cell.config_hash,
@@ -124,22 +153,57 @@ def run_rmse_bias(config: ValidationConfig) -> RmseBiasResult:
                 method=str(result.method),
                 verdict=str(result.verdict),
                 diagnostics={
-                    **dict(result.diagnostics),
+                    **diagnostics,
                     "n_users": int(n_users),
                     "guardrail_all_pass": bool(result.guardrail_proof.all_pass),
+                    "validation_role": role,
                     "verifier_entrypoint": "admatix_verifier.app.verify",
                 },
             )
         )
+        if idx % 25 == 0 or idx == total_cells:
+            write_progress(
+                progress_path,
+                stage="rmse_bias",
+                completed=idx,
+                total=total_cells,
+                latest={
+                    "config_hash": cell.config_hash,
+                    "seed": int(cell.seed),
+                    "world_type": str(world_type),
+                    "world_id": world.world_id,
+                },
+            )
 
     per_world_type: dict[str, dict[str, float]] = {}
     passes_bias_all = True
     passes_rmse_all = True
     consistency_ok = True
 
-    for world_type, rows in by_type.items():
+    for world_type in sorted(expected_by_type):
+        rows = by_type.get(world_type, [])
+        missing = int(missing_by_type.get(world_type, 0))
+        expected = int(expected_by_type[world_type])
+        underpowered = int(underpowered_by_type.get(world_type, 0))
+        gated_expected = max(0, expected - underpowered)
+        missing_rate = _missing_estimate_rate(missing, gated_expected)
         if not rows:
-            per_world_type[world_type] = {"n": 0, "bias": float("nan"), "rmse": float("nan")}
+            per_world_type[world_type] = {
+                "n": 0,
+                "expected_n": expected,
+                "gated_expected_n": gated_expected,
+                "underpowered_estimates": underpowered,
+                "missing_estimates": missing,
+                "missing_estimate_rate": round(missing_rate, 10),
+                "bias": float("nan"),
+                "rmse": float("nan"),
+                "passes_bias": False,
+                "passes_rmse": False,
+                "consistency_ok": False,
+            }
+            passes_bias_all = False
+            passes_rmse_all = False
+            consistency_ok = False
             continue
         est = np.array([r[0] for r in rows], dtype=float)
         truth = np.array([r[1] for r in rows], dtype=float)
@@ -156,6 +220,9 @@ def run_rmse_bias(config: ValidationConfig) -> RmseBiasResult:
         )
         passes_bias = abs(bias) <= rel_bias_limit * true_lift_mean if true_lift_mean > 0 else abs(bias) <= 0.005
         passes_rmse = rmse <= _RMSE_REL * true_lift_mean if true_lift_mean > 0 else rmse <= 0.01
+        if missing:
+            passes_bias = False
+            passes_rmse = False
 
         # Consistency check: RMSE at 4·default < RMSE at default (within
         # the same world_type subset, when both are present). We use the
@@ -177,6 +244,11 @@ def run_rmse_bias(config: ValidationConfig) -> RmseBiasResult:
 
         per_world_type[world_type] = {
             "n": int(len(rows)),
+            "expected_n": expected,
+            "gated_expected_n": gated_expected,
+            "underpowered_estimates": underpowered,
+            "missing_estimates": missing,
+            "missing_estimate_rate": round(missing_rate, 10),
             "bias": round(bias, 10),
             "rmse": round(rmse, 10),
             "true_lift_mean": round(true_lift_mean, 10),
@@ -204,9 +276,22 @@ def run_rmse_bias(config: ValidationConfig) -> RmseBiasResult:
         "metrics_path": str(metrics_path),
         "table_path": str(table_path),
         "runs_path": str(runs_path),
+        "progress_path": str(progress_path),
         "config_hash": config.hash(),
     }
     write_json(metrics_path, metrics)
+    write_progress(
+        progress_path,
+        stage="rmse_bias",
+        completed=total_cells,
+        total=total_cells,
+        status="completed",
+        latest={
+            "metrics_path": str(metrics_path),
+            "passes_bias": bool(passes_bias_all),
+            "passes_rmse": bool(passes_rmse_all),
+        },
+    )
 
     return RmseBiasResult(
         n_worlds=int(len(runs)),

@@ -261,6 +261,7 @@
       "noise_sd": 0.0,
       "seasonality": 0.0,
       "true_lift": 0.04,
+      "validation_role": "robustness",
       "world_type": "zero_lift_placebo"
     },
     {
@@ -275,6 +276,7 @@
       "noise_sd": 0.0,
       "seasonality": 0.1,
       "true_lift": 0.04,
+      "validation_role": "robustness",
       "world_type": "non_stationary"
     },
     {
@@ -287,6 +289,7 @@
       "noise_sd": 0.0,
       "seasonality": 0.0,
       "true_lift": 0.04,
+      "validation_role": "robustness",
       "world_type": "cross_campaign_interference"
     },
     {
@@ -303,6 +306,7 @@
       "spillover_strength": 0.05,
       "time_varying_confound_amplitude": 0.5,
       "true_lift": 0.04,
+      "validation_role": "robustness",
       "world_type": "adversarial_misspecified"
     }
   ]

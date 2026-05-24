@@ -73,14 +73,27 @@ def underpowered_geo_world(tmp_path_factory) -> tuple[object, VerifyRequest]:
 def test_geo_recovers_lift_in_powered_world(powered_geo_world):
     world, req = powered_geo_world
     events = load_events(world.data_uri)
+    assert {"treated_geo", "post_period"} <= set(events.columns)
     result = geo.run(req, events)
     assert result.method == "geo_synthetic_control"
     assert result.estimate is not None
+    assert result.diagnostics.get("estimand") == "treated_geo_x_post_period"
     assert result.diagnostics.get("mde") is not None
     assert result.diagnostics.get("power") is not None
     assert isinstance(result.diagnostics["mde"], float)
     assert isinstance(result.diagnostics["power"], float)
-    assert result.ci_low <= 0.04 <= result.ci_high
+    target = world.ground_truth["verification_target_ate"]
+    assert result.ci_low <= target <= result.ci_high
+    assert abs(result.estimate - target) < 0.02
+
+
+def test_geo_requires_prepost_holdout_columns(powered_geo_world):
+    world, req = powered_geo_world
+    events = load_events(world.data_uri).drop(columns=["treated_geo", "post_period"])
+    result = geo.run(req, events)
+    assert result.method == "geo_synthetic_control"
+    assert result.verdict == "inconclusive"
+    assert result.diagnostics.get("reason") == "missing_geo_prepost_design"
 
 
 def test_geo_returns_underpowered_when_mde_above_lift(underpowered_geo_world):
@@ -90,3 +103,5 @@ def test_geo_returns_underpowered_when_mde_above_lift(underpowered_geo_world):
     assert result.method == "geo_synthetic_control"
     assert result.verdict == "inconclusive"
     assert result.diagnostics.get("reason") == "underpowered"
+    assert result.estimate is not None
+    assert result.ci_low is not None and result.ci_high is not None

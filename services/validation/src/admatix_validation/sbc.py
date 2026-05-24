@@ -25,7 +25,7 @@ from typing import Literal
 
 import numpy as np
 
-from .grids import write_json, write_jsonl
+from .grids import write_json, write_jsonl, write_progress
 from .reference_models import (
     REFERENCE_MODEL_NAME,
     build_pymc_cate_model,
@@ -212,11 +212,13 @@ def run_sbc(
 
     sbc_dir = config.output_dir / "sbc"
     sbc_dir.mkdir(parents=True, exist_ok=True)
+    progress_path = sbc_dir / "progress.json"
+    write_progress(progress_path, stage="sbc", completed=0, total=n_sims)
 
     draws_rows: list[dict] = []
     counts = np.zeros(n_bins, dtype=int)
 
-    for seed in seeds:
+    for idx, seed in enumerate(seeds, start=1):
         gamma_truth = sample_prior_gamma(int(seed))
         events, gt = simulate_world_from_prior(
             gamma_truth,
@@ -245,6 +247,14 @@ def run_sbc(
             "posterior_mean": round(posterior_mean, 10),
             "n_posterior_draws": int(len(posterior_gamma)),
         })
+        if idx % 10 == 0 or idx == n_sims:
+            write_progress(
+                progress_path,
+                stage="sbc",
+                completed=idx,
+                total=n_sims,
+                latest={"seed": int(seed), "rank_bin": int(rank_bin)},
+            )
 
     chi2_stat, chi2_p = _chi2_uniform(counts)
     shape = _shape_diagnostic(counts)
@@ -268,6 +278,7 @@ def run_sbc(
         "rank_plot_path": str(rank_plot_path),
         "metrics_path": str(metrics_path),
         "draws_path": str(draws_path),
+        "progress_path": str(progress_path),
         "reference_model": REFERENCE_MODEL_NAME,
         "pymc_n_draws": int(n_draws),
         "pymc_n_tune": int(n_tune),
@@ -275,6 +286,14 @@ def run_sbc(
         "config_hash": config.hash(),
     }
     write_json(metrics_path, metrics)
+    write_progress(
+        progress_path,
+        stage="sbc",
+        completed=n_sims,
+        total=n_sims,
+        status="completed",
+        latest={"metrics_path": str(metrics_path), "passes_uniformity": bool(passes_uniformity)},
+    )
 
     return SbcResult(
         n_simulations=int(n_sims),

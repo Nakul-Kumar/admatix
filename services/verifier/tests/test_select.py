@@ -46,12 +46,16 @@ def _events_geo() -> pd.DataFrame:
     for geo_idx in range(12):
         for period in range(5):
             for _ in range(20):
+                treated_geo = 1 if geo_idx < 6 else 0
+                post_period = 1 if period >= 2 else 0
                 rows.append(
                     {
                         "user_id": len(rows),
                         "period": period,
                         "geo_id": f"geo_{geo_idx:02d}",
-                        "treatment": 1 if geo_idx < 6 else 0,
+                        "treated_geo": treated_geo,
+                        "post_period": post_period,
+                        "treatment": 1 if treated_geo and post_period else 0,
                         "outcome": 0,
                     }
                 )
@@ -101,10 +105,18 @@ def test_select_picks_geo_when_hint_or_n_geos():
     sel = selection_with_reasons(_req(), events)
     assert sel.method == "geo_synthetic_control"
 
-    # Force via hint with fewer geos.
-    sparse_geo = events.iloc[:60].copy()
+    # Force via hint with fewer geos, but still require the pre/post contract.
+    sparse_geo = events[events["geo_id"].isin([f"geo_{idx:02d}" for idx in range(8)])].copy()
     sel2 = selection_with_reasons(_req(hint={"design": "geo_holdout"}), sparse_geo)
     assert sel2.method == "geo_synthetic_control"
+
+
+def test_select_rejects_legacy_geo_only_treatment_contract():
+    events = _events_geo().drop(columns=["treated_geo", "post_period"])
+    sel = selection_with_reasons(_req(), events)
+    assert sel.method != "geo_synthetic_control"
+    geo_rejection = next(r for r in sel.rejected if r.method == "geo_synthetic_control")
+    assert geo_rejection.reason == "missing_geo_prepost_columns"
 
 
 def test_select_picks_cate_for_user_level():

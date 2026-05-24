@@ -61,6 +61,9 @@ class SimulationConfig:
     n_periods: int = 90
     n_geos: int = 100
     seed: int = 17
+    # For geo_structured worlds, periods >= intervention_period are the
+    # post-action window. None defaults to the midpoint of n_periods.
+    intervention_period: int | None = None
     # Heterogeneity scale on the per-user CATE modifier. The modifier is
     # `1 + heterogeneity_scale * (recency_z - 0.5)` so the population mean is 1
     # and the range is `[1 - 0.5*h, 1 + 0.5*h]`. Default of 0.4 reproduces the
@@ -118,6 +121,8 @@ class SimulationConfig:
             raise ValueError("n_periods must be positive")
         if self.n_geos <= 0:
             raise ValueError("n_geos must be positive")
+        if self.intervention_period is not None and not 0 < self.intervention_period < self.n_periods:
+            raise ValueError("intervention_period must be between 1 and n_periods - 1")
         if self.confound_strength < 0:
             raise ValueError("confound_strength must be >= 0")
         if self.heterogeneity_scale < 0:
@@ -145,6 +150,11 @@ class SimulationConfig:
         if world_type == WorldType.GEO_STRUCTURED and self.n_users < self.n_geos:
             raise ValueError(
                 "geo_structured world requires n_users >= n_geos so every geo has at least one user"
+            )
+        if world_type == WorldType.GEO_STRUCTURED and self.n_users < self.n_geos * self.n_periods:
+            raise ValueError(
+                "geo_structured world requires n_users >= n_geos * n_periods "
+                "so every geo-period cell is populated"
             )
         if world_type == WorldType.CROSS_CAMPAIGN_INTERFERENCE and self.n_campaigns < 2:
             raise ValueError(
@@ -240,7 +250,6 @@ def _covariate_contribution(coefs: dict[str, float], recency_z: float, frequency
 
 def _covariates(config: SimulationConfig) -> list[dict[str, Any]]:
     rng = random.Random(config.seed + SEED_OFFSET_COVARIATES)
-    panel_rng = random.Random(config.seed + SEED_OFFSET_PANEL)
     hidden_rng = random.Random(config.seed + SEED_OFFSET_HIDDEN_CONFOUNDER)
     rows: list[dict[str, Any]] = []
     devices = ["desktop", "mobile", "tablet"]
@@ -258,12 +267,12 @@ def _covariates(config: SimulationConfig) -> list[dict[str, Any]]:
         if is_geo_world:
             # Build a true geo×period panel. Round-robin geo assignment guarantees
             # every geo is populated; period is drawn so that within each geo the
-            # observations span all periods evenly. Decoupled from user_id so the
-            # geo-holdout / DiD verifier has a usable panel.
+            # observations span all periods evenly. This keeps the geo-holdout /
+            # DiD verifier from spending calibration power on avoidable panel
+            # imbalance rather than on the modeled outcome noise.
             geo_index = user_id % config.n_geos
             period_index = (user_id // config.n_geos) % config.n_periods
-            jitter = panel_rng.randrange(config.n_periods)
-            period = (period_index + jitter) % config.n_periods
+            period = period_index
             geo_id = f"geo_{geo_index:03d}"
         else:
             geo_id = f"geo_{user_id % config.n_geos:03d}"
@@ -297,12 +306,23 @@ def _assign_treatment(config: SimulationConfig, rows: list[dict[str, Any]], coef
         geos = sorted({row["geo_id"] for row in rows})
         n_treated = max(1, min(len(geos) - 1, round(len(geos) * config.treat_frac)))
         treated_geos = set(rng.sample(geos, n_treated))
+        intervention_period = (
+            int(config.intervention_period)
+            if config.intervention_period is not None
+            else config.n_periods // 2
+        )
         for row in rows:
-            row["treatment"] = 1 if row["geo_id"] in treated_geos else 0
+            treated_geo = 1 if row["geo_id"] in treated_geos else 0
+            post_period = 1 if int(row["period"]) >= intervention_period else 0
+            row["treated_geo"] = treated_geo
+            row["post_period"] = post_period
+            row["treatment"] = 1 if treated_geo and post_period else 0
         return
 
     if config.world_type in (WorldType.CLEAN_AB, WorldType.NON_STATIONARY):
         for row in rows:
+            row["treated_geo"] = 0
+            row["post_period"] = 1
             row["treatment"] = 1 if rng.random() < config.treat_frac else 0
         return
 
@@ -312,6 +332,8 @@ def _assign_treatment(config: SimulationConfig, rows: list[dict[str, Any]], coef
         competing_rng = random.Random(config.seed + SEED_OFFSET_COMPETING_CAMPAIGNS)
         n_competing = config.n_campaigns - 1
         for row in rows:
+            row["treated_geo"] = 0
+            row["post_period"] = 1
             row["treatment"] = 1 if rng.random() < config.treat_frac else 0
             competing = [
                 1 if competing_rng.random() < config.treat_frac else 0
@@ -332,6 +354,8 @@ def _assign_treatment(config: SimulationConfig, rows: list[dict[str, Any]], coef
     hidden_strength = float(config.hidden_confounder_strength) if is_adversarial else 0.0
     logit_treat = _logit(config.treat_frac)
     for row in rows:
+        row["treated_geo"] = 0
+        row["post_period"] = 1
         contribution = _covariate_contribution(
             coefs, row["recency_z"], row["frequency_z"], row["prior_z"]
         )
@@ -434,6 +458,8 @@ _OUTPUT_FIELDS = [
     "baseline_propensity",
     "treated_propensity",
     "treatment",
+    "treated_geo",
+    "post_period",
     "competing_load",
     "outcome",
     "revenue",
@@ -478,6 +504,7 @@ def generate_world(config: SimulationConfig, output_dir: Path) -> SimulatedWorld
     taus: list[float] = []
     p0_sum = 0.0
     p1_sum = 0.0
+    verification_target_taus: list[float] = []
 
     is_adversarial = config.world_type == WorldType.ADVERSARIAL_MISSPECIFIED
     is_cross_campaign = config.world_type == WorldType.CROSS_CAMPAIGN_INTERFERENCE
@@ -500,6 +527,8 @@ def generate_world(config: SimulationConfig, output_dir: Path) -> SimulatedWorld
                 1.0 - float(config.interference_strength) * float(row["competing_load"]),
             )
         tau = effective_lift * norm * decay * interference_factor
+        if config.world_type == WorldType.GEO_STRUCTURED and int(row["post_period"]) == 0:
+            tau = 0.0
 
         confounder_term = _covariate_contribution(
             coefs, row["recency_z"], row["frequency_z"], row["prior_z"]
@@ -563,6 +592,8 @@ def generate_world(config: SimulationConfig, output_dir: Path) -> SimulatedWorld
         row["revenue"] = f"{revenue:.4f}"
         row["tau"] = f"{tau:.10f}"
         taus.append(tau)
+        if config.world_type != WorldType.GEO_STRUCTURED or int(row["post_period"]) == 1:
+            verification_target_taus.append(tau)
         p0_sum += p0
         p1_sum += p1
         if row["treatment"]:
@@ -581,6 +612,11 @@ def generate_world(config: SimulationConfig, output_dir: Path) -> SimulatedWorld
     n = len(taus)
     ate = sum(taus) / n if n else 0.0
     att = sum(treated_taus) / len(treated_taus) if treated_taus else 0.0
+    verification_target_ate = (
+        sum(verification_target_taus) / len(verification_target_taus)
+        if verification_target_taus
+        else ate
+    )
     mean_p0 = p0_sum / n if n else 0.0
     mean_p1 = p1_sum / n if n else 0.0
     # seed-paired counterfactual difference at the propensity level (post-clip).
@@ -588,17 +624,23 @@ def generate_world(config: SimulationConfig, output_dir: Path) -> SimulatedWorld
 
     assignment_rule = {
         WorldType.CLEAN_AB: "bernoulli_independent_of_x",
-        WorldType.GEO_STRUCTURED: "geo_level_random",
+        WorldType.GEO_STRUCTURED: "geo_level_prepost_holdout",
         WorldType.CONFOUNDED: "logit_centered_covariates",
         WorldType.ZERO_LIFT_PLACEBO: "logit_centered_covariates",
         WorldType.NON_STATIONARY: "bernoulli_independent_of_x",
         WorldType.CROSS_CAMPAIGN_INTERFERENCE: "bernoulli_independent_of_x_per_campaign",
         WorldType.ADVERSARIAL_MISSPECIFIED: "logit_centered_covariates_plus_hidden_u",
     }[config.world_type]
+    geo_intervention_period = (
+        int(config.intervention_period)
+        if config.intervention_period is not None
+        else config.n_periods // 2
+    )
 
     ground_truth: dict[str, Any] = {
         "ate": round(ate, 10),
         "att": round(att, 10),
+        "verification_target_ate": round(verification_target_ate, 10),
         "true_incremental_lift": effective_lift,
         "true_iroas": None,
         "seed": config.seed,
@@ -608,6 +650,16 @@ def generate_world(config: SimulationConfig, output_dir: Path) -> SimulatedWorld
         "geo_random_effect_sd": (
             GEO_RANDOM_EFFECT_SD if config.world_type == WorldType.GEO_STRUCTURED else 0.0
         ),
+        "geo_holdout": {
+            "intervention_period": geo_intervention_period if config.world_type == WorldType.GEO_STRUCTURED else None,
+            "estimand": (
+                "mean post-period tau across treated and control geos"
+                if config.world_type == WorldType.GEO_STRUCTURED
+                else None
+            ),
+            "treated_geo_column": "treated_geo",
+            "post_period_column": "post_period",
+        },
         # The three coefficient values below are the LITERAL slopes used in the
         # outcome model on the centered covariates documented in
         # `outcome_model.covariate_normalization`. They are also the slopes used

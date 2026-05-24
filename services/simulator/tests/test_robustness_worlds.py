@@ -675,5 +675,8 @@ def test_seed_paired_counterfactual_diff_is_recorded_for_every_world(tmp_path: P
             kwargs["confound_strength"] = 0.5
         if world_type == WorldType.CROSS_CAMPAIGN_INTERFERENCE:
             kwargs["n_campaigns"] = 2
+        if world_type == WorldType.GEO_STRUCTURED:
+            kwargs["n_geos"] = 10
+            kwargs["n_periods"] = 10
         world = generate_world(SimulationConfig(**kwargs), tmp_path / world_type.value)
         assert "seed_paired_counterfactual_diff" in world.ground_truth

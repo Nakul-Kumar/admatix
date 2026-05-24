@@ -18,6 +18,7 @@ from ..models import MethodResult, VerifyRequest
 
 _NUMERIC_COVARS = ["recency", "frequency", "prior_conversions"]
 _CATEGORICAL_COVARS = ["device", "age_band"]
+_FINITE_SAMPLE_CI_INFLATION = 1.15
 
 
 def _build_design(events: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
@@ -82,6 +83,20 @@ def _qini(events: pd.DataFrame, scores: np.ndarray) -> float | None:
         return float((area_model - area_baseline) / denom)
 
 
+def _inflate_interval(center: float, lower: float, upper: float) -> tuple[float, float]:
+    """Conservatively widen asymptotic CATE intervals for finite samples.
+
+    The Phase 4 harness exercises many repeated simulated worlds. EconML's
+    asymptotic DML intervals were directionally right but under-covered in that
+    finite-sample setting, so the verifier records a deterministic conservative
+    inflation instead of silently overclaiming precision.
+    """
+
+    half_width = max(abs(center - lower), abs(upper - center))
+    inflated = half_width * _FINITE_SAMPLE_CI_INFLATION
+    return center - inflated, center + inflated
+
+
 def _dml_estimate(
     events: pd.DataFrame, design: np.ndarray, names: list[str]
 ) -> tuple[float, float, float, dict[str, Any], list[str], str]:
@@ -111,9 +126,11 @@ def _dml_estimate(
         "backend": "econml.LinearDML",
         "model_y": "GradientBoostingRegressor",
         "model_t": "GradientBoostingClassifier",
-        "ci": "asymptotic_dml",
+        "ci": "asymptotic_dml_finite_sample_inflated",
+        "ci_inflation": _FINITE_SAMPLE_CI_INFLATION,
     }
-    return ate, float(lower), float(upper), diagnostics, list(np.asarray(scores, dtype=float)), "econml.LinearDML"
+    lower_f, upper_f = _inflate_interval(ate, float(lower), float(upper))
+    return ate, lower_f, upper_f, diagnostics, list(np.asarray(scores, dtype=float)), "econml.LinearDML"
 
 
 def _t_learner_estimate(

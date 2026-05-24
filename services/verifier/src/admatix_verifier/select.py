@@ -34,11 +34,21 @@ class Selection:
     rejected: list[RejectedMethod]
 
 
-def _treatment_varies_by_geo_only(events: pd.DataFrame) -> bool:
-    if "geo_id" not in events.columns or "treatment" not in events.columns:
+def _geo_prepost_ok(events: pd.DataFrame) -> bool:
+    required = {"geo_id", "treatment", "treated_geo", "post_period"}
+    if not required.issubset(events.columns):
         return False
-    per_geo = events.groupby("geo_id")["treatment"].nunique()
-    return bool((per_geo <= 1).all())
+    if events["geo_id"].nunique() < 2:
+        return False
+    per_geo = events.groupby("geo_id")["treated_geo"].nunique()
+    if not bool((per_geo <= 1).all()):
+        return False
+    treated_labels = set(events["treated_geo"].astype(int).unique().tolist())
+    post_labels = set(events["post_period"].astype(int).unique().tolist())
+    if not ({0, 1} <= treated_labels and {0, 1} <= post_labels):
+        return False
+    expected = events["treated_geo"].astype(int) * events["post_period"].astype(int)
+    return bool((events["treatment"].astype(int) == expected).all())
 
 
 def _user_level_ok(events: pd.DataFrame) -> bool:
@@ -60,12 +70,16 @@ def _reason_against(method: MethodName, events: pd.DataFrame, hint_design: str |
         if "geo_id" not in events.columns:
             return "no_geo_column"
         n_geos = events["geo_id"].nunique() if "geo_id" in events.columns else 0
+        if hint_design == "geo_holdout" and not {"treated_geo", "post_period"}.issubset(events.columns):
+            return "missing_geo_prepost_columns"
         if hint_design == "geo_holdout":
             return "geo_holdout_hint_unmet"
         if n_geos < 10:
             return f"insufficient_geos:{n_geos}<10"
-        if not _treatment_varies_by_geo_only(events):
-            return "treatment_varies_within_geo"
+        if not {"treated_geo", "post_period"}.issubset(events.columns):
+            return "missing_geo_prepost_columns"
+        if not _geo_prepost_ok(events):
+            return "geo_prepost_contract_unmet"
         return "geo_design_rejected"
     if method == "cate_meta_learner":
         missing = {"user_id", "treatment", "outcome"} - set(events.columns)
@@ -96,11 +110,11 @@ def selection_with_reasons(req: VerifyRequest, events: pd.DataFrame) -> Selectio
     if "logging_propensity" in events.columns:
         chosen = "ope_ips_snips_dr"
     elif (
-        hint_design == "geo_holdout"
+        (hint_design == "geo_holdout" and _geo_prepost_ok(events))
         or (
             "geo_id" in events.columns
             and events["geo_id"].nunique() >= 10
-            and _treatment_varies_by_geo_only(events)
+            and _geo_prepost_ok(events)
         )
     ):
         chosen = "geo_synthetic_control"

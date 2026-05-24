@@ -104,17 +104,29 @@ def test_zero_lift_placebo_keeps_tau_and_ate_at_zero(tmp_path: Path) -> None:
 
 
 def test_geo_structured_world_assigns_treatment_at_geo_level(tmp_path: Path) -> None:
-    config = SimulationConfig(world_type=WorldType.GEO_STRUCTURED, n_users=1200, n_geos=24, seed=44)
+    config = SimulationConfig(world_type=WorldType.GEO_STRUCTURED, n_users=2400, n_geos=24, seed=44)
     world = generate_world(config, tmp_path)
     rows = _read_rows(world.data_path)
 
     treatment_by_geo: dict[str, set[str]] = {}
+    treated_label_by_geo: dict[str, set[str]] = {}
+    post_by_period: dict[int, set[str]] = defaultdict(set)
     for row in rows:
         treatment_by_geo.setdefault(row["geo_id"], set()).add(row["treatment"])
+        treated_label_by_geo.setdefault(row["geo_id"], set()).add(row["treated_geo"])
+        post_by_period[int(row["period"])].add(row["post_period"])
 
     assert len(treatment_by_geo) == 24
-    assert all(len(assignments) == 1 for assignments in treatment_by_geo.values())
+    assert all(len(assignments) == 1 for assignments in treated_label_by_geo.values())
+    assert {"0", "1"} == {next(iter(values)) for values in treated_label_by_geo.values()}
+    assert any(assignments == {"0", "1"} for assignments in treatment_by_geo.values())
+    assert all(assignments == {"0"} for geo, assignments in treatment_by_geo.items() if treated_label_by_geo[geo] == {"0"})
+    assert set(post_by_period) == set(range(config.n_periods))
+    assert any(values == {"0"} for values in post_by_period.values())
+    assert any(values == {"1"} for values in post_by_period.values())
     assert world.ground_truth["geo_count"] == 24
+    assert world.ground_truth["geo_holdout"]["intervention_period"] == config.n_periods // 2
+    assert world.ground_truth["verification_target_ate"] > world.ground_truth["ate"]
     assert "geo_random_effect_sd" in world.ground_truth
 
 
@@ -228,13 +240,17 @@ def test_geo_structured_world_has_usable_geo_period_panel(tmp_path: Path) -> Non
 
     periods_per_geo: dict[str, set[int]] = defaultdict(set)
     geos_per_period: dict[int, set[str]] = defaultdict(set)
-    treatment_by_geo: dict[str, str] = {}
+    treated_label_by_geo: dict[str, str] = {}
+    treatment_by_geo_period: dict[tuple[str, int], set[str]] = defaultdict(set)
+    counts_by_geo_period: Counter[tuple[str, int]] = Counter()
     for row in rows:
         geo = row["geo_id"]
         period = int(row["period"])
         periods_per_geo[geo].add(period)
         geos_per_period[period].add(geo)
-        treatment_by_geo[geo] = row["treatment"]
+        treated_label_by_geo[geo] = row["treated_geo"]
+        treatment_by_geo_period[(geo, period)].add(row["treatment"])
+        counts_by_geo_period[(geo, period)] += 1
 
     assert len(periods_per_geo) == 20
     # Every geo must be observed at every period for a clean panel.
@@ -243,13 +259,11 @@ def test_geo_structured_world_has_usable_geo_period_panel(tmp_path: Path) -> Non
             f"geo {geo} only present in periods {sorted(periods)}; panel is not balanced"
         )
 
-    # Every period must contain BOTH a treated and a control geo so DiD has
-    # both arms at every time point.
+    # Every period must contain BOTH a treated and a control geo label so DiD
+    # has both holdout arms at every time point.
     for period, geos in geos_per_period.items():
-        treatments_present = {treatment_by_geo[g] for g in geos}
-        assert treatments_present == {"0", "1"}, (
-            f"period {period} missing one treatment arm: {treatments_present}"
-        )
+        labels_present = {treated_label_by_geo[g] for g in geos}
+        assert labels_present == {"0", "1"}, f"period {period} missing one geo holdout arm: {labels_present}"
 
     # Geo composition of each period must be the SAME set of geos (the test
     # the old striped layout would fail outright).
@@ -257,6 +271,21 @@ def test_geo_structured_world_has_usable_geo_period_panel(tmp_path: Path) -> Non
     assert len(set(composition_per_period.values())) == 1, (
         "geo composition differs across periods — DiD will conflate treatment with composition"
     )
+
+    counts = list(counts_by_geo_period.values())
+    assert max(counts) - min(counts) <= 1, (
+        "geo-period cells must be balanced; random period jitter adds avoidable calibration noise"
+    )
+
+    intervention_period = world.ground_truth["geo_holdout"]["intervention_period"]
+    for (geo, period), treatments in treatment_by_geo_period.items():
+        assert len(treatments) == 1
+        treatment = next(iter(treatments))
+        expected = "1" if treated_label_by_geo[geo] == "1" and period >= intervention_period else "0"
+        assert treatment == expected, (
+            f"geo {geo} period {period} has treatment={treatment}; expected {expected} "
+            "from treated_geo * post_period"
+        )
 
 
 def test_confound_strength_zero_is_honored_in_confounded_world(tmp_path: Path) -> None:
@@ -368,12 +397,12 @@ def test_confound_strength_negative_is_rejected() -> None:
 
 
 def test_geo_structured_requires_enough_users() -> None:
-    """If n_users < n_geos some geos would be empty, breaking the geo panel."""
+    """If n_users < n_geos * n_periods some geo-period cells would be empty."""
     try:
-        SimulationConfig(world_type=WorldType.GEO_STRUCTURED, n_users=5, n_geos=20)
+        SimulationConfig(world_type=WorldType.GEO_STRUCTURED, n_users=599, n_geos=20, n_periods=30)
     except ValueError:
         return
-    raise AssertionError("geo_structured n_users < n_geos should be rejected")
+    raise AssertionError("geo_structured n_users < n_geos * n_periods should be rejected")
 
 
 def test_revenue_rng_is_independent_of_outcome_realization(tmp_path: Path) -> None:

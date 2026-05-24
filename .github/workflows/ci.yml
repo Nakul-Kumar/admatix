@@ -78,3 +78,39 @@ jobs:
 
       - name: Run verifier tests
         run: pnpm run test:python:verifier
+
+      - name: Install validation dependencies
+        run: python -m pip install --prefer-binary -r services/validation/requirements.lock
+
+      - name: Run validation fast tests
+        run: pnpm run test:python:validation
+
+  dashboard:
+    name: Proof dashboard checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: proof-dashboard/package-lock.json
+
+      - name: Install dashboard dependencies
+        working-directory: proof-dashboard
+        run: npm ci
+
+      - name: Validate dashboard data origins
+        working-directory: proof-dashboard
+        run: npm run validate:origin
+
+      - name: Typecheck dashboard
+        working-directory: proof-dashboard
+        run: npm run typecheck
+
+      - name: Build dashboard
+        working-directory: proof-dashboard
+        run: npm run build
