@@ -1,0 +1,96 @@
+{
+  "origin": {
+    "kind": "demo",
+    "label": "Bundled CX-1 demo benchmark",
+    "description": "Synthetic sample shipped with the standalone dashboard. Not live account proof.",
+    "produced_by": "CX-1 dashboard fixture pack",
+    "artifact_uri": "proof-dashboard/public/data/benchmark.json"
+  },
+  "generated_at": "2026-05-22T08:00:00Z",
+  "window_days": 90,
+  "arms": [
+    {
+      "id": "A",
+      "name": "General AI Agent · basic skills",
+      "short": "Naive agent",
+      "description": "GPT-class agent driving the ad account end-to-end. Reads platform-reported metrics, no causal verification, no modern ad skills (no MTA, no audience modeling).",
+      "uses_admatix": false,
+      "modern_skills": false,
+      "metrics": {
+        "platform_reported_roas": 4.8,
+        "true_incremental_roas": 1.6,
+        "spend_usd": 1000000,
+        "wasted_spend_usd": 480000,
+        "wasted_spend_caught_pct": 0,
+        "false_scale_ups": 28,
+        "true_lift_captured_pct": 41
+      }
+    },
+    {
+      "id": "B",
+      "name": "General AI Agent · modern skills",
+      "short": "Agent + skills",
+      "description": "Same agent equipped with modern ad skills: multi-touch attribution, audience modeling, conversion lift studies. Still trusts platform-reported metrics by default.",
+      "uses_admatix": false,
+      "modern_skills": true,
+      "metrics": {
+        "platform_reported_roas": 4.4,
+        "true_incremental_roas": 2.1,
+        "spend_usd": 1000000,
+        "wasted_spend_usd": 310000,
+        "wasted_spend_caught_pct": 0,
+        "false_scale_ups": 19,
+        "true_lift_captured_pct": 62
+      }
+    },
+    {
+      "id": "C",
+      "name": "General AI Agent + AdMatix",
+      "short": "Agent + AdMatix",
+      "description": "Baseline agent gated by AdMatix. Every proposal passes through the verifier and gate; the agent acts on calibrated posteriors instead of platform-reported deltas.",
+      "uses_admatix": true,
+      "modern_skills": false,
+      "metrics": {
+        "platform_reported_roas": 3.7,
+        "true_incremental_roas": 2.9,
+        "spend_usd": 1000000,
+        "wasted_spend_usd": 85000,
+        "wasted_spend_caught_pct": 71,
+        "false_scale_ups": 4,
+        "true_lift_captured_pct": 88
+      }
+    },
+    {
+      "id": "D",
+      "name": "General AI Agent + skills + AdMatix",
+      "short": "Full stack",
+      "description": "Modern-skills agent gated by AdMatix. The agent proposes intelligent changes; the verifier and gate keep them honest. Highest true incremental ROAS, lowest wasted spend.",
+      "uses_admatix": true,
+      "modern_skills": true,
+      "metrics": {
+        "platform_reported_roas": 3.6,
+        "true_incremental_roas": 3.4,
+        "spend_usd": 1000000,
+        "wasted_spend_usd": 42000,
+        "wasted_spend_caught_pct": 84,
+        "false_scale_ups": 1,
+        "true_lift_captured_pct": 94
+      }
+    }
+  ],
+  "weekly_curve": [
+    { "week": 1,  "arm_a": 140,  "arm_b": 160,  "arm_c": 180,  "arm_d": 210  },
+    { "week": 2,  "arm_a": 250,  "arm_b": 290,  "arm_c": 340,  "arm_d": 410  },
+    { "week": 3,  "arm_a": 370,  "arm_b": 420,  "arm_c": 510,  "arm_d": 620  },
+    { "week": 4,  "arm_a": 490,  "arm_b": 560,  "arm_c": 680,  "arm_d": 850  },
+    { "week": 5,  "arm_a": 620,  "arm_b": 720,  "arm_c": 880,  "arm_d": 1090 },
+    { "week": 6,  "arm_a": 780,  "arm_b": 890,  "arm_c": 1090, "arm_d": 1340 },
+    { "week": 7,  "arm_a": 920,  "arm_b": 1060, "arm_c": 1310, "arm_d": 1610 },
+    { "week": 8,  "arm_a": 1080, "arm_b": 1240, "arm_c": 1530, "arm_d": 1900 },
+    { "week": 9,  "arm_a": 1210, "arm_b": 1410, "arm_c": 1760, "arm_d": 2200 },
+    { "week": 10, "arm_a": 1330, "arm_b": 1580, "arm_c": 2000, "arm_d": 2510 },
+    { "week": 11, "arm_a": 1430, "arm_b": 1750, "arm_c": 2240, "arm_d": 2820 },
+    { "week": 12, "arm_a": 1530, "arm_b": 1920, "arm_c": 2470, "arm_d": 3120 },
+    { "week": 13, "arm_a": 1600, "arm_b": 2100, "arm_c": 2900, "arm_d": 3400 }
+  ]
+}
