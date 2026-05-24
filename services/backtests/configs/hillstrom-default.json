@@ -1,0 +1,6 @@
+{
+  "output_dir": "output",
+  "seed": 17,
+  "bootstrap_iters": 1000,
+  "hillstrom_arms": ["mens_email", "womens_email"]
+}

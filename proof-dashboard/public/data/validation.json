@@ -1,0 +1,67 @@
+{
+  "origin": {
+    "kind": "demo",
+    "label": "Bundled CX-1 demo validation",
+    "description": "Synthetic sample shipped with the standalone dashboard. Not live account proof.",
+    "produced_by": "CX-1 dashboard fixture pack",
+    "artifact_uri": "proof-dashboard/public/data/validation.json"
+  },
+  "generated_at": "2026-05-22T08:00:00Z",
+  "sbc": {
+    "description": "Simulation-based calibration. Draw θ from the prior, simulate data, refit, record rank of θ in posterior. A calibrated verifier produces uniform ranks.",
+    "n_simulations": 1000,
+    "bins": 20,
+    "expected_per_bin": 50,
+    "ks_p_value": 0.71,
+    "histogram": [52, 48, 51, 47, 53, 49, 50, 52, 48, 51, 49, 53, 47, 52, 48, 50, 51, 49, 52, 48],
+    "baseline_histogram": [98, 84, 70, 58, 48, 40, 33, 28, 24, 22, 22, 24, 28, 33, 40, 48, 58, 70, 84, 88]
+  },
+  "ci_coverage": {
+    "description": "Empirical coverage of credible intervals. A calibrated 90% CI should contain the true effect 90% of the time. AdMatix lines up with the diagonal; the baseline is anti-conservative.",
+    "targets": [50, 60, 70, 80, 90, 95],
+    "admatix": [51, 61, 69, 80, 89, 94],
+    "baseline": [34, 41, 49, 56, 62, 68]
+  },
+  "qini": {
+    "description": "Cumulative incremental conversions when targeting the top X% scored by each method. Higher and earlier is better. AUUC is the area under the uplift curve minus the random baseline.",
+    "auuc_admatix": 0.187,
+    "auuc_baseline": 0.041,
+    "curve": [
+      { "pct": 0,   "admatix": 0.000, "baseline": 0.000, "random": 0.000 },
+      { "pct": 10,  "admatix": 0.052, "baseline": 0.014, "random": 0.010 },
+      { "pct": 20,  "admatix": 0.098, "baseline": 0.025, "random": 0.020 },
+      { "pct": 30,  "admatix": 0.138, "baseline": 0.034, "random": 0.030 },
+      { "pct": 40,  "admatix": 0.172, "baseline": 0.041, "random": 0.040 },
+      { "pct": 50,  "admatix": 0.196, "baseline": 0.046, "random": 0.050 },
+      { "pct": 60,  "admatix": 0.211, "baseline": 0.049, "random": 0.060 },
+      { "pct": 70,  "admatix": 0.214, "baseline": 0.052, "random": 0.068 },
+      { "pct": 80,  "admatix": 0.208, "baseline": 0.054, "random": 0.075 },
+      { "pct": 90,  "admatix": 0.195, "baseline": 0.050, "random": 0.080 },
+      { "pct": 100, "admatix": 0.187, "baseline": 0.041, "random": 0.084 }
+    ]
+  },
+  "placebo": {
+    "description": "500 placebo trials where treatment is identical to control. A correct verifier returns ~0 lift. AdMatix concentrates at zero; the platform-trusting baseline finds illusory positive effects.",
+    "n_trials": 500,
+    "expected_mean": 0.0,
+    "admatix_mean": 0.4,
+    "admatix_p95": 1.6,
+    "baseline_mean": 4.2,
+    "baseline_p95": 8.9,
+    "distribution": [
+      { "bucket": -3, "admatix": 8,   "baseline": 0  },
+      { "bucket": -2, "admatix": 38,  "baseline": 2  },
+      { "bucket": -1, "admatix": 92,  "baseline": 8  },
+      { "bucket": 0,  "admatix": 168, "baseline": 22 },
+      { "bucket": 1,  "admatix": 124, "baseline": 46 },
+      { "bucket": 2,  "admatix": 52,  "baseline": 70 },
+      { "bucket": 3,  "admatix": 14,  "baseline": 88 },
+      { "bucket": 4,  "admatix": 4,   "baseline": 92 },
+      { "bucket": 5,  "admatix": 0,   "baseline": 76 },
+      { "bucket": 6,  "admatix": 0,   "baseline": 50 },
+      { "bucket": 7,  "admatix": 0,   "baseline": 28 },
+      { "bucket": 8,  "admatix": 0,   "baseline": 12 },
+      { "bucket": 9,  "admatix": 0,   "baseline": 6  }
+    ]
+  }
+}

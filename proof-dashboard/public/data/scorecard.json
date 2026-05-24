@@ -1,0 +1,48 @@
+{
+  "origin": {
+    "kind": "demo",
+    "label": "Bundled CX-1 demo scorecard",
+    "description": "Synthetic sample shipped with the standalone dashboard. Not live account proof.",
+    "produced_by": "CX-1 dashboard fixture pack",
+    "artifact_uri": "proof-dashboard/public/data/scorecard.json"
+  },
+  "generated_at": "2026-05-22T08:00:00Z",
+  "window_days": 90,
+  "decisions_evaluated": 1247,
+  "wasted_spend_caught_usd": 2832400,
+  "wasted_spend_caught_pct": 28.4,
+  "false_scale_ups_prevented": 41,
+  "true_lift_captured_pct": 92.4,
+  "calibration_pct": 94.1,
+  "auuc_uplift": 0.187,
+  "vs_baseline": {
+    "incremental_roas_lift_pct": 37.8,
+    "false_positive_reduction_pct": 78.2
+  },
+  "pipeline_stages": [
+    {
+      "key": "gate",
+      "title": "Gate",
+      "body": "Every proposed change passes through schema, evidence-completeness, and policy gates before it can touch a live budget.",
+      "tag": "Reject early · 11.8% of proposals filtered"
+    },
+    {
+      "key": "log",
+      "title": "Log",
+      "body": "Tamper-evident receipt of the proposal, counterfactual baseline, and verifier inputs. Reproducible across replays.",
+      "tag": "100% append-only · MCP-attested"
+    },
+    {
+      "key": "verify",
+      "title": "Verify",
+      "body": "Posterior-replay verifier produces a calibrated lift estimate plus credible interval. SBC-validated and placebo-checked.",
+      "tag": "Bayesian posterior · SBC p = 0.71"
+    },
+    {
+      "key": "decide",
+      "title": "Decide",
+      "body": "Scale, hold, or cut — backed by a calibrated interval rather than a platform-reported point estimate.",
+      "tag": "Decision under uncertainty"
+    }
+  ]
+}
