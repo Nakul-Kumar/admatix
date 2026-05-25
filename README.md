@@ -77,6 +77,13 @@ AdMatix separates raw data from proof:
 
 See [docs/architecture/LIVE-DATA-EVIDENCE-ARCHITECTURE.md](docs/architecture/LIVE-DATA-EVIDENCE-ARCHITECTURE.md) for the full ER map, KPI taxonomy, dataset roadmap, and live pilot plan.
 
+The first live/customer pilot should follow the read-only walled-garden plan in
+[docs/architecture/WALLED-GARDEN-PILOT-READINESS.md](docs/architecture/WALLED-GARDEN-PILOT-READINESS.md).
+Dataset and AD-Bench expansion is tracked in
+[docs/build/DATASET-BENCHMARK-INTAKE-PLAN.md](docs/build/DATASET-BENCHMARK-INTAKE-PLAN.md).
+Ongoing multi-agent development rules are in
+[docs/architecture/ADMATIX-AGENT-OPERATING-MODEL.md](docs/architecture/ADMATIX-AGENT-OPERATING-MODEL.md).
+
 ## Dashboard
 
 The dashboard is a static React/Vite proof surface served at [https://admatix.tech](https://admatix.tech).
