@@ -16,6 +16,7 @@ const MIGRATION_FILES = [
   "0003_warehouse_bronze_silver.sql",
   "0004_sim_bench_schemas.sql",
   "0005_live_data_readiness.sql",
+  "0006_diligence_replay_constraints.sql",
 ] as const;
 
 export interface MigrationResult {

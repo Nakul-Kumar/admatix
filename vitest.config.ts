@@ -11,6 +11,7 @@ export default defineConfig({
       "packages/*/src/**/*.test.ts",
       "apps/*/src/**/*.test.ts",
       "tests/e2e/**/*.test.ts",
+      "tests/db/**/*.test.ts",
     ],
     globals: false,
     // The e2e demo flow runs the whole orchestration end-to-end and
