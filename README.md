@@ -30,7 +30,7 @@ AdMatix currently includes:
 | Product loop | `pnpm demo`, `tests/e2e/demo-flow.test.ts` | Dry-run demo and e2e tests pass | AdMatix can audit fixture account data, build H0 packets, block unsafe budget changes, and produce dry-run diffs. | Live ad-account operation or autonomous spend mutation. |
 | Safety gate | `packages/policy`, `packages/evidence` | PolicyGuard blocks a +60% budget shift against a 20% cap | Spend-touching proposals can be blocked by deterministic policy/evidence gates. | That every possible unsafe action has been proven impossible. |
 | CX-2 validation | `docs/proof/artifacts/cx2-validation-summary.json` | PASS: empirical 95% CI coverage `0.964815`, SBC p-value `0.7598939812328932`, max wrong-claim rate `0.0`, placebo false-positive rate `0.05` | The verifier is calibrated on seeded simulator worlds within stated limits. | Simulation proves real-world lift. |
-| CX-3 head-to-head | `docs/proof/artifacts/cx3-headtohead-summary.json` | READY: `28` real Claude subscription buyer rows, `0` fallback rows, `0` failed rows, simulated benchmark | The benchmark has real LLM lane accounting without fallback inflation. | Live-market superiority or causal lift. |
+| CX-3 head-to-head | `docs/proof/artifacts/cx3-headtohead-summary.json` | READY: `28` real Claude subscription buyer rows, `0` fallback rows, `0` failed rows, simulated benchmark | The benchmark has real LLM lane accounting without fallback inflation. | Live-market superiority or causal lift on real ad accounts. |
 | CX-4 public backtests | `docs/proof/artifacts/cx4-backtests-summary.json` | PASS: full Criteo Uplift v2.1 `13,979,592` rows and Hillstrom `64,000` rows, aggregate-only, with checksums | Public randomized/backtest datasets recover aggregate measured effects. | Public RCT data equals production account proof. |
 | Dashboard | `proof-dashboard/`, [admatix.tech/artifacts](https://admatix.tech/artifacts) | LIVE: artifact view uses `origin.kind = "artifact"`; Demo Lab pages stay illustrative | Investors can inspect accepted aggregate proof artifacts and claim limits. | Continuous live ad-account telemetry. |
 | Live-data readiness | `warehouse/migrations/0005_live_data_readiness.sql` | Disposable Postgres 17 migration apply/replay validated on the VPS | The schema is ready for shadow connector syncs, raw platform landings, experiment preregistration, and immutable proof bundles. | Connected live ad accounts or applied production migrations. |
@@ -144,7 +144,7 @@ The approval and dry-run path is intentionally fail-closed:
 ```text
 apps/                 api, web cockpit, MCP server, CLI
 packages/             schemas, core, connectors, evidence, policy, agents, evals
-services/             ingest, simulator, verifier, validation, benchmark, backtests
+services/             ingest, simulator, verifier, validation, benchmark, backtests, uplift
 warehouse/            Supabase/Postgres migrations and dbt project
 docs/proof/           proof report, claims matrix, demo package, aggregate artifacts
 docs/architecture/    system architecture, simulator/verifier, live-data roadmap
