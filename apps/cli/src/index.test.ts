@@ -2,6 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Writable } from "node:stream";
+import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { runCli } from "./index.js";
 
@@ -170,9 +171,8 @@ describe("admatix CLI acceptance", () => {
   });
 
   it("connectors preview --cassette emits directional, non-proof metadata", async () => {
-    const cassettePath = join(
-      process.cwd(),
-      "packages/connectors/testdata/cassettes/google_ads/campaign_metrics.json",
+    const cassettePath = fileURLToPath(
+      new URL("../../../packages/connectors/testdata/cassettes/google_ads/campaign_metrics.json", import.meta.url),
     );
     const result = await invoke([
       "connectors",

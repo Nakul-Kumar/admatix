@@ -1,16 +1,19 @@
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const migration = readFileSync(
-  resolve("warehouse/migrations/0007_connector_import_foundation.sql"),
+  fileURLToPath(new URL("../../warehouse/migrations/0007_connector_import_foundation.sql", import.meta.url)),
   "utf8",
 );
 const promotionMigration = readFileSync(
-  resolve("warehouse/migrations/0008_live_import_promotion.sql"),
+  fileURLToPath(new URL("../../warehouse/migrations/0008_live_import_promotion.sql", import.meta.url)),
   "utf8",
 );
-const applyMigrations = readFileSync(resolve("scripts/db/apply-migrations.ts"), "utf8");
+const applyMigrations = readFileSync(
+  fileURLToPath(new URL("../../scripts/db/apply-migrations.ts", import.meta.url)),
+  "utf8",
+);
 
 describe("connector import foundation migration", () => {
   it("is wired into the migration runner", () => {

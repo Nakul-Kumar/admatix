@@ -1,7 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-const base = process.env.VITE_BASE_PATH ?? process.env.BASE_PATH ?? "./";
+const runtimeEnv =
+  (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
+const base = runtimeEnv.VITE_BASE_PATH ?? runtimeEnv.BASE_PATH ?? "./";
 
 export default defineConfig({
   plugins: [react()],

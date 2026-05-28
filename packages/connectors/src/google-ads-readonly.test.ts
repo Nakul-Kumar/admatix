@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   assertReadOnlyCapabilities,
@@ -11,9 +11,8 @@ import {
   previewGoogleAds,
 } from "./google-ads-readonly.js";
 
-const cassettePath = join(
-  process.cwd(),
-  "packages/connectors/testdata/cassettes/google_ads/campaign_metrics.json",
+const cassettePath = fileURLToPath(
+  new URL("../testdata/cassettes/google_ads/campaign_metrics.json", import.meta.url),
 );
 
 describe("Google Ads read-only preview", () => {

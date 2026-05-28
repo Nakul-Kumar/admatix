@@ -1,6 +1,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   AuditReport,
@@ -80,9 +81,8 @@ describe("F8: API entry point enforces ADMATIX_MODE=fixtures", () => {
         expect(capabilities.statusCode).toBe(200);
         expect((capabilities.json() as { status: string }).status).toBe("available");
 
-        const cassette = join(
-          process.cwd(),
-          "packages/connectors/testdata/cassettes/google_ads/campaign_metrics.json",
+        const cassette = fileURLToPath(
+          new URL("../../../packages/connectors/testdata/cassettes/google_ads/campaign_metrics.json", import.meta.url),
         );
         const preview = await readonlyApp.inject({
           method: "POST",
