@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Writable } from "node:stream";
@@ -56,6 +56,81 @@ describe("admatix CLI acceptance", () => {
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain("Scorecard");
     expect(result.stdout).toContain("Suite: safety-v1");
+  });
+
+  it("import --json previews a CSV manifest", async () => {
+    const storeRoot = await mkdtemp(join(tmpdir(), "admatix-cli-import-"));
+    tempRoots.push(storeRoot);
+    const csvPath = join(storeRoot, "google-ads.csv");
+    await writeFile(
+      csvPath,
+      [
+        "date,account_id,campaign_id,spend,impressions,clicks",
+        "2026-05-20,acc_1,campaign_1,100,1000,50",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const result = await invoke([
+      "import",
+      "--file",
+      csvPath,
+      "--source",
+      "google_ads_export",
+      "--platform",
+      "google_ads",
+      "--object-type",
+      "platform_report",
+      "--account",
+      "acc_1",
+      "--required-columns",
+      "date,campaign_id,spend,impressions,clicks",
+      "--json",
+    ]);
+
+    expect(result.exitCode).toBe(0);
+    const json = JSON.parse(result.stdout) as {
+      platform: string;
+      row_count: number;
+      quality: { status: string };
+    };
+    expect(json.platform).toBe("google_ads");
+    expect(json.row_count).toBe(1);
+    expect(json.quality.status).toBe("pass");
+  });
+
+  it("import --json fails closed on data quality errors", async () => {
+    const storeRoot = await mkdtemp(join(tmpdir(), "admatix-cli-import-bad-"));
+    tempRoots.push(storeRoot);
+    const csvPath = join(storeRoot, "bad-google-ads.csv");
+    await writeFile(
+      csvPath,
+      [
+        "date,account_id,campaign_id,spend,impressions,clicks",
+        "2026-05-20,acc_1,campaign_1,-100,1000,50",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const result = await invoke([
+      "import",
+      "--file",
+      csvPath,
+      "--source",
+      "google_ads_export",
+      "--platform",
+      "google_ads",
+      "--object-type",
+      "platform_report",
+      "--required-columns",
+      "date,campaign_id,spend,impressions,clicks",
+      "--json",
+    ]);
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('"quality"');
+    expect(result.stderr).toContain("import_quality_failed");
+    expect(result.stderr).toContain("non_negative_numeric_metrics");
   });
 
   it("F8: refuses to start if ADMATIX_MODE != fixtures", async () => {
