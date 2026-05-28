@@ -4,11 +4,12 @@ import Fastify, {
 } from "fastify";
 import { createStore, type Store } from "@admatix/core";
 import { registerAuthHook } from "./auth.js";
-import { assertFixturesMode } from "./fixtures-mode.js";
+import { assertSupportedApiMode, isReadonlyMode } from "./fixtures-mode.js";
 import { registerAuditRoutes } from "./routes/audit.js";
 import { registerPacketsRoutes } from "./routes/packets.js";
 import { registerApprovalsRoutes } from "./routes/approvals.js";
 import { registerBenchmarksRoutes } from "./routes/benchmarks.js";
+import { registerConnectorRoutes } from "./routes/connectors.js";
 
 export interface ApiDeps {
   /** Override the default JSON-on-disk Store. */
@@ -23,7 +24,7 @@ export interface ApiOptions extends FastifyServerOptions {
 
 /** Build a Fastify instance with every AdMatix route registered. */
 export async function buildServer(opts: ApiOptions = {}): Promise<FastifyInstance> {
-  assertFixturesMode();
+  assertSupportedApiMode();
   const { host: _host, port: _port, deps: _deps, ...fastifyOpts } = opts;
   // Default logger redacts secrets in flight — AGENTS.md §9 says we never
   // log OAuth tokens. Callers can still override via `logger: false`
@@ -49,6 +50,11 @@ export async function buildServer(opts: ApiOptions = {}): Promise<FastifyInstanc
   registerAuthHook(app);
 
   await app.register((instance, _o, done) => {
+    registerConnectorRoutes(instance);
+    if (isReadonlyMode()) {
+      done();
+      return;
+    }
     registerAuditRoutes(instance, { store });
     registerPacketsRoutes(instance, { store });
     registerApprovalsRoutes(instance, { store });

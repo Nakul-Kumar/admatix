@@ -11,7 +11,9 @@ select
   max(upper(currency))::char(3) as currency,
   min(_source) as _source,
   min(_batch_id) as _batch_id,
+  min(connector_sync_id) as connector_sync_id,
+  min(connector_import_manifest_id) as connector_import_manifest_id,
+  min(_row_hash) as _row_hash,
   now()::timestamptz as _loaded_at
 from {{ ref('bronze_first_party_orders') }}
 group by order_ts::date, external_account_id
-

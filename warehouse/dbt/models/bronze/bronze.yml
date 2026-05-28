@@ -228,7 +228,7 @@ models:
       - name: _row_hash
         description: Stable row hash.
   - name: bronze_platform_metrics
-    description: Bronze view over Phase 2 fixture platform metric seed rows preserving ingest metadata.
+    description: Bronze view over fixture plus live raw platform metric rows preserving ingest metadata.
     columns:
       - name: bronze_id
         description: Deterministic surrogate row number for fixture bronze rows.
@@ -264,8 +264,12 @@ models:
         description: Ingest batch identifier.
       - name: _row_hash
         description: Stable SHA-256 row hash for fixture deduplication.
+      - name: connector_sync_id
+        description: Live connector sync id when row comes from warehouse.raw_platform_reports; null for fixtures.
+      - name: connector_import_manifest_id
+        description: Import manifest id when row comes from a persisted CSV/manual/API import; null for fixtures.
   - name: bronze_first_party_orders
-    description: Bronze view over Phase 2 first-party order seed rows preserving ingest metadata.
+    description: Bronze view over fixture plus live raw first-party conversion/order rows preserving ingest metadata.
     columns:
       - name: bronze_id
         description: Deterministic surrogate row number for fixture bronze rows.
@@ -298,6 +302,14 @@ models:
         description: Ingest batch identifier.
       - name: _row_hash
         description: Stable SHA-256 row hash for fixture deduplication.
+      - name: connector_sync_id
+        description: Live connector sync id when row comes from warehouse.raw_conversion_events; null for fixtures.
+      - name: connector_import_manifest_id
+        description: Import manifest id when row comes from a persisted CSV/manual/API import; null for fixtures.
+  - name: bronze_raw_platform_reports
+    description: Live bronze view over warehouse.raw_platform_reports. Not proof-ready by itself.
+  - name: bronze_raw_conversion_events
+    description: Live bronze view over warehouse.raw_conversion_events. Preferred first-party outcome source, but still not causal proof without an experiment.
   - name: bronze_creative_metrics_fixture
     description: Bronze view over Phase 2 fixture creative metric seed rows.
     columns:

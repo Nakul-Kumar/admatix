@@ -56,7 +56,7 @@ afterAll(async () => {
 });
 
 describe("F8: API entry point enforces ADMATIX_MODE=fixtures", () => {
-  it("buildServer throws if ADMATIX_MODE is not fixtures", async () => {
+  it("buildServer throws if ADMATIX_MODE is unsupported", async () => {
     const prev = process.env["ADMATIX_MODE"];
     process.env["ADMATIX_MODE"] = "live";
     try {
@@ -65,6 +65,59 @@ describe("F8: API entry point enforces ADMATIX_MODE=fixtures", () => {
       if (prev === undefined) delete process.env["ADMATIX_MODE"];
       else process.env["ADMATIX_MODE"] = prev;
     }
+  });
+
+  it("readonly mode exposes connector preview but not fixture audit routes", async () => {
+    await withEnv({ ADMATIX_MODE: "readonly" }, async () => {
+      const readonlyApp = await buildServer({ logger: false });
+      await readonlyApp.ready();
+      try {
+        const capabilities = await readonlyApp.inject({
+          method: "GET",
+          url: "/api/v1/connectors/capabilities?platform=google_ads",
+          headers: MANAGER_AUTH,
+        });
+        expect(capabilities.statusCode).toBe(200);
+        expect((capabilities.json() as { status: string }).status).toBe("available");
+
+        const cassette = join(
+          process.cwd(),
+          "packages/connectors/testdata/cassettes/google_ads/campaign_metrics.json",
+        );
+        const preview = await readonlyApp.inject({
+          method: "POST",
+          url: "/api/v1/connectors/preview",
+          headers: MANAGER_AUTH,
+          payload: {
+            request_id: "req_api_preview",
+            platform: "google_ads",
+            source_kind: "oauth_readonly",
+            object_type: "platform_report",
+            sync_type: "performance_report",
+            account_id: "1234567890",
+            window: "2026-05-20..2026-05-21",
+            params: {},
+            cassette_path: cassette,
+          },
+        });
+        expect(preview.statusCode).toBe(200);
+        expect((preview.json() as { row_count: number; proof_ready: boolean }).row_count).toBe(2);
+        expect((preview.json() as { proof_ready: boolean }).proof_ready).toBe(false);
+
+        const audit = await readonlyApp.inject({
+          method: "POST",
+          url: "/api/v1/audit",
+          headers: MANAGER_AUTH,
+          payload: {
+            accountRef: "fixture:acc_demo",
+            goal: "reduce_cac",
+          },
+        });
+        expect(audit.statusCode).toBe(404);
+      } finally {
+        await readonlyApp.close();
+      }
+    });
   });
 });
 

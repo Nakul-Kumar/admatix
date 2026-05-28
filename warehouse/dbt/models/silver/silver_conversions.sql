@@ -13,6 +13,8 @@ select
   'first_party_order'::text as attribution_model,
   _source,
   _batch_id,
+  connector_sync_id,
+  connector_import_manifest_id,
+  _row_hash,
   now()::timestamptz as _loaded_at
 from {{ ref('bronze_first_party_orders') }}
-

@@ -5,8 +5,10 @@ import { registerActivateCommand } from "./commands/activate.js";
 import { registerApproveCommand } from "./commands/approve.js";
 import { registerAuditCommand } from "./commands/audit.js";
 import { registerBenchmarkCommand } from "./commands/benchmark.js";
+import { registerConnectorsCommand } from "./commands/connectors.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
 import { registerFixturesCommand } from "./commands/fixtures.js";
+import { registerIngestCommand } from "./commands/ingest.js";
 import { registerImportCommand } from "./commands/import.js";
 import { registerMeasureCommand } from "./commands/measure.js";
 import { registerPacketCommand } from "./commands/packet.js";
@@ -15,7 +17,7 @@ import { registerReflectCommand } from "./commands/reflect.js";
 import { registerReportCommand } from "./commands/report.js";
 import { registerRollbackCommand } from "./commands/rollback.js";
 import { CliError, printError } from "./support.js";
-import { assertFixturesMode } from "./fixtures-mode.js";
+import { assertCliModeForArgs } from "./fixtures-mode.js";
 
 export interface CliOptions {
   readonly storeRoot?: string;
@@ -44,9 +46,11 @@ export function createProgram(_opts: CliOptions = {}): Command {
       const { writeResult } = await import("./support.js");
       const result = await initLocalStore(resolveStoreRoot(cmd));
       writeResult(cmd, result, (r) => `Initialized ${r.root}\n`, opts);
-    });
+  });
   registerDoctorCommand(program, opts);
+  registerConnectorsCommand(program, opts);
   registerFixturesCommand(program, opts);
+  registerIngestCommand(program, opts);
   registerImportCommand(program, opts);
   registerAuditCommand(program, opts);
   registerPlanCommand(program, opts);
@@ -63,7 +67,7 @@ export function createProgram(_opts: CliOptions = {}): Command {
 
 export async function runCli(argv: readonly string[], opts: CliOptions = {}): Promise<void> {
   try {
-    assertFixturesMode();
+    assertCliModeForArgs(argv);
   } catch (error) {
     const err = opts.errorOutput ?? process.stderr;
     err.write(`${(error as Error).message}\n`);

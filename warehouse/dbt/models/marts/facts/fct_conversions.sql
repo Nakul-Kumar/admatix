@@ -17,6 +17,10 @@ with base as (
     s.is_first_party,
     s.attribution_model,
     s._source,
+    s._batch_id,
+    s.connector_sync_id,
+    s.connector_import_manifest_id,
+    s._row_hash,
     s.conversion_key
   from {{ ref('silver_conversions') }} s
   join {{ ref('dim_account') }} a on a.account_business_key = s.account_key
@@ -39,6 +43,10 @@ select
   is_first_party,
   attribution_model,
   _source,
+  _batch_id,
+  connector_sync_id,
+  connector_import_manifest_id,
+  _row_hash,
   now()::timestamptz as _loaded_at
 from base
 {% if is_incremental() %}

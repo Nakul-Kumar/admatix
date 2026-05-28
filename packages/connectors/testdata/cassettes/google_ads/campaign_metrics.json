@@ -1,0 +1,44 @@
+{
+  "schema_version": "connector-cassette/v1",
+  "platform": "google_ads",
+  "api_version": "v20",
+  "query_name": "google_ads_campaign_metrics",
+  "captured_at": "2026-05-27T00:00:00.000Z",
+  "request": {
+    "method": "POST",
+    "url": "https://googleads.googleapis.com/v20/customers/1234567890/googleAds:searchStream"
+  },
+  "response": {
+    "status": 200,
+    "rows": [
+      {
+        "segments": { "date": "2026-05-20" },
+        "customer": { "id": "1234567890", "descriptiveName": "Demo Ads Account" },
+        "campaign": { "id": "111", "name": "Brand Search", "status": "ENABLED" },
+        "metrics": {
+          "costMicros": 120000000,
+          "impressions": 10000,
+          "clicks": 250,
+          "conversions": 12,
+          "conversionsValue": 650
+        }
+      },
+      {
+        "segments": { "date": "2026-05-21" },
+        "customer": { "id": "1234567890", "descriptiveName": "Demo Ads Account" },
+        "campaign": { "id": "111", "name": "Brand Search", "status": "ENABLED" },
+        "metrics": {
+          "costMicros": 130000000,
+          "impressions": 11000,
+          "clicks": 260,
+          "conversions": 13,
+          "conversionsValue": 700
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "sanitized": true,
+    "claim_limit": "Cassette rows verify schema mapping only; they do not prove incremental lift."
+  }
+}

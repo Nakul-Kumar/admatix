@@ -14,6 +14,9 @@ with ranked as (
     upper(currency)::char(3) as currency,
     _source,
     _batch_id,
+    connector_sync_id,
+    connector_import_manifest_id,
+    _row_hash,
     _loaded_at,
     row_number() over (
       partition by metric_date, platform, external_account_id, campaign_external_id
@@ -35,7 +38,9 @@ select
   currency,
   _source,
   _batch_id,
+  connector_sync_id,
+  connector_import_manifest_id,
+  _row_hash,
   now()::timestamptz as _loaded_at
 from ranked
 where rn = 1
-

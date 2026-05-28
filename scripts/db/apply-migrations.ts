@@ -18,6 +18,7 @@ const MIGRATION_FILES = [
   "0005_live_data_readiness.sql",
   "0006_diligence_replay_constraints.sql",
   "0007_connector_import_foundation.sql",
+  "0008_live_import_promotion.sql",
 ] as const;
 
 export interface MigrationResult {

@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: mart_import_quality_status
+    description: Import manifest quality rollup. Passing quality means warehouse-ready, not proof-ready.
+    columns:
+      - name: connector_import_manifest_id
+        description: Import manifest primary key.
+        tests: [not_null, unique]
+      - name: manifest_key
+        description: Deterministic connector manifest id.
+      - name: quality_status
+        description: pass, warn, or fail rollup across connector quality checks.
+      - name: causal_status
+        description: Always directional_until_lift_test for imported live data until an experiment is pre-registered and measured.
+      - name: proof_ready
+        description: Always false for raw imports; proof bundles require separate promotion.

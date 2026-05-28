@@ -6,9 +6,15 @@ import type { VerifierClient } from "@admatix/agents";
 import type { Connector } from "@admatix/connectors";
 import type { Store } from "@admatix/core";
 import { ApprovalReceipt, z } from "@admatix/schemas";
-import { assertFixturesMode } from "./fixtures-mode.js";
+import { assertSupportedMcpMode, isReadonlyMode } from "./fixtures-mode.js";
 import { activateDryRunTool } from "./tools/activate-dry-run.js";
 import { auditAccountTool } from "./tools/audit-account.js";
+import {
+  ConnectorCapabilitiesInput,
+  ConnectorPreviewInput,
+  connectorCapabilitiesTool,
+  connectorPreviewTool,
+} from "./tools/connectors.js";
 import { createPlanTool } from "./tools/create-plan.js";
 import {
   ToolResultEnvelopeSchema,
@@ -21,6 +27,8 @@ import { validateH0PacketTool } from "./tools/validate-h0-packet.js";
 import { verifyTool, VerifyInputSchema } from "./tools/verify.js";
 
 export const APPROVED_TOOL_NAMES = [
+  "connector_capabilities",
+  "connector_preview",
   "audit_account",
   "create_plan",
   "show_h0_packet",
@@ -71,7 +79,7 @@ const RunBenchmarkInputSchema = z.object({
 }).strict();
 
 export function createAdmatixMcpServer(deps: AdmatixMcpDeps = {}): McpServer {
-  assertFixturesMode();
+  assertSupportedMcpMode();
   const ctx = createToolContext(deps);
   const server = new McpServer(
     { name: "admatix-mcp-server", version: "0.1.0" },
@@ -81,6 +89,11 @@ export function createAdmatixMcpServer(deps: AdmatixMcpDeps = {}): McpServer {
       },
     },
   );
+
+  if (isReadonlyMode()) {
+    registerReadonlyConnectorTools(server);
+    return server;
+  }
 
   server.registerTool(
     "audit_account",
@@ -186,6 +199,33 @@ function readOnlyAnnotations() {
     idempotentHint: true,
     openWorldHint: false,
   };
+}
+
+function registerReadonlyConnectorTools(server: McpServer): void {
+  server.registerTool(
+    "connector_capabilities",
+    {
+      title: "Connector Capabilities",
+      description: "Return read-only connector capabilities for a platform.",
+      inputSchema: ConnectorCapabilitiesInput,
+      outputSchema: ToolResultEnvelopeSchema,
+      annotations: readOnlyAnnotations(),
+    },
+    async (input) => toMcpResult(await connectorCapabilitiesTool(input)),
+  );
+
+  server.registerTool(
+    "connector_preview",
+    {
+      title: "Connector Preview",
+      description:
+        "Preview read-only connector access from a sanitized cassette or credential reference without mutating accounts.",
+      inputSchema: ConnectorPreviewInput,
+      outputSchema: ToolResultEnvelopeSchema,
+      annotations: readOnlyAnnotations(),
+    },
+    async (input) => toMcpResult(await connectorPreviewTool(input)),
+  );
 }
 
 function toMcpResult(envelope: ToolResultEnvelope) {

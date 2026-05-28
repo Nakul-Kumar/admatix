@@ -145,6 +145,149 @@ describe("admatix CLI acceptance", () => {
       else process.env["ADMATIX_MODE"] = prev;
     }
   });
+
+  it("allows connector preview commands in readonly mode but blocks fixture workflows", async () => {
+    const prev = process.env["ADMATIX_MODE"];
+    process.env["ADMATIX_MODE"] = "readonly";
+    try {
+      const capabilities = await invoke([
+        "connectors",
+        "capabilities",
+        "--platform",
+        "google_ads",
+        "--json",
+      ]);
+      expect(capabilities.exitCode).toBe(0);
+      expect(JSON.parse(capabilities.stdout).status).toBe("available");
+
+      const audit = await invoke(["audit", "--account", "fixture:agency-demo", "--json"]);
+      expect(audit.exitCode).toBe(2);
+      expect(audit.stderr).toContain("ADMATIX_MODE=readonly");
+    } finally {
+      if (prev === undefined) delete process.env["ADMATIX_MODE"];
+      else process.env["ADMATIX_MODE"] = prev;
+    }
+  });
+
+  it("connectors preview --cassette emits directional, non-proof metadata", async () => {
+    const cassettePath = join(
+      process.cwd(),
+      "packages/connectors/testdata/cassettes/google_ads/campaign_metrics.json",
+    );
+    const result = await invoke([
+      "connectors",
+      "preview",
+      "--platform",
+      "google_ads",
+      "--cassette",
+      cassettePath,
+      "--account",
+      "1234567890",
+      "--window",
+      "2026-05-20..2026-05-21",
+      "--json",
+    ]);
+
+    expect(result.exitCode).toBe(0);
+    const json = JSON.parse(result.stdout) as {
+      row_count: number;
+      proof_ready: boolean;
+      causal_status: string;
+    };
+    expect(json.row_count).toBe(2);
+    expect(json.proof_ready).toBe(false);
+    expect(json.causal_status).toBe("directional_until_lift_test");
+  });
+
+  it("import persist --dry-run plans warehouse writes without touching a database", async () => {
+    const storeRoot = await mkdtemp(join(tmpdir(), "admatix-cli-import-persist-"));
+    tempRoots.push(storeRoot);
+    const csvPath = join(storeRoot, "google-ads.csv");
+    await writeFile(
+      csvPath,
+      [
+        "date,account_id,campaign_id,spend,impressions,clicks",
+        "2026-05-20,acc_1,campaign_1,100,1000,50",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const result = await invoke([
+      "import",
+      "persist",
+      "--file",
+      csvPath,
+      "--source",
+      "google_ads_export",
+      "--platform",
+      "google_ads",
+      "--object-type",
+      "platform_report",
+      "--tenant-uuid",
+      "00000000-0000-0000-0000-000000000001",
+      "--required-columns",
+      "date,campaign_id,spend,impressions,clicks",
+      "--dry-run",
+      "--json",
+    ]);
+
+    expect(result.exitCode).toBe(0);
+    const json = JSON.parse(result.stdout) as {
+      dry_run: boolean;
+      raw_rows_total: number;
+      raw_rows_inserted: number;
+    };
+    expect(json.dry_run).toBe(true);
+    expect(json.raw_rows_total).toBe(1);
+    expect(json.raw_rows_inserted).toBe(0);
+  });
+
+  it("ingest audit keeps imported manifests directional and non-proof", async () => {
+    const storeRoot = await mkdtemp(join(tmpdir(), "admatix-cli-ingest-audit-"));
+    tempRoots.push(storeRoot);
+    const csvPath = join(storeRoot, "google-ads.csv");
+    const manifestPath = join(storeRoot, "manifest.json");
+    await writeFile(
+      csvPath,
+      [
+        "date,account_id,campaign_id,spend,impressions,clicks",
+        "2026-05-20,acc_1,campaign_1,100,1000,50",
+      ].join("\n"),
+      "utf8",
+    );
+    const manifest = await invoke([
+      "import",
+      "--file",
+      csvPath,
+      "--source",
+      "google_ads_export",
+      "--platform",
+      "google_ads",
+      "--object-type",
+      "platform_report",
+      "--out",
+      manifestPath,
+      "--json",
+    ]);
+    expect(manifest.exitCode).toBe(0);
+
+    const result = await invoke([
+      "ingest",
+      "audit",
+      "--manifest",
+      manifestPath,
+      "--json",
+    ]);
+    expect(result.exitCode).toBe(0);
+    const json = JSON.parse(result.stdout) as {
+      proof_ready: boolean;
+      causal_status: string;
+      h0_packets: unknown[];
+    };
+    expect(json.proof_ready).toBe(false);
+    expect(json.causal_status).toBe("directional_until_lift_test");
+    expect(json.h0_packets).toEqual([]);
+  });
 });
 
 async function invoke(args: readonly string[]): Promise<{

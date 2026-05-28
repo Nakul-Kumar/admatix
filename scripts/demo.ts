@@ -367,6 +367,7 @@ async function step7Mcp(
   // the tools the demo's MCP server actually exposes.
   const tools = [...APPROVED_TOOL_NAMES]
     .filter((name) => name !== "verify")
+    .filter((name) => !name.startsWith("connector_"))
     .sort();
   out.line(`      tools: ${tools.join(", ")}`);
   const ctx = { store, connector };

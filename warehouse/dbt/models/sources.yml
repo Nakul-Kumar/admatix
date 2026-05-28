@@ -29,6 +29,8 @@ sources:
       - name: tenants
       - name: policies
       - name: connector_syncs
+      - name: connector_import_manifests
+      - name: connector_quality_checks
       - name: experiment_designs
       - name: proof_bundles
   - name: ledger

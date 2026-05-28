@@ -13,7 +13,11 @@ with base as (
     s.conversions,
     s.platform_revenue,
     s.currency,
-    s._source
+    s._source,
+    s._batch_id,
+    s.connector_sync_id,
+    s.connector_import_manifest_id,
+    s._row_hash
   from {{ ref('silver_campaign_daily') }} s
   join {{ ref('dim_account') }} a on a.account_business_key = s.account_key
   join {{ ref('dim_campaign') }} c on c.campaign_business_key = s.campaign_key and c.is_current
@@ -33,6 +37,10 @@ select
   platform_revenue,
   currency,
   _source,
+  _batch_id,
+  connector_sync_id,
+  connector_import_manifest_id,
+  _row_hash,
   now()::timestamptz as _loaded_at
 from base
 {% if is_incremental() %}

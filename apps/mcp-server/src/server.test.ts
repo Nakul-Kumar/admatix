@@ -72,11 +72,29 @@ afterEach(async () => {
 });
 
 describe("F8: MCP entry point enforces ADMATIX_MODE=fixtures", () => {
-  it("createAdmatixMcpServer throws if ADMATIX_MODE is not fixtures", async () => {
+  it("createAdmatixMcpServer throws if ADMATIX_MODE is unsupported", async () => {
     const prev = process.env["ADMATIX_MODE"];
     process.env["ADMATIX_MODE"] = "live";
     try {
       expect(() => createAdmatixMcpServer({ dataDir: "/tmp" })).toThrow(/ADMATIX_MODE/);
+    } finally {
+      if (prev === undefined) delete process.env["ADMATIX_MODE"];
+      else process.env["ADMATIX_MODE"] = prev;
+    }
+  });
+
+  it("readonly mode registers only connector preview tools", async () => {
+    const prev = process.env["ADMATIX_MODE"];
+    process.env["ADMATIX_MODE"] = "readonly";
+    try {
+      const server = createAdmatixMcpServer({ dataDir: await tempRoot() });
+      const registered = server as unknown as {
+        _registeredTools: Record<string, unknown>;
+      };
+      const names = Object.keys(registered._registeredTools).sort();
+      await server.close();
+
+      expect(names).toEqual(["connector_capabilities", "connector_preview"]);
     } finally {
       if (prev === undefined) delete process.env["ADMATIX_MODE"];
       else process.env["ADMATIX_MODE"] = prev;
@@ -94,6 +112,8 @@ describe("MCP server", () => {
     await server.close();
 
     expect(APPROVED_TOOL_NAMES).toEqual([
+      "connector_capabilities",
+      "connector_preview",
       "audit_account",
       "create_plan",
       "show_h0_packet",
@@ -105,7 +125,10 @@ describe("MCP server", () => {
     // `verify` is registered only when `deps.verifierClient` is supplied,
     // so a Phase-1-shaped server with no verifier dep advertises six.
     expect(names).toEqual(
-      [...APPROVED_TOOL_NAMES].filter((n) => n !== "verify").sort(),
+      [...APPROVED_TOOL_NAMES]
+        .filter((n) => n !== "verify")
+        .filter((n) => !n.startsWith("connector_"))
+        .sort(),
     );
   });
 
@@ -424,7 +447,10 @@ describe("MCP server", () => {
         // stdio entry point boots without a verifier dep — `verify` is gated
         // behind `deps.verifierClient` so only the six base tools appear.
         expect(tools.tools.map((tool) => tool.name).sort()).toEqual(
-          [...APPROVED_TOOL_NAMES].filter((n) => n !== "verify").sort(),
+          [...APPROVED_TOOL_NAMES]
+            .filter((n) => n !== "verify")
+            .filter((n) => !n.startsWith("connector_"))
+            .sort(),
         );
 
         const unknown = await client.callTool(

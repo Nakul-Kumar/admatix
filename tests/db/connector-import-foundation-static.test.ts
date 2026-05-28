@@ -6,11 +6,16 @@ const migration = readFileSync(
   resolve("warehouse/migrations/0007_connector_import_foundation.sql"),
   "utf8",
 );
+const promotionMigration = readFileSync(
+  resolve("warehouse/migrations/0008_live_import_promotion.sql"),
+  "utf8",
+);
 const applyMigrations = readFileSync(resolve("scripts/db/apply-migrations.ts"), "utf8");
 
 describe("connector import foundation migration", () => {
   it("is wired into the migration runner", () => {
     expect(applyMigrations).toContain("0007_connector_import_foundation.sql");
+    expect(applyMigrations).toContain("0008_live_import_promotion.sql");
   });
 
   it("defines the manifest, quality, cursor, job, and bronze manifest tables", () => {
@@ -36,5 +41,13 @@ describe("connector import foundation migration", () => {
     expect(migration).toContain("'manual_export'");
     expect(migration).toContain("'oauth_readonly'");
     expect(migration).toContain("'platform_mcp'");
+  });
+
+  it("links raw platform and conversion rows back to import manifests", () => {
+    expect(promotionMigration).toContain("warehouse.raw_platform_reports");
+    expect(promotionMigration).toContain("warehouse.raw_conversion_events");
+    expect(promotionMigration).toContain("connector_import_manifest_id");
+    expect(promotionMigration).toContain("uq_raw_platform_reports_import_semantic");
+    expect(promotionMigration).toContain("uq_raw_conversion_events_import_semantic");
   });
 });
