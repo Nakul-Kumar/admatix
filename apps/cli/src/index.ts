@@ -1,11 +1,13 @@
 #!/usr/bin/env tsx
 import { Command } from "commander";
+import { pathToFileURL } from "node:url";
 import { registerActivateCommand } from "./commands/activate.js";
 import { registerApproveCommand } from "./commands/approve.js";
 import { registerAuditCommand } from "./commands/audit.js";
 import { registerBenchmarkCommand } from "./commands/benchmark.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
 import { registerFixturesCommand } from "./commands/fixtures.js";
+import { registerImportCommand } from "./commands/import.js";
 import { registerMeasureCommand } from "./commands/measure.js";
 import { registerPacketCommand } from "./commands/packet.js";
 import { registerPlanCommand } from "./commands/plan.js";
@@ -45,6 +47,7 @@ export function createProgram(_opts: CliOptions = {}): Command {
     });
   registerDoctorCommand(program, opts);
   registerFixturesCommand(program, opts);
+  registerImportCommand(program, opts);
   registerAuditCommand(program, opts);
   registerPlanCommand(program, opts);
   registerPacketCommand(program, opts);
@@ -80,7 +83,7 @@ export async function runCli(argv: readonly string[], opts: CliOptions = {}): Pr
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await runCli(process.argv.slice(2));
 }
 
