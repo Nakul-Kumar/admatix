@@ -12,6 +12,8 @@ import type { CliContext } from "../support.js";
 import {
   DEFAULT_TENANT,
   actionable,
+  dbUrlFromRef,
+  pgSslConfig,
   stableJson,
   writeResult,
 } from "../support.js";
@@ -205,38 +207,8 @@ interface PersistCommandOptions {
 function splitCsvOption(value?: string): string[] {
   if (!value) return [];
   return value
-    .split(",")
+    .split(value.includes(",") ? "," : /\s+/)
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 }
 
-function dbUrlFromRef(ref: string): string {
-  if (!ref.startsWith("env:")) {
-    throw actionable(
-      `Unsupported database URL reference "${ref}".`,
-      "Use an environment reference such as env:SUPABASE_DB_URL; raw database URLs are intentionally rejected.",
-      2,
-      "unsupported_database_ref",
-      { ref_kind: ref.split(":")[0] ?? "unknown" },
-    );
-  }
-  const name = ref.slice("env:".length);
-  const value = process.env[name];
-  if (!value) {
-    throw actionable(
-      `Database URL environment variable "${name}" is missing.`,
-      "Set the environment variable locally or use --dry-run.",
-      2,
-      "missing_database_ref",
-      { env: name },
-    );
-  }
-  return value;
-}
-
-function pgSslConfig(): { rejectUnauthorized: boolean } | undefined {
-  if (["0", "false", "off", "no"].includes((process.env["ADMATIX_DB_SSL"] ?? "").toLowerCase())) {
-    return undefined;
-  }
-  return { rejectUnauthorized: false };
-}

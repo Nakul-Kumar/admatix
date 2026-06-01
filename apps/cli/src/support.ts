@@ -302,6 +302,37 @@ export function actionable(
   });
 }
 
+export function dbUrlFromRef(ref: string): string {
+  if (!ref.startsWith("env:")) {
+    throw actionable(
+      `Unsupported database URL reference "${ref}".`,
+      "Use an environment reference such as env:SUPABASE_DB_URL; raw database URLs are intentionally rejected.",
+      2,
+      "unsupported_database_ref",
+      { ref_kind: ref.split(":")[0] ?? "unknown" },
+    );
+  }
+  const name = ref.slice("env:".length);
+  const value = process.env[name];
+  if (!value) {
+    throw actionable(
+      `Database URL environment variable "${name}" is missing.`,
+      "Set the environment variable locally or use --dry-run.",
+      2,
+      "missing_database_ref",
+      { env: name },
+    );
+  }
+  return value;
+}
+
+export function pgSslConfig(): { rejectUnauthorized: boolean } | undefined {
+  if (["0", "false", "off", "no"].includes((process.env["ADMATIX_DB_SSL"] ?? "").toLowerCase())) {
+    return undefined;
+  }
+  return { rejectUnauthorized: false };
+}
+
 export function withCliDemoId(packet: H0Packet, index: number): H0Packet {
   const id = `h0_${String(index + 1).padStart(3, "0")}`;
   return { ...packet, packet_id: id };

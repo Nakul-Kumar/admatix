@@ -1,8 +1,8 @@
 import {
   buildCsvImportManifest,
+  ImportManifest,
   parseCsvRows,
   type BuildCsvImportManifestOptions,
-  type ImportManifest,
 } from "./import-manifest.js";
 import type { ConnectorSyncType } from "./read-contract.js";
 
@@ -33,6 +33,29 @@ export interface PersistCsvImportResult {
   readonly raw_rows_inserted: number;
   readonly quality_checks_written: number;
   readonly bronze_manifest_written: boolean;
+  readonly claim_limits: string[];
+}
+
+export interface ReadPersistedImportManifestOptions {
+  readonly tenant_uuid: string;
+  readonly manifest_ref: string;
+}
+
+export interface PersistedImportManifestRead {
+  readonly manifest: ImportManifest;
+  readonly connector_import_manifest_id: string;
+  readonly manifest_key: string;
+  readonly quality: {
+    readonly check_count: number;
+    readonly failed_check_count: number;
+    readonly warning_check_count: number;
+    readonly quality_status: "pass" | "warn" | "fail";
+  };
+  readonly warehouse_inputs: {
+    readonly raw_platform_report_rows: number;
+    readonly raw_conversion_event_rows: number;
+    readonly raw_rows_total: number;
+  };
   readonly claim_limits: string[];
 }
 
@@ -242,6 +265,93 @@ export async function persistCsvImport(
   }
 }
 
+export async function readPersistedImportManifest(
+  client: QueryExecutor,
+  options: ReadPersistedImportManifestOptions,
+): Promise<PersistedImportManifestRead | null> {
+  const found = await client.query<{
+    connector_import_manifest_id: string;
+    manifest_key: string;
+    manifest_body: unknown;
+  }>(
+    `
+      SELECT
+        connector_import_manifest_id::text AS connector_import_manifest_id,
+        manifest_key,
+        manifest_body
+      FROM app.connector_import_manifests
+      WHERE tenant_id = $1::uuid
+        AND (connector_import_manifest_id::text = $2 OR manifest_key = $2)
+      LIMIT 1
+    `,
+    [options.tenant_uuid, options.manifest_ref],
+  );
+  const row = found.rows[0];
+  if (!row) return null;
+
+  const manifest = ImportManifest.parse(row.manifest_body);
+  const quality = await client.query<{
+    check_count: string | number;
+    failed_check_count: string | number;
+    warning_check_count: string | number;
+  }>(
+    `
+      SELECT
+        count(*) AS check_count,
+        count(*) FILTER (WHERE status = 'fail') AS failed_check_count,
+        count(*) FILTER (WHERE status = 'warn') AS warning_check_count
+      FROM app.connector_quality_checks
+      WHERE tenant_id = $1::uuid
+        AND connector_import_manifest_id = $2::uuid
+    `,
+    [options.tenant_uuid, row.connector_import_manifest_id],
+  );
+  const qualityRow = quality.rows[0];
+  const checkCount = asCount(qualityRow?.check_count);
+  const failedCheckCount = asCount(qualityRow?.failed_check_count);
+  const warningCheckCount = asCount(qualityRow?.warning_check_count);
+
+  const rawPlatform = await client.query<{ count: string | number }>(
+    `
+      SELECT count(*) AS count
+      FROM warehouse.raw_platform_reports
+      WHERE tenant_id = $1::uuid
+        AND connector_import_manifest_id = $2::uuid
+    `,
+    [options.tenant_uuid, row.connector_import_manifest_id],
+  );
+  const rawConversions = await client.query<{ count: string | number }>(
+    `
+      SELECT count(*) AS count
+      FROM warehouse.raw_conversion_events
+      WHERE tenant_id = $1::uuid
+        AND connector_import_manifest_id = $2::uuid
+    `,
+    [options.tenant_uuid, row.connector_import_manifest_id],
+  );
+  const rawPlatformRows = asCount(rawPlatform.rows[0]?.count);
+  const rawConversionRows = asCount(rawConversions.rows[0]?.count);
+
+  return {
+    manifest,
+    connector_import_manifest_id: row.connector_import_manifest_id,
+    manifest_key: row.manifest_key,
+    quality: {
+      check_count: checkCount,
+      failed_check_count: failedCheckCount,
+      warning_check_count: warningCheckCount,
+      quality_status:
+        failedCheckCount > 0 ? "fail" : warningCheckCount > 0 ? "warn" : "pass",
+    },
+    warehouse_inputs: {
+      raw_platform_report_rows: rawPlatformRows,
+      raw_conversion_event_rows: rawConversionRows,
+      raw_rows_total: rawPlatformRows + rawConversionRows,
+    },
+    claim_limits: persistClaimLimits(),
+  };
+}
+
 type RawRow =
   | { kind: "platform_report"; row: Record<string, string> }
   | { kind: "conversion_event"; row: Record<string, string> };
@@ -383,6 +493,15 @@ function numberValue(row: Record<string, string>, keys: string[]): number | null
   if (value === undefined) return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
+}
+
+function asCount(value: string | number | undefined): number {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
 }
 
 function persistClaimLimits(): string[] {

@@ -18,11 +18,14 @@ export {
 } from "./import-manifest.js";
 export {
   persistCsvImport,
+  readPersistedImportManifest,
 } from "./import-persistence.js";
 export type {
+  PersistedImportManifestRead,
   PersistCsvImportOptions,
   PersistCsvImportResult,
   QueryExecutor,
+  ReadPersistedImportManifestOptions,
 } from "./import-persistence.js";
 export {
   ConnectorReadRequest,

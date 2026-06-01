@@ -34,10 +34,18 @@ describe("connector import foundation migration", () => {
   });
 
   it("keeps manifests and quality checks append-only for the app role", () => {
+    expect(migration).toContain("GRANT SELECT, INSERT ON");
     expect(migration).toContain("REVOKE UPDATE, DELETE, TRUNCATE ON");
     expect(migration).toContain("app.connector_import_manifests");
     expect(migration).toContain("app.connector_quality_checks");
     expect(migration).toContain("warehouse.bronze_file_manifests");
+  });
+
+  it("grants read-only manifest visibility for audit readers", () => {
+    expect(migration).toContain("GRANT SELECT ON");
+    expect(migration).toContain("TO admatix_readonly");
+    expect(migration).toContain("app.connector_import_manifests");
+    expect(migration).toContain("app.connector_quality_checks");
   });
 
   it("supports manual, read-only OAuth, and MCP-sourced batches", () => {

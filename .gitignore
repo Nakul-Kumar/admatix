@@ -26,6 +26,7 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 .build/
+.local/
 warehouse/dbt/target/
 warehouse/dbt/dbt_packages/
 warehouse/dbt/logs/

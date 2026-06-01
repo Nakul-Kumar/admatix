@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
+import { buildCsvImportManifest, type QueryExecutor } from "@admatix/connectors";
+import { auditManifest } from "./commands/ingest.js";
 import { runCli } from "./index.js";
 
 const tempRoots: string[] = [];
@@ -98,6 +100,42 @@ describe("admatix CLI acceptance", () => {
     expect(json.platform).toBe("google_ads");
     expect(json.row_count).toBe(1);
     expect(json.quality.status).toBe("pass");
+  });
+
+  it("accepts whitespace-separated column lists from PowerShell comma expansion", async () => {
+    const storeRoot = await mkdtemp(join(tmpdir(), "admatix-cli-import-pwsh-"));
+    tempRoots.push(storeRoot);
+    const csvPath = join(storeRoot, "google-ads.csv");
+    await writeFile(
+      csvPath,
+      [
+        "date,account_id,campaign_id,spend,impressions,clicks",
+        "2026-05-20,acc_1,campaign_1,100,1000,50",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const result = await invoke([
+      "import",
+      "--file",
+      csvPath,
+      "--source",
+      "google_ads_export",
+      "--platform",
+      "google_ads",
+      "--object-type",
+      "platform_report",
+      "--required-columns",
+      "date campaign_id spend impressions clicks",
+      "--semantic-key",
+      "date campaign_id",
+      "--json",
+    ]);
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      quality: { status: "pass" },
+    });
   });
 
   it("import --json fails closed on data quality errors", async () => {
@@ -288,6 +326,114 @@ describe("admatix CLI acceptance", () => {
     expect(json.causal_status).toBe("directional_until_lift_test");
     expect(json.h0_packets).toEqual([]);
   });
+
+  it("ingest audit can read a persisted manifest id without promoting proof", async () => {
+    const manifest = buildCsvImportManifest(
+      [
+        "date,account_id,campaign_id,spend,impressions,clicks",
+        "2026-05-20,acc_1,campaign_1,100,1000,50",
+      ].join("\n"),
+      {
+        tenant_id: "tenant_demo",
+        source: "google_ads_export",
+        source_kind: "manual_export",
+        platform: "google_ads",
+        object_type: "platform_report",
+        file_name: "google-ads.csv",
+        account_id: "acc_1",
+        required_columns: ["date", "campaign_id", "spend", "impressions", "clicks"],
+      },
+    );
+
+    const result = await auditManifest(
+      manifest.manifest_id,
+      { tenantUuid: "00000000-0000-0000-0000-000000000001" },
+      fakeManifestReader({
+        manifestId: "44444444-4444-4444-4444-444444444444",
+        manifestKey: manifest.manifest_id,
+        manifestBody: manifest,
+        platformRows: 1,
+        conversionRows: 0,
+      }),
+    );
+
+    expect(result).toMatchObject({
+      connector_import_manifest_id: "44444444-4444-4444-4444-444444444444",
+      causal_status: "directional_until_lift_test",
+      proof_ready: false,
+      h0_packets: [],
+      warehouse_inputs: {
+        raw_platform_report_rows: 1,
+        raw_conversion_event_rows: 0,
+        raw_rows_total: 1,
+      },
+    });
+  });
+
+  it("import preview and dry-run support first-party order exports", async () => {
+    const storeRoot = await mkdtemp(join(tmpdir(), "admatix-cli-first-party-"));
+    tempRoots.push(storeRoot);
+    const csvPath = join(storeRoot, "orders.csv");
+    await writeFile(
+      csvPath,
+      [
+        "date,external_account_id,order_id,revenue,gross_margin,currency",
+        "2026-05-20,store_1,order_1,200,80,USD",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const preview = await invoke([
+      "import",
+      "--file",
+      csvPath,
+      "--source",
+      "first_party_orders_export",
+      "--platform",
+      "first_party",
+      "--object-type",
+      "order",
+      "--required-columns",
+      "date,order_id,revenue",
+      "--semantic-key",
+      "date,order_id",
+      "--json",
+    ]);
+    expect(preview.exitCode).toBe(0);
+    expect(JSON.parse(preview.stdout)).toMatchObject({
+      platform: "first_party",
+      object_type: "order",
+      quality: { status: "pass" },
+    });
+
+    const dryRun = await invoke([
+      "import",
+      "persist",
+      "--file",
+      csvPath,
+      "--source",
+      "first_party_orders_export",
+      "--platform",
+      "first_party",
+      "--object-type",
+      "order",
+      "--tenant-uuid",
+      "00000000-0000-0000-0000-000000000001",
+      "--required-columns",
+      "date,order_id,revenue",
+      "--semantic-key",
+      "date,order_id",
+      "--dry-run",
+      "--json",
+    ]);
+    expect(dryRun.exitCode).toBe(0);
+    expect(JSON.parse(dryRun.stdout)).toMatchObject({
+      dry_run: true,
+      raw_rows_total: 1,
+      raw_rows_inserted: 0,
+      quality_blocked: false,
+    });
+  });
 });
 
 async function invoke(args: readonly string[]): Promise<{
@@ -322,6 +468,50 @@ function capture(): { stream: Writable; read(): string } {
     }),
     read() {
       return chunks.join("");
+    },
+  };
+}
+
+function fakeManifestReader(opts: {
+  manifestId: string;
+  manifestKey: string;
+  manifestBody: unknown;
+  platformRows: number;
+  conversionRows: number;
+}): QueryExecutor {
+  return {
+    async query<T extends Record<string, unknown> = Record<string, unknown>>(sql: string) {
+      if (/FROM app\.connector_import_manifests/.test(sql)) {
+        return {
+          rows: [
+            {
+              connector_import_manifest_id: opts.manifestId,
+              manifest_key: opts.manifestKey,
+              manifest_body: opts.manifestBody,
+            } as unknown as T,
+          ],
+          rowCount: 1,
+        };
+      }
+      if (/FROM app\.connector_quality_checks/.test(sql)) {
+        return {
+          rows: [
+            {
+              check_count: "7",
+              failed_check_count: "0",
+              warning_check_count: "0",
+            } as unknown as T,
+          ],
+          rowCount: 1,
+        };
+      }
+      if (/FROM warehouse\.raw_platform_reports/.test(sql)) {
+        return { rows: [{ count: String(opts.platformRows) } as unknown as T], rowCount: 1 };
+      }
+      if (/FROM warehouse\.raw_conversion_events/.test(sql)) {
+        return { rows: [{ count: String(opts.conversionRows) } as unknown as T], rowCount: 1 };
+      }
+      throw new Error(`unexpected query: ${sql}`);
     },
   };
 }
