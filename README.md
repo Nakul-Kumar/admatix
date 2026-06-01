@@ -6,7 +6,7 @@ AdMatix lets humans, LLM agents, and ad-ops tools propose campaign changes, but 
 
 > Agents propose. AdMatix gates. Humans approve. Evidence decides what can be claimed.
 
-Public proof dashboard: [https://admatix.tech/artifacts](https://admatix.tech/artifacts)
+Learn more: [https://admatix.tech/](https://admatix.tech/)
 
 Important boundary: the dashboard is an artifact-backed proof snapshot, not a continuous live ad-account feed. AdMatix has not proven live paid-media lift yet. The next milestone is a pre-registered live geo or holdout pilot.
 
@@ -32,7 +32,7 @@ AdMatix currently includes:
 | CX-2 validation | `docs/proof/artifacts/cx2-validation-summary.json` | PASS: empirical 95% CI coverage `0.964815`, SBC p-value `0.7598939812328932`, max wrong-claim rate `0.0`, placebo false-positive rate `0.05` | The verifier is calibrated on seeded simulator worlds within stated limits. | Simulation proves real-world lift. |
 | CX-3 head-to-head | `docs/proof/artifacts/cx3-headtohead-summary.json` | READY: `28` real Claude subscription buyer rows, `0` fallback rows, `0` failed rows, simulated benchmark | The benchmark has real LLM lane accounting without fallback inflation. | Live-market superiority or causal lift on real ad accounts. |
 | CX-4 public backtests | `docs/proof/artifacts/cx4-backtests-summary.json` | PASS: full Criteo Uplift v2.1 `13,979,592` rows and Hillstrom `64,000` rows, aggregate-only, with checksums | Public randomized/backtest datasets recover aggregate measured effects. | Public RCT data equals production account proof. |
-| Dashboard | `proof-dashboard/`, [admatix.tech/artifacts](https://admatix.tech/artifacts) | LIVE: artifact view uses `origin.kind = "artifact"`; Demo Lab pages stay illustrative | Investors can inspect accepted aggregate proof artifacts and claim limits. | Continuous live ad-account telemetry. |
+| Dashboard | `proof-dashboard/` (access-controlled) | LIVE: artifact view uses `origin.kind = "artifact"`; Demo Lab pages stay illustrative | Vetted reviewers can inspect accepted aggregate proof artifacts and claim limits. | Continuous live ad-account telemetry. |
 | Live-data readiness | `warehouse/migrations/0005_live_data_readiness.sql` | Disposable Postgres 17 migration apply/replay validated on the VPS | The schema is ready for shadow connector syncs, raw platform landings, experiment preregistration, and immutable proof bundles. | Connected live ad accounts or applied production migrations. |
 
 ## Claim Boundary
@@ -86,10 +86,10 @@ Ongoing multi-agent development rules are in
 
 ## Dashboard
 
-The dashboard is a static React/Vite proof surface served at [https://admatix.tech](https://admatix.tech).
+The public site is the landing page at [https://admatix.tech/](https://admatix.tech/).
 
-- `/` and `/artifacts`: accepted aggregate proof artifacts only.
-- `/overview`, `/worlds`, `/benchmark`, `/validation`, `/decisions`: Demo Lab routes with illustrative sample data.
+The proof dashboard (`proof-dashboard/`) is a static React/Vite surface that is **access-controlled** and shared with vetted reviewers on request rather than published openly.
+
 - Every dataset carries an origin badge: `artifact`, `demo`, `fixture`, `live`, or `unavailable`.
 - The dashboard data contract is enforced by `npm run validate:origin` and `npm run check:data`.
 
